@@ -1,25 +1,34 @@
 package frc.robot.loops;
 
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.util.Point;
 
 public class DrivetrainLoop implements Loop{
 
     private static DrivetrainLoop mInstance; 
 		private Drivetrain drive; 
 		
-		//Open Loop Constants
+		//Open loop constants
 		private double openLoopLeft = 0; 
 		private double openLoopRight = 0; 
+		private boolean wantLow = false;
+		
+		//Point following constants
+		private Point goal = new Point();
+		private double topSpeed = 0;
+
+		//Lock constants
+		private double lockPos = 0;
+		private double lockAng = 0;
 
     public enum DriveControlState {
-		OPEN_LOOP, // open loop voltage control
-		VELOCITY_SETPOINT, // velocity PID control
-		PATH_FOLLOWING, // used for autonomous driving
-		TURN_TO_HEADING
+			OPEN_LOOP, // open loop voltage control
+			POINT_FOLLOWING, // used for autonomous driving
+			VISION_TRACKING, //tracking with vision
+			LOCK //lock drive when scoring
     }
     
     private DriveControlState mControlState = DriveControlState.OPEN_LOOP;
-
 
     public static DrivetrainLoop getInstance() {
 		if(mInstance == null){
@@ -43,14 +52,23 @@ public class DrivetrainLoop implements Loop{
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 		case OPEN_LOOP:
+		if(wantLow) {
+			drive.shiftLow();
+		} else {
+			drive.shiftHigh();
+		}
 		drive.runLeftDrive(openLoopLeft);
 		drive.runRightDrive(openLoopRight);
 			return;
-		case VELOCITY_SETPOINT:
+		case POINT_FOLLOWING:
+
+		//add point following code here
+			
 			return;
-		case PATH_FOLLOWING:
+		case VISION_TRACKING:
 			return;
-		case TURN_TO_HEADING:
+		case LOCK:
+		drive.drivePID(lockPos, lockAng, 0);
 			return;
 		}
     }
@@ -59,21 +77,56 @@ public class DrivetrainLoop implements Loop{
 	public void onStop(double time_stamp) {
 		// TODO Auto-generated method stub
 
-    }
-    
-    public void setDriveState(DriveControlState state) {
+ 	}
+		
+	//set control state of drive	
+  public void setDriveState(DriveControlState state) {
 		mControlState = state;
 	}
-
-	public void setLeftDrive(double val){
-		this.openLoopLeft = val; 
-	}
-	public void setRightDrive(double val){
-		this.openLoopRight = val; 
-	}
 	
+	//get the control state of the drive
 	public DriveControlState getControlState() {
 		return mControlState;
 	}
-    
+
+	//OPEN LOOP
+	//set value for left side to drive at for open loop
+	public void setLeftDrive(double val){
+		this.openLoopLeft = val; 
+	}
+
+	//set value for left side to drive at for open loop
+	public void setRightDrive(double val){
+		this.openLoopRight = val; 
+	}
+
+	//set the gear desired for the drive (false is high, true is low) 
+	public void selectGear(boolean gear) {
+		if (!gear)
+			wantLow = false;
+		else
+			wantLow = true;
+	}
+	
+	//POINT FOLLOWING
+	//set goal point
+	public void setGoalPoint(Point goal) {
+		this.goal = goal;
+	}
+
+	//set top speed
+	public void setTopSpeed(double topSpeed) {
+		this.topSpeed = topSpeed;
+	}
+
+	//VISION TRACKING
+
+	//add methods for drivetrain vision state
+
+	//LOCK 
+	//lock drive with PID
+	public void lockDrive() {
+		lockPos = drive.getAveragePos();
+		lockAng = drive.getAngle();
+	}
 }

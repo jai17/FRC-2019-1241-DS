@@ -174,10 +174,6 @@ public class PIDController {
 		// PID Output
 		output = pOut + iOut + dOut;
 
-		/*// Scale output to be between 1 and -1
-		if (output != 0.0)
-			output = output / Math.abs(output) * (1.0 - Math.pow(NumberConstants.Drive_Scale, (Math.abs(output))));
-*/
 		return output;
 	}
 

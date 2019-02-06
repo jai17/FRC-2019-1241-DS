@@ -26,7 +26,7 @@ public class Carriage extends Subsystem {
   VictorSPX shooterMotorRight;
 
   //Solonoids
-  Solenoid coneSolenoid;
+  Solenoid clawSolenoid;
   Solenoid ejectorSolenoid;
   Solenoid sliderSolenoid;
 
@@ -55,7 +55,7 @@ public class Carriage extends Subsystem {
     shooterMotorRight= new VictorSPX(ElectricalConstants.SHOOTER_MOTOR_RIGHT);
 
     //Intializes the solenoids
-    coneSolenoid= new Solenoid(ElectricalConstants.CONE_SOLENOID);
+    clawSolenoid= new Solenoid(ElectricalConstants.CONE_SOLENOID);
     ejectorSolenoid = new Solenoid( ElectricalConstants.EJECTOR_SOLENOID);
     sliderSolenoid= new Solenoid(ElectricalConstants.SLIDER_SOLENOID);
 
@@ -96,13 +96,13 @@ public class Carriage extends Subsystem {
   //Retracts solenoids
   public void holdAndSecure()
   {
-    coneSolenoid.set(true);
+    clawSolenoid.set(true);
   }
 
   //Extends solenoids
   public void prisonBreak()
   {
-    coneSolenoid.set(false);
+    clawSolenoid.set(false);
   }
 
   public void extendCarriage()

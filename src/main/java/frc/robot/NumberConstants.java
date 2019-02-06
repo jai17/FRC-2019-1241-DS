@@ -13,6 +13,7 @@ public class NumberConstants {
     public static final double pDrive = 0.0;
     public static final double iDrive = 0.0;
     public static final double dDrive = 0.0;
+    public static final double fDrive = 0.0;
 
     // turning constants
     public static final double pTurn = 0.0;
