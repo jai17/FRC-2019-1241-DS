@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.ElectricalConstants;
 import frc.robot.NumberConstants;
+import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.PID.PIDController;
 import frc.robot.commands.drive.TankDrive;
 import frc.robot.loops.Loop;
+import frc.robot.util.Point;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -31,6 +33,12 @@ public class Drivetrain extends Subsystem {
   private RobotState robotState; 
   //Talon Control Mode constant
   private ControlMode talonControlMode = ControlMode.PercentOutput; 
+
+  //drive pose 
+  private double prevLVel = 0, prevRVel = 0;
+	private Point drivePoint;
+	private double prevAvgDist = 0;
+	private double xPos, yPos;
 
   /* Drive speed controlers */
   public TalonSRX leftMaster;
@@ -67,14 +75,14 @@ public class Drivetrain extends Subsystem {
 			return mInstance;
   }
   
-
+//Drivetrain setup
 public Drivetrain() {
   //Initialize Talons
   //left master
   leftMaster = new TalonSRX(ElectricalConstants.LEFT_DRIVE_FRONT);
   leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-  leftMaster.setInverted(false);
-  leftMaster.setSensorPhase(false);
+  leftMaster.setInverted(true);
+  leftMaster.setSensorPhase(true);
   leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
 
   //left slaves
@@ -89,7 +97,7 @@ public Drivetrain() {
   rightMaster = new TalonSRX(ElectricalConstants.RIGHT_DRIVE_FRONT);
   rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
   rightMaster.setInverted(false);
-  rightMaster.setSensorPhase(true);
+  rightMaster.setSensorPhase(false);
   rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
 
   //right slaves
@@ -153,16 +161,19 @@ public Drivetrain() {
   }
 
   //encoder methods
+  //get left encoder
   public double getLeftPos() {
 	  return leftMaster.getSelectedSensorPosition(0) / ElectricalConstants.DRIVE_TO_INCHES;
   }
 
+  //get right encoder
   public double getRightPos() {
 		return rightMaster.getSelectedSensorPosition(0) / ElectricalConstants.DRIVE_TO_INCHES;
   }
 
-  public double getAvgPos() {
-    return (getLeftPos() + getRightPos())/2;
+  // average encoder value
+  public double getAveragePos() {
+    return (getLeftPos() + getRightPos()) / 2;
   }
 
   public double getLeftSpeed() {
@@ -179,47 +190,78 @@ public Drivetrain() {
 
 	public double getRightVelocityInchesPerSec() {
 		return ((getRightSpeed() / ElectricalConstants.DRIVE_TO_INCHES) * 10);
-	}
+  }
+  
+  public double getAverageVelInchesPerSec() {
+    return (getLeftVelocityInchesPerSec() + getRightVelocityInchesPerSec()) / 2;
+  }
 
   public void resetEncoders() {
 		leftMaster.setSelectedSensorPosition(0, 0, 0);
 		rightMaster.setSelectedSensorPosition(0, 0, 0);
   }
 
-  //gyro angles
+  //gyro methods
+  //get absolute angle
   public double getAngle() {
 		return gyro.getAngle();
   }
 
+  //get angle relative to where robot is turned on 
   public double getYaw() {
     return gyro.getYaw();
   }
 
+  //reset gyro
   public void resetGyro() {
     gyro.zeroYaw();
   }
 
   //solenoid methods
+  //get whether solenoid is in high or low
   public DoubleSolenoid.Value getIslow() {
     return shifterSolenoid.get();
   }
 
+  //shift to low gear
   public void shiftLow() {
     shifterSolenoid.set(DoubleSolenoid.Value.kForward);
     isLow = true;
   }
 
+  //shift to high gear
   public void shiftHigh() {
     shifterSolenoid.set(DoubleSolenoid.Value.kReverse);
     isLow = false;
   }
 
+  //get if drive is in low gear
   public boolean getIsLow() {
     return isLow;
   }
 
-  /*************** PID methods *******************/
+  //PID methods
+  // drive PID 
+  public void drivePID(double distSetpoint, double angleSetpoint, double epsilon) {
+    drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
+    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    
+    double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), epsilon);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), 1.0);
+    driveOut = Math.min(driveOut, 0.25);
+    
+    if(driveOut > 0) {
+      runLeftDrive(driveOut + angleOut + NumberConstants.fDrive);
+      runRightDrive(driveOut - angleOut + NumberConstants.fDrive);
+    } else if (driveOut < 0) {
+      runLeftDrive(driveOut + angleOut - NumberConstants.fDrive);
+      runRightDrive(driveOut - angleOut - NumberConstants.fDrive);
+    }
+    
+    System.out.println(this.toString() +":drivePID RUNNING: tracking: "+  angleSetpoint);
+  }
   
+<<<<<<< HEAD
 	public void driveSetpoint(double setPoint, double speed, double setAngle, double tolerance) {
 		double output = drivePID.calcPID(setPoint, getAvgPos(), tolerance);
 		double angle = gyroPID.calcPID(setAngle, getYaw(), tolerance);
@@ -256,13 +298,66 @@ public Drivetrain() {
 			runRightDrive(-angle * speed);
 		}
 	}
+=======
+  // drive PID constrained to top speed
+  public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double timestamp, double topSpeed) {
+    drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
+    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    
+    double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), epsilon);
+    //limit driving PID output to top speed
+    if(driveOut > 0) //driving forward
+      driveOut = Math.min(driveOut, topSpeed);
+    else if (driveOut < 0) //driving backward
+      driveOut = Math.max(driveOut, -topSpeed);
+    
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), 1);
+    
+    double leftOut = driveOut + angleOut;
+    double rightOut = -driveOut + angleOut;
+    
+    //drive robot
+    runLeftDrive(leftOut);
+    runRightDrive(rightOut);
+  }
+  
+  // turn PID
+  public void turnPID(double angleSetpoint, double epsilon, double timestamp) {
+    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon);
+    
+    if(angleOut > 0) { //turning right
+      runLeftDrive(angleOut + NumberConstants.fDrive);
+      runRightDrive(-angleOut - NumberConstants.fDrive);
+    } else if (angleOut < 0) { //turning left
+      runLeftDrive(-angleOut - NumberConstants.fDrive);
+      runRightDrive(angleOut + NumberConstants.fDrive);
+    }
+  }
+  
+  // turn PID constrained to top speed
+  public void regulatedTurnPID(double angleSetpoint, double epsilon, double timestamp, double topSpeed, boolean relative) {
+    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    
+    double currentVal;
+    if(relative) {
+      currentVal = getYaw();
+    } else {
+      currentVal = getAngle();
+    }
+    
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, currentVal, epsilon);
+    //limit turning PID output to top speed
+    if(angleOut > 0) //driving forward
+      angleOut = Math.min(angleOut, topSpeed);
+    else if (angleOut < 0) //driving backward
+      angleOut = Math.max(angleOut, -topSpeed);
+    
+    runLeftDrive(angleOut);
+    runRightDrive(angleOut);
+  }
+>>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
 
-	public void driveAngle(double setAngle, double speed) {
-		double angle = gyroPID.calcPID(setAngle, getYaw(), 1);
-
-		runLeftDrive(speed + angle);
-		runRightDrive(-speed + angle);
-	}
 
 	public boolean drivePIDDone() {
 		return drivePID.isDone();
@@ -315,8 +410,70 @@ public Drivetrain() {
 		rightMaster.set(ControlMode.Velocity, rampRate);
 	}
 
+  //reset encoders and gyro
   public void reset() {
 		resetEncoders();
 		resetGyro();
   }
+
+  //set brake mode
+  public void setBrakeMode() {
+    leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+    rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+  }
+  
+  //set coast mode
+  public void setCoastMode() {
+    leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+    rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+  }
+
+  //POSE
+		// set xPos
+		public void setXPos(double newXPos) {
+			drivePoint.setXpos(newXPos);
+		}
+
+		// set yPos
+		public void setYPos(double newYPos) {
+			drivePoint.setYpos(newYPos);
+		}
+
+		// reset x and y
+		public void resetXY() {
+			xPos = 0;
+			yPos = 0;
+			prevAvgDist = 0;
+		}
+
+		// set x and y to a value
+		public void setXY(double x, double y) {
+			xPos = x;
+			yPos = y;
+		}
+		
+		//get field-relative position of drive
+		//within a single timestamp, the robot will not move out of quadrants 1 or 2 (won't turn 90+ degrees in 10 ms)
+		public double[] getXY() {
+			double deltaDist = getAveragePos() - prevAvgDist;
+			double currentAngle = getYaw();
+			
+			xPos += deltaDist * Math.sin(Math.toRadians(currentAngle));
+			yPos += deltaDist * Math.cos(Math.toRadians(currentAngle));
+			
+			prevAvgDist = getAveragePos();
+			
+			return new double[] {xPos,yPos};
+		}
+		
+		//get field relative position of drive as a point
+		public Point getXYPoint() {
+			double[] xy = getXY();
+			return new Point(xy[0], xy[1]);
+		}
+		
+		//get previous average distance
+		public double getPrevAvgDist() {
+			return prevAvgDist;
+		}
 }

@@ -38,6 +38,7 @@ public class TankDrive extends Command {
   @Override
   protected void execute() {
 
+<<<<<<< HEAD
       xVal = vision.avg();
       degreesToTarget = vision.pixelToDegree(xVal); 
 
@@ -46,18 +47,43 @@ public class TankDrive extends Command {
       }
 
     if (Robot.m_oi.getDriveRightBumper()) {
+=======
+    //shift gears
+    if (Robot.m_oi.getDriveRightTrigger()) { //shift low
+>>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-		  driveLoop.setLeftDrive(-0.25 * Robot.m_oi.getDriveLeftY());
-			driveLoop.setRightDrive(0.25 * Robot.m_oi.getDriveRightY());
-		}else if (Robot.m_oi.getDriveRightTrigger()) {
+      driveLoop.selectGear(true);
+
+    } else { //shift high
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-			driveLoop.setLeftDrive(-0.25 * Robot.m_oi.getDriveLeftY());
-			driveLoop.setRightDrive(0.25 * Robot.m_oi.getDriveRightY());
-    } else {
+      driveLoop.selectGear(false);
+    }
+
+    //drive motors
+    if (Robot.m_oi.getDriveRightBumper()) { //half speed
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-      driveLoop.setLeftDrive(-0.25 * Robot.m_oi.getDriveLeftY());
-			driveLoop.setRightDrive(0.25 * Robot.m_oi.getDriveRightY());
+		  driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
+      driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
+      
+		} else { //regular
+      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+      driveLoop.setLeftDrive(Robot.m_oi.getDriveLeftY());
+			driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
       }
+
+    //vision tracking
+    if (Robot.m_oi.getDriveLeftTrigger()) {
+      driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
+
+      //add tracking code here
+
+    }
+
+    //scoring
+    if (Robot.m_oi.getDriveAButton()) { //lock drive
+      driveLoop.lockDrive();
+      driveLoop.setDriveState(DriveControlState.LOCK);
+    }
   }
 
   // Make this return true when this Command no longer needs to run execute()

@@ -53,11 +53,19 @@ public class Robot extends TimedRobot {
   public static CarriageLoop carriageLoop;
   public static ElevatorLoop elevatorLoop;
   public static HatchLoop hatchLoop;
+<<<<<<< HEAD
   public RobotState state;
+=======
+  public static VisionLoop visionLoop;
+  public static RobotState state;
+>>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
   RobotPoseTracker tracker;
 
   // Preferences
   Preferences prefs;
+
+  public static double kP_DRIVE, kI_DRIVE, kD_DRIVE;
+  public static double kP_TURN, kI_TURN, kD_TURN;
 
   // Vision Preferences
   public static double[] hsvThresholdHue = new double[2];
@@ -231,7 +239,7 @@ public class Robot extends TimedRobot {
 
     // DRIVE
     SmartDashboard.putNumber("Robot Angle", drive.getYaw()); // Gyro Yaw
-    SmartDashboard.putNumber("Drive Encoders", drive.getAvgPos()); // distance drive has travelled in inches
+    SmartDashboard.putNumber("Drive Encoders", drive.getAveragePos()); // distance drive has travelled in inches
 
     // //Field Relative Positioning
     // SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
