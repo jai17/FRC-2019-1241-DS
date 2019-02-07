@@ -53,12 +53,7 @@ public class Robot extends TimedRobot {
   public static CarriageLoop carriageLoop;
   public static ElevatorLoop elevatorLoop;
   public static HatchLoop hatchLoop;
-<<<<<<< HEAD
-  public RobotState state;
-=======
-  public static VisionLoop visionLoop;
   public static RobotState state;
->>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
   RobotPoseTracker tracker;
 
   // Preferences

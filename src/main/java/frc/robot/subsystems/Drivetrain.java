@@ -261,44 +261,6 @@ public Drivetrain() {
     System.out.println(this.toString() +":drivePID RUNNING: tracking: "+  angleSetpoint);
   }
   
-<<<<<<< HEAD
-	public void driveSetpoint(double setPoint, double speed, double setAngle, double tolerance) {
-		double output = drivePID.calcPID(setPoint, getAvgPos(), tolerance);
-		double angle = gyroPID.calcPID(setAngle, getYaw(), tolerance);
-		double min = 0.20;
-		
-		if(output < min && output > 0){
-			runLeftDrive((min + angle) * speed);
-			runRightDrive((-min + angle) * speed * 0.95);
-		}else if(output > -min && output < 0){
-			runLeftDrive((-min + angle) * speed);
-			runRightDrive((min + angle) * speed * 0.95);
-		}
-		else{
-			runLeftDrive((output + angle) * speed);
-			runRightDrive((-output + angle) * speed * 0.95);
-		}
-	}
-
-	public void turnDrive(double setAngle, double speed, double tolerance) {
-		double angle = gyroPID.calcPID(setAngle, getYaw(), tolerance);
-		double min = 0.15;
-
-		if (Math.abs(setAngle - getYaw()) < tolerance) {
-			runLeftDrive(0);
-			runRightDrive(0);
-		} else if (angle > -min && angle < 0) {
-			runLeftDrive(-min);
-			runRightDrive(-min);
-		} else if (angle < min && angle > 0) {
-			runLeftDrive(min);
-			runRightDrive(min);
-		} else {
-			runLeftDrive(-angle * speed);
-			runRightDrive(-angle * speed);
-		}
-	}
-=======
   // drive PID constrained to top speed
   public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double timestamp, double topSpeed) {
     drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
@@ -356,7 +318,6 @@ public Drivetrain() {
     runLeftDrive(angleOut);
     runRightDrive(angleOut);
   }
->>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
 
 
 	public boolean drivePIDDone() {

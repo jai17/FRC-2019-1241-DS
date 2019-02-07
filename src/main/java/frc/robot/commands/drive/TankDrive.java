@@ -13,11 +13,14 @@ import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
+import frc.robot.util.ToggleBoolean;
 
 public class TankDrive extends Command {
   DrivetrainLoop driveLoop;
   Vision vision; 
   Drivetrain drive; 
+
+  ToggleBoolean toggle; 
 
   //For Vision
   double xVal, degreesToTarget; 
@@ -32,29 +35,27 @@ public class TankDrive extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    toggle = new ToggleBoolean(); 
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
 
-<<<<<<< HEAD
       xVal = vision.avg();
       degreesToTarget = vision.pixelToDegree(xVal); 
 
       if (Robot.m_oi.getDriveStartButton()){
-        drive.turnDrive(drive.getAngle() - degreesToTarget, 0.5, 1);
+        //drive.regulatedTurnPID(drive.getAngle() - degreesToTarget, 1, 1, 0.5, true);
+        drive.turnPID(drive.getAngle() - degreesToTarget, 1, 2);
       }
 
-    if (Robot.m_oi.getDriveRightBumper()) {
-=======
     //shift gears
-    if (Robot.m_oi.getDriveRightTrigger()) { //shift low
->>>>>>> b79abb9385f86e8e3e34a95bc2405fb356d0151d
+    toggle.set(Robot.m_oi.getDriveRightTrigger());
+    if (toggle.get()) { //shift low
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
       driveLoop.selectGear(true);
-
-    } else { //shift high
+    } else if (!toggle.get()) { //shift high
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
       driveLoop.selectGear(false);
     }

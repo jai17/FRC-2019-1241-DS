@@ -22,8 +22,8 @@ public class CarriageCommand extends Command {
   private double shooterSpeed = 0;
 
   public CarriageCommand() {
-    carriageLoop = Robot.carriageLoop;
-    carriage = Robot.carriage;
+    carriageLoop = CarriageLoop.getInstance();
+    carriage = Carriage.getInstance();
     requires(carriage);
   }
 

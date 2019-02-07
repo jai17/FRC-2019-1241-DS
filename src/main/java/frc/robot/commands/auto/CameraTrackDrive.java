@@ -45,7 +45,7 @@ public class CameraTrackDrive extends Command {
         setTimeout(timeOut);
       drive.resetEncoders();
       timer = new Timer(); 
-      driveLoop.setDriveState(DriveControlState.TRACKING);
+      driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
     }
 
     // Called repeatedly when this Command is scheduled to run
@@ -61,7 +61,7 @@ public class CameraTrackDrive extends Command {
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-        if(Math.abs(distance - Robot.drive.getAvgPos()) <= tolerance){
+        if(Math.abs(distance - Robot.drive.getAveragePos()) <= tolerance){
           if(!timerStarted){
             timer.start();
             timerStarted = true;
