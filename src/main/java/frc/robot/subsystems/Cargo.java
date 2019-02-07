@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.NumberConstants;
 import frc.robot.PID.PIDController;
+import frc.robot.commands.cargo.CargoCommand;
 import frc.robot.ElectricalConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
 
@@ -76,8 +77,7 @@ public class Cargo extends Subsystem {
 
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
+    setDefaultCommand(new CargoCommand());
   }
 
   // intake, outtake, stop, runUp, runDown

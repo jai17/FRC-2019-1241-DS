@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.ElectricalConstants;
 import frc.robot.NumberConstants;
 import frc.robot.PID.PIDController;
+import frc.robot.commands.elevator.ElevatorCommand;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -66,8 +67,7 @@ public class Elevator extends Subsystem {
 
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
+     setDefaultCommand(new ElevatorCommand());
   }
 
   public boolean getAtBottom(){
@@ -100,6 +100,10 @@ public void setMotionMagicSetpoint(double setpoint, int cruiseVelocity, double s
 		magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/secsToMaxSpeed), 0);
 
 		runElevatorMotionMagic(setpoint*NumberConstants.ELEVATOR_MAX_SPEED);
+}
+
+public double getMotionMagicError(){
+  return magEncoderTalon.getClosedLoopError(0); 
 }
 
 // ************************** PID Functions ******************************

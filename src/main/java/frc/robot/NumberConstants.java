@@ -20,9 +20,9 @@ public class NumberConstants {
     public static final double dTurn = 0.0;
 
     // gyro constants
-    public static final double pGyro = 0.0;
+    public static final double pGyro = 0.025;
     public static final double iGyro = 0.0;
-    public static final double dGyro = 0.0;
+    public static final double dGyro = 0.001;
 
     // locking constants (lock drive base when scoring)
     public static final double pLock = 0.0;
@@ -52,7 +52,11 @@ public class NumberConstants {
     public static final int ELEVATOR_ACCELERATION = 0;
 
     // Position setpoints
-    // (add setpoints here)
+    public static final double ELEVATOR_REST_POSITION = 1; 
+    public static final double ELEVATOR_LOW_POSITION = 5.5; 
+    public static final double ELEVATOR_MID_POSITION = 19.5; 
+    public static final double ELEVATOR_HIGH_POSITION = 33; 
+    public static final double ELEVATOR_CARGOSHIP_POSITION = 10; 
 
     /*********************** CARGO ************************************/
     // PID constants
@@ -70,6 +74,10 @@ public class NumberConstants {
     public static final int CARGO_MAX_SPEED = 0;
     public static final int CARGO_CRUISE_VELOCITY = 0;
     public static final int CARGO_ACCELERATION = 0;
+
+    // Angle constants 
+    public static final double CARGO_FEEDING_ANGLE = 5; 
+    public static final double CARGO_INTAKING_ANGLE = 90; 
 
     // Soft Limits
     public static final int CARGO_FORWARD_SOFT_LIMIT = 0;
@@ -94,6 +102,11 @@ public class NumberConstants {
     public static final int HATCH_MAX_SPEED = 0;
     public static final int HATCH_CRUISE_VELOCITY = 0;
     public static final int HATCH_ACCELERATION = 0;
+
+    // Angle constants 
+    public static final double HATCH_FEEDING_ANGLE = 0; 
+    public static final double HATCH_INTAKING_ANGLE = 90; 
+    public static final double HATCH_REST_ANGLE = -85; 
 
     /*********************** CARRIAGE ************************************/
 

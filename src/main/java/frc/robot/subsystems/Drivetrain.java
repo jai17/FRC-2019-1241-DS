@@ -240,7 +240,7 @@ public Drivetrain() {
 
 	public void turnDrive(double setAngle, double speed, double tolerance) {
 		double angle = gyroPID.calcPID(setAngle, getYaw(), tolerance);
-		double min = 0.27;
+		double min = 0.15;
 
 		if (Math.abs(setAngle - getYaw()) < tolerance) {
 			runLeftDrive(0);
@@ -252,8 +252,8 @@ public Drivetrain() {
 			runLeftDrive(min);
 			runRightDrive(min);
 		} else {
-			runLeftDrive(angle * speed);
-			runRightDrive(angle * speed);
+			runLeftDrive(-angle * speed);
+			runRightDrive(-angle * speed);
 		}
 	}
 
@@ -266,11 +266,16 @@ public Drivetrain() {
 
 	public boolean drivePIDDone() {
 		return drivePID.isDone();
-	}
-
+  }
+  public void resetDrivePID(){
+    drivePID.resetPID();
+  }
 	public boolean gyroPIDDone() {
 		return gyroPID.isDone();
-	}
+  }
+  public void resetGyroPID(){
+    gyroPID.resetPID();
+  }
 
 	public void changeDriveGains(double p, double i, double d) {
 		drivePID.changePIDGains(p, i, d);

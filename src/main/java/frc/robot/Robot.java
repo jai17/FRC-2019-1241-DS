@@ -21,12 +21,12 @@ import frc.robot.loops.ElevatorLoop;
 import frc.robot.loops.HatchLoop;
 import frc.robot.loops.Looper;
 import frc.robot.loops.RobotPoseTracker;
-import frc.robot.loops.VisionLoop;
 import frc.robot.subsystems.Cargo;
 import frc.robot.subsystems.Carriage;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Hatch;
+import frc.robot.subsystems.Vision;
 import frc.robot.util.Logger;
 
 /**
@@ -45,6 +45,7 @@ public class Robot extends TimedRobot {
   public static Carriage carriage;
   public static Elevator elevator;
   public static Hatch hatch;
+  public static Vision vision; 
 
   // Loops
   public static DrivetrainLoop driveLoop;
@@ -52,7 +53,6 @@ public class Robot extends TimedRobot {
   public static CarriageLoop carriageLoop;
   public static ElevatorLoop elevatorLoop;
   public static HatchLoop hatchLoop;
-  public static VisionLoop visionLoop;
   public RobotState state;
   RobotPoseTracker tracker;
 
@@ -88,6 +88,7 @@ public class Robot extends TimedRobot {
     carriage = Carriage.getInstance();
     elevator = Elevator.getInstance();
     hatch = Hatch.getInstance();
+    vision = Vision.getInstance(); 
 
     // Loop Instances
     driveLoop = DrivetrainLoop.getInstance();
@@ -98,7 +99,6 @@ public class Robot extends TimedRobot {
     state = RobotState.getInstance();
     tracker = RobotPoseTracker.getInstance();
     logger = logger.getInstance();
-    visionLoop = VisionLoop.getInstance();
 
     // Preferences instance
     prefs = Preferences.getInstance();
@@ -118,7 +118,6 @@ public class Robot extends TimedRobot {
       looper.register(carriageLoop);
       looper.register(elevatorLoop);
       looper.register(hatchLoop);
-      looper.register(visionLoop);
       looper.register(tracker);
     } catch (Throwable t) {
       System.out.println(t.getMessage());
@@ -204,7 +203,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-
+    updateSmartDashboard();
     logger.openFile("Teleop init");
     looper.start();
 
@@ -216,6 +215,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     Scheduler.getInstance().run();
+    updateSmartDashboard();
   }
 
   /**
@@ -233,23 +233,22 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Robot Angle", drive.getYaw()); // Gyro Yaw
     SmartDashboard.putNumber("Drive Encoders", drive.getAvgPos()); // distance drive has travelled in inches
 
-    //Field Relative Positioning
-    SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
-    SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven()); 
-    SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta()); 
-    SmartDashboard.putNumber("RobotVelocity", state.getVelocityDelta().getR()); 
+    // //Field Relative Positioning
+    // SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
+    // SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven()); 
+    // SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta()); 
 
     // VISION
-    SmartDashboard.putNumber("X", visionLoop.avg());
-    SmartDashboard.putNumber("Degrees To Target", visionLoop.pixelToDegree(visionLoop.avg()));
+    SmartDashboard.putNumber("X", vision.avg());
+    SmartDashboard.putNumber("Degrees To Target", vision.pixelToDegree(vision.avg()));
 
-    hsvThresholdHue[0] = prefs.getDouble("HueMin", 50);
+    hsvThresholdHue[0] = prefs.getDouble("HueMin", 30);
     hsvThresholdHue[1] = prefs.getDouble("HueMax", 180);
 
     hsvThresholdSat[0] = prefs.getDouble("SatMin", 0);
     hsvThresholdSat[1] = prefs.getDouble("SatMax", 255);
 
-    hsvThresholdVal[0] = prefs.getDouble("ValMin", 238);
+    hsvThresholdVal[0] = prefs.getDouble("ValMin", 0);
     hsvThresholdVal[1] = prefs.getDouble("ValMax", 255);
 
   }

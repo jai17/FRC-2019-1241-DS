@@ -11,11 +11,18 @@ public class DrivetrainLoop implements Loop{
 		private double openLoopLeft = 0; 
 		private double openLoopRight = 0; 
 
+		//PID contants
+		private double distance; 
+		private double speed; 
+		private double tolerance; 
+		private double angle; 
+
     public enum DriveControlState {
 		OPEN_LOOP, // open loop voltage control
 		VELOCITY_SETPOINT, // velocity PID control
 		PATH_FOLLOWING, // used for autonomous driving
-		TURN_TO_HEADING
+		TURN_TO_HEADING, 
+		TRACKING
     }
     
     private DriveControlState mControlState = DriveControlState.OPEN_LOOP;
@@ -52,6 +59,9 @@ public class DrivetrainLoop implements Loop{
 			return;
 		case TURN_TO_HEADING:
 			return;
+			case TRACKING:
+			drive.driveSetpoint(distance, 0.5, angle, tolerance);
+			return; 
 		}
     }
     
@@ -70,6 +80,19 @@ public class DrivetrainLoop implements Loop{
 	}
 	public void setRightDrive(double val){
 		this.openLoopRight = val; 
+	}
+
+	public void setDistancePID(double distance){
+		this.distance = distance; 
+	}
+	public void setSpeedPID(double speed){
+		this.speed = speed; 
+	}
+	public void setTolerancePID(double tolerance){
+		this.tolerance = tolerance; 
+	}
+	public void setAnglePID(double angle){
+		this.angle = angle; 
 	}
 	
 	public DriveControlState getControlState() {

@@ -12,13 +12,19 @@ import frc.robot.Robot;
 import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Vision;
 
 public class TankDrive extends Command {
   DrivetrainLoop driveLoop;
+  Vision vision; 
   Drivetrain drive; 
+
+  //For Vision
+  double xVal, degreesToTarget; 
 
   public TankDrive() {
     driveLoop = DrivetrainLoop.getInstance(); 
+    vision = Vision.getInstance(); 
     drive = Drivetrain.getInstance();
     requires(drive);
   }
@@ -31,6 +37,13 @@ public class TankDrive extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
+
+      xVal = vision.avg();
+      degreesToTarget = vision.pixelToDegree(xVal); 
+
+      if (Robot.m_oi.getDriveStartButton()){
+        drive.turnDrive(drive.getAngle() - degreesToTarget, 0.5, 1);
+      }
 
     if (Robot.m_oi.getDriveRightBumper()) {
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
