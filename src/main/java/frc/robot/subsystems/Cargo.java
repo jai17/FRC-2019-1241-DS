@@ -18,7 +18,7 @@ public class Cargo extends Subsystem {
 
   //Speed Controllers
   TalonSRX cargoPivot; //Pivot Talon
-  VictorSPX pivotSlave; 
+  TalonSRX pivotSlave; 
   VictorSPX cargoRoller; //Roller Victor
 
   //Sensor Feedback 
@@ -42,9 +42,9 @@ public class Cargo extends Subsystem {
 
   public Cargo() {
     cargoPivot = new TalonSRX(ElectricalConstants.CARGO_PIVOT_LEFT);
-    cargoPivot.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
-    cargoPivot.setInverted(false);
-    cargoPivot.setSensorPhase(true);
+    cargoPivot.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    cargoPivot.setInverted(true);
+    cargoPivot.setSensorPhase(false);
     cargoPivot.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
 
     //For Motion Magic set up 
@@ -56,15 +56,17 @@ public class Cargo extends Subsystem {
     cargoPivot.config_kI(0, NumberConstants.iTalonCargo, 0);
     cargoPivot.config_kD(0, NumberConstants.dTalonCargo, 0);
 
-    pivotSlave = new VictorSPX(ElectricalConstants.CARGO_PIVOT_RIGHT); 
+    pivotSlave = new TalonSRX(ElectricalConstants.CARGO_PIVOT_RIGHT); 
     pivotSlave.set(ControlMode.Follower, ElectricalConstants.CARGO_PIVOT_LEFT);
+    pivotSlave.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
     pivotSlave.follow(cargoPivot); 
+    pivotSlave.setInverted(true);
 
     //FOR SOFT LIMITS
-    cargoPivot.configForwardSoftLimitEnable(true, 0);
-    cargoPivot.configForwardSoftLimitThreshold(NumberConstants.CARGO_FORWARD_SOFT_LIMIT, 0); 
-    cargoPivot.configReverseSoftLimitEnable(true, 0);
-    cargoPivot.configReverseSoftLimitThreshold(NumberConstants.CARGO_BACK_SOFT_LIMIT, 0);
+    cargoPivot.configForwardSoftLimitEnable(false, 0);
+    //cargoPivot.configForwardSoftLimitThreshold(NumberConstants.CARGO_FORWARD_SOFT_LIMIT, 0); 
+    cargoPivot.configReverseSoftLimitEnable(false, 0);
+    //cargoPivot.configReverseSoftLimitThreshold(NumberConstants.CARGO_BACK_SOFT_LIMIT, 0);
 
     cargoRoller = new VictorSPX(ElectricalConstants.CARGO_ROLLER_MOTOR);
 
@@ -82,12 +84,12 @@ public class Cargo extends Subsystem {
 
   // intake, outtake, stop, runUp, runDown
   public void intake(double val) {
-    cargoRoller.set(ControlMode.PercentOutput, val);
+    cargoRoller.set(ControlMode.PercentOutput, -val);
   }
 
   // outtake )
   public void outtake(double val) {
-    cargoRoller.set(ControlMode.PercentOutput, -val);
+    cargoRoller.set(ControlMode.PercentOutput, val);
   }
 
   // stop the intake
@@ -98,11 +100,13 @@ public class Cargo extends Subsystem {
   // run (something) up at positive output
   public void runUp(double output) {
     cargoPivot.set(ControlMode.PercentOutput, output);
+    //pivotSlave.set(ControlMode.PercentOutput, output);
   }
 
   // run (something) down at negative output
   public void runDown(double output) {
     cargoPivot.set(ControlMode.PercentOutput, -output);
+    //pivotSlave.set(ControlMode.PercentOutput, -output);
   }
 
   // getAngles, resetAngles, isCargoPresent
@@ -113,6 +117,10 @@ public class Cargo extends Subsystem {
   //Returns the Cargo pivot angle in degrees 
   public double getCargoAngle(){
     return getRawCargoPivot()/ElectricalConstants.CARGO_TO_DEGREES; 
+  }
+
+  public double getRawPivotSpeed(){
+    return cargoPivot.getSelectedSensorVelocity(); 
   }
 
   //Resets the Cargo pivot angle 
@@ -132,7 +140,7 @@ public class Cargo extends Subsystem {
 
   //Gets the state of the Cargo from the sensor 
   public boolean getOptic() { 
-    return optical.get();
+    return !optical.get();
   }
 
   //********************PID Functions *********************/

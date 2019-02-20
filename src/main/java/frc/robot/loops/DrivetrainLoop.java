@@ -1,9 +1,10 @@
 package frc.robot.loops;
 
+import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Point;
 
-public class DrivetrainLoop implements Loop {
+public class 	DrivetrainLoop implements Loop {
 
 	private static DrivetrainLoop mInstance;
 	private Drivetrain drive;
@@ -11,7 +12,7 @@ public class DrivetrainLoop implements Loop {
 	// Open loop constants
 	private double openLoopLeft = 0;
 	private double openLoopRight = 0;
-	private boolean wantLow = false;
+	private boolean wantLow = true;
 
 	// Point following constants
 	private Point goal = new Point();
@@ -22,19 +23,22 @@ public class DrivetrainLoop implements Loop {
 	private double lockAng = 0;
 
 	// PID contants
+	private boolean drivePID = true; 
 	private double distance;
 	private double speed;
 	private double tolerance;
 	private double angle;
+	private double stick;
 
 	public enum DriveControlState {
 		OPEN_LOOP, // open loop voltage control
 		POINT_FOLLOWING, // used for autonomous driving
 		VISION_TRACKING, // tracking with vision
-		LOCK // lock drive when scoring
+		LOCK,  // lock drive when scoring
+		PID //PIDSetpoint
 	}
 
-	private DriveControlState mControlState = DriveControlState.OPEN_LOOP;
+	private DriveControlState mControlState = DriveControlState.PID;
 
 	public static DrivetrainLoop getInstance() {
 		if (mInstance == null) {
@@ -70,12 +74,31 @@ public class DrivetrainLoop implements Loop {
 			return;
 		case VISION_TRACKING:
 			//drive.regulatedDrivePID(distance, angle, tolerance, 1, 0.5);
-			drive.drivePID(distance, angle, tolerance);
+			//drive.drivePID(distance, angle, speed, tolerance);
+			// drive.changeGyroGains(0.5, 0, 0.01);`
+			if (wantLow) {
+				drive.shiftLow();
+			} else {
+				drive.shiftHigh();
+			}
+			drive.trackTurnPID(angle, speed, tolerance, stick);
 			return;
 		case LOCK:
-			drive.drivePID(lockPos, lockAng, 0);
+			//drive.drivePID(lockPos, lockAng, speed, 0);
 			return;
+		case PID:
+			if (drivePID){
+				drive.drivePID(distance, angle, speed, tolerance);
+			} else {
+				drive.turnPID(angle, speed, tolerance);
+			}
 
+			if (wantLow) {
+				drive.shiftLow();
+			} else {
+				drive.shiftHigh();
+			}
+			return;
 		}
 	}
 
@@ -106,6 +129,9 @@ public class DrivetrainLoop implements Loop {
 		this.openLoopRight = val;
 	}
 
+	public void setPIDType(boolean PIDType){
+		drivePID = PIDType;
+	}
 
 	public void setDistancePID(double distance) {
 		this.distance = distance;
@@ -122,7 +148,12 @@ public class DrivetrainLoop implements Loop {
 	public void setAnglePID(double angle){
 		this.angle = angle; 
 	}
-	//set the gear desired for the drive (false is high, true is low) 
+
+	public void setStick(double stick) {
+		this.stick = stick;
+	}
+
+	//set the gear desired for the drive (true is high, false is low) 
 	public void selectGear(boolean gear) {
 		if (!gear)
 			wantLow = false;

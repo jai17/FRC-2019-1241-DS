@@ -13,8 +13,10 @@ import com.ctre.phoenix.motorcontrol.can.*;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.ElectricalConstants;
+import frc.robot.commands.carriage.CarriageCommand;
 
 public class Carriage extends Subsystem {
 
@@ -26,9 +28,9 @@ public class Carriage extends Subsystem {
   VictorSPX shooterMotorRight;
 
   //Solonoids
-  Solenoid clawSolenoid;
-  Solenoid ejectorSolenoid;
-  Solenoid sliderSolenoid;
+  DoubleSolenoid clawSolenoid;
+  DoubleSolenoid ejectorSolenoid;
+  DoubleSolenoid sliderSolenoid;
 
   //Digital inputs
   DigitalInput hatchSensor;
@@ -51,20 +53,27 @@ public class Carriage extends Subsystem {
   {
     //Intializes the victors
     feederMotor= new VictorSPX(ElectricalConstants.FEEDER_MOTOR);
-    shooterMotorLeft= new VictorSPX(ElectricalConstants.SHOOTER_MOTOR_LEFT);
-    shooterMotorRight= new VictorSPX(ElectricalConstants.SHOOTER_MOTOR_RIGHT);
+    feederMotor.setInverted(true);
+
+    shooterMotorLeft = new VictorSPX(ElectricalConstants.SHOOTER_MOTOR_LEFT);
+    shooterMotorLeft.setInverted(true);
+    shooterMotorRight = new VictorSPX(ElectricalConstants.SHOOTER_MOTOR_RIGHT);
 
     //Intializes the solenoids
-    clawSolenoid= new Solenoid(ElectricalConstants.CONE_SOLENOID);
-    ejectorSolenoid = new Solenoid( ElectricalConstants.EJECTOR_SOLENOID);
-    sliderSolenoid= new Solenoid(ElectricalConstants.SLIDER_SOLENOID);
+    clawSolenoid= new DoubleSolenoid(ElectricalConstants.CLAW_SOLENOID_A, ElectricalConstants.CLAW_SOLENOID_B);
+    ejectorSolenoid = new DoubleSolenoid(ElectricalConstants.EJECTOR_SOLENOID_A, ElectricalConstants.EJECTOR_SOLENOID_B);
+    sliderSolenoid= new DoubleSolenoid(ElectricalConstants.SLIDER_SOLENOID_A, ElectricalConstants.SLIDER_SOLENOID_B);
 
     cargoOptical = new DigitalInput(ElectricalConstants.CARGO_DETECTOR_CARRIAGE);
 
+    retractCarriage();
+    retractEjector();
+    holdAndSecure();
   }
 
   @Override
   public void initDefaultCommand() {
+    setDefaultCommand(new CarriageCommand());
   }
 
   //Runs the feeder in at full speed(1)
@@ -83,45 +92,53 @@ public class Carriage extends Subsystem {
   public void shootForward(double val)
   {
     shooterMotorLeft.set(ControlMode.PercentOutput,val);
-    shooterMotorLeft.set(ControlMode.PercentOutput,-val);
+    shooterMotorRight.set(ControlMode.PercentOutput,-val);
   }
 
   //Shoots cargo backwards at full speed(-1)
   public void shootBackwards(double val)
   {
     shooterMotorLeft.set(ControlMode.PercentOutput,-val);
-    shooterMotorLeft.set(ControlMode.PercentOutput,val);
+    shooterMotorRight.set(ControlMode.PercentOutput,val);
   }
 
   //Retracts solenoids
   public void holdAndSecure()
   {
-    clawSolenoid.set(true);
+    clawSolenoid.set(DoubleSolenoid.Value.kForward);
   }
 
   //Extends solenoids
   public void prisonBreak()
   {
-    clawSolenoid.set(false);
+    clawSolenoid.set(DoubleSolenoid.Value.kReverse);
+  }
+
+  public boolean getClaw() {
+    if (clawSolenoid.get() == DoubleSolenoid.Value.kForward) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public void extendCarriage()
   {
-    sliderSolenoid.set(true);
+    sliderSolenoid.set(DoubleSolenoid.Value.kForward);
   }
 
   public void retractCarriage()
   {
-    sliderSolenoid.set(false);
+    sliderSolenoid.set(DoubleSolenoid.Value.kReverse);
   }
 
   public void ejectHatch()
   {
-    ejectorSolenoid.set(true);
+    ejectorSolenoid.set(DoubleSolenoid.Value.kForward);
   }
   public void retractEjector()
   {
-    ejectorSolenoid.set(false);
+    ejectorSolenoid.set(DoubleSolenoid.Value.kReverse);
   }
 
   //Sets the state of the ball in the Carriage

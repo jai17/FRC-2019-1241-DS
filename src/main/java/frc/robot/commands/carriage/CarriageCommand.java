@@ -12,16 +12,23 @@ import frc.robot.Robot;
 import frc.robot.loops.CarriageLoop;
 import frc.robot.loops.CarriageLoop.CarriageControlState;
 import frc.robot.subsystems.Carriage;
+import frc.robot.util.ToggleBoolean;
 
 public class CarriageCommand extends Command {
   CarriageLoop carriageLoop;
   Carriage carriage;
 
   //false is within frame perimeter
-  private boolean sliderToggle = false, clawToggle = false, ejectToggle = false;
+  private ToggleBoolean sliderToggle, clawToggle, ejectToggle;
   private double shooterSpeed = 0;
 
+  boolean claw = false; 
+
   public CarriageCommand() {
+    sliderToggle = new ToggleBoolean(0.5);
+    clawToggle = new ToggleBoolean(0.5);
+    ejectToggle = new ToggleBoolean(0.5);
+
     carriageLoop = CarriageLoop.getInstance();
     carriage = Carriage.getInstance();
     requires(carriage);
@@ -30,33 +37,54 @@ public class CarriageCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    clawToggle.set(Robot.m_oi.getToolDPadRight());
+    sliderToggle.set(Robot.m_oi.getToolDPadLeft());
+    ejectToggle.set(Robot.m_oi.getToolDPadUp());
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
 
-    if (Robot.m_oi.getToolXButton()) { // claw
-      clawToggle = !clawToggle;
-    } else if (Robot.m_oi.getToolYButton()) { //slider
-      sliderToggle = !sliderToggle;
-    } else if (Robot.m_oi.getDriveLeftBumper()) { //ejector
-      ejectToggle = !ejectToggle;
+    //pneumatic toggles
+    if(Robot.m_oi.getToolDPadRight()){ //toggle claw 
+      clawToggle.set(Robot.m_oi.getToolDPadRight());
+    }
+    if(Robot.m_oi.getToolDPadLeft()){ //toggle tray
+      sliderToggle.set(Robot.m_oi.getToolDPadLeft());
+    }
+    if(Robot.m_oi.getToolDPadUp()){ //shoot hatch
+      ejectToggle.set(Robot.m_oi.getToolDPadUp());
+      clawToggle.set(false);
+    }
+    if(Robot.m_oi.getToolDPadDown()) { //retract everything
+      clawToggle.set(false);
+      ejectToggle.set(false);
+      sliderToggle.set(false);
     }
 
-    if (Robot.m_oi.getToolAButton()) {
+    // if(Robot.m_oi.getToolDPadRight()){
+    //   claw = !claw; 
+    // }
+
+    //shooting
+    if (Robot.m_oi.getToolBButton()) { 
       shooterSpeed = 1.0;
+      carriageLoop.setIsShooting(true);
     } else {
       shooterSpeed = 0;
+      carriageLoop.setIsShooting(false);
     }
 
-    carriageLoop.setClawPos(clawToggle);
-    carriageLoop.setSliderPos(sliderToggle);
-    carriageLoop.setEjectorPos(ejectToggle);
+    //set pneumatics
+    carriageLoop.setClawPos(clawToggle.get());
+    carriageLoop.setSliderPos(sliderToggle.get());
+    carriageLoop.setEjectorPos(ejectToggle.get());
 
-    carriageLoop.setIsShooting(true);
+    //set shooter
     carriageLoop.setShooterSpeed(shooterSpeed);
+
+    carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
   }
 
   // Make this return true when this Command no longer needs to run execute()

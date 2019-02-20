@@ -16,6 +16,8 @@ import frc.robot.commands.elevator.ElevatorCommand;
 import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Elevator extends Subsystem {
@@ -45,21 +47,32 @@ public class Elevator extends Subsystem {
     //Set up Mag Encoders
     magEncoderTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
 		magEncoderTalon.setInverted(false);
-		magEncoderTalon.setSensorPhase(true);
-    magEncoderTalon.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+		magEncoderTalon.setSensorPhase(false);
+    magEncoderTalon.setNeutralMode(NeutralMode.Brake);
   
     // Method in order to set a default Motion Magic Velocity and Acceleration 
     magEncoderTalon.configMotionAcceleration(2500, 0);
-    magEncoderTalon.configMotionCruiseVelocity(2500, 0);
+    magEncoderTalon.configMotionCruiseVelocity(NumberConstants.ELEVATOR_MAX_SPEED, 0);
 
     magEncoderTalon.config_kP(0, NumberConstants.pTalonElevator, 0);
     magEncoderTalon.config_kI(0, NumberConstants.iTalonElevator, 0);
     magEncoderTalon.config_kD(0, NumberConstants.dTalonElevator, 0);
-    magEncoderTalon.config_kF(0, NumberConstants.fTalonElevator, 0);
+    magEncoderTalon.config_kF(0, NumberConstants.fTalonElevator, 10);
+    magEncoderTalon.selectProfileSlot(0, 0);
+
+    
+    //FOR SOFT LIMITS
+    magEncoderTalon.configForwardSoftLimitEnable(false, 0);
+    //cargoPivot.configForwardSoftLimitThreshold(NumberConstants.CARGO_FORWARD_SOFT_LIMIT, 0); 
+    magEncoderTalon.configReverseSoftLimitEnable(false, 0);
+    //cargoPivot.configReverseSoftLimitThreshold(NumberConstants.CARGO_BACK_SOFT_LIMIT, 0);
+
     
     tachTalon = new TalonSRX(ElectricalConstants.LEFT_ELEVATOR_MOTOR);
-    tachTalon.configSelectedFeedbackSensor(FeedbackDevice.Tachometer, 0, 0); 
-    tachTalon.set(ControlMode.Follower, ElectricalConstants.LEFT_ELEVATOR_MOTOR);
+    // tachTalon.configSelectedFeedbackSensor(FeedbackDevice.Tachometer, 0, 0); 
+    // tachTalon.set(ControlMode.Follower, ElectricalConstants.RIGHT_ELEVATOR_MOTOR);
+    tachTalon.setNeutralMode(NeutralMode.Brake);
+    tachTalon.setInverted(true); 
     tachTalon.follow(magEncoderTalon);
 
     elevatorPID = new PIDController(NumberConstants.pElevator, NumberConstants.iElevator, NumberConstants.dElevator);
@@ -72,14 +85,6 @@ public class Elevator extends Subsystem {
 
   public boolean getAtBottom(){
     return tachTalon.getSensorCollection().isFwdLimitSwitchClosed();
-  }
-
-  public void runUp(double val){
-    magEncoderTalon.set(ControlMode.PercentOutput,val);
-  }
-
-  public void runDown(double val){
-    magEncoderTalon.set(ControlMode.PercentOutput,-val);
   }
 
   public void runElevator(double val){
@@ -96,10 +101,15 @@ public void setSetpoint(double power){
 
 public void setMotionMagicSetpoint(double setpoint, int cruiseVelocity, double secsToMaxSpeed) {
 		
-		magEncoderTalon.configMotionCruiseVelocity(cruiseVelocity, 0);
-		magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/secsToMaxSpeed), 0);
+    magEncoderTalon.configMotionCruiseVelocity(cruiseVelocity, 0);
 
-		runElevatorMotionMagic(setpoint*NumberConstants.ELEVATOR_MAX_SPEED);
+    if ((this.getElevatorEncoder() > 70) && setpoint > this.getElevatorEncoder()){
+      magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/3.5), 0);
+    } else {
+    magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/secsToMaxSpeed), 0);
+    }
+
+		runElevatorMotionMagic(setpoint*ElectricalConstants.ELEVATOR_TO_INCHES);
 }
 
 public double getMotionMagicError(){
@@ -145,4 +155,6 @@ public void resetEncoders() {
 public double elevatorCurrentDraw(){
   return magEncoderTalon.getOutputCurrent();
 }
+
+
 }

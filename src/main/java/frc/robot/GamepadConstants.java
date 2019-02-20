@@ -20,8 +20,11 @@ public class GamepadConstants {
     public static final int LEFT_ANALOG_Y                   = 1;
     public static final int RIGHT_ANALOG_X                  = 2;
     public static final int RIGHT_ANALOG_Y                  = 3;
-    public static final int DPAD_X                          = 4;
-    public static final int DPAD_Y                          = 5;
+
+    public static final int DPAD_UP                         = 0;
+    public static final int DPAD_RIGHT                      = 90;
+    public static final int DPAD_DOWN                       = 180;
+    public static final int DPAD_LEFT                       = 270;
     
     public static final int DRIVE_USB_PORT                  = 0;
     public static final int TOOL_USB_PORT                   = 1;

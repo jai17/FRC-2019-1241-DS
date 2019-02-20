@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.NumberConstants;
 import frc.robot.Robot;
 import frc.robot.loops.CargoLoop;
+import frc.robot.loops.CarriageLoop;
 import frc.robot.loops.CargoLoop.CargoControlState;
+import frc.robot.loops.CarriageLoop.CarriageControlState;
 import frc.robot.subsystems.Cargo;
 import frc.robot.subsystems.Carriage;
 import frc.robot.util.ToggleBoolean;
@@ -21,9 +23,11 @@ public class CargoCommand extends Command {
 
   CargoLoop cargoLoop;
   Carriage carriage;
+  CarriageLoop carriageLoop; 
   Cargo cargo;
+  boolean openLoop = false; 
 
-  ToggleBoolean toggle = new ToggleBoolean();
+  ToggleBoolean toggle; 
 
   Timer timer;
   private boolean started = false;
@@ -38,7 +42,9 @@ public class CargoCommand extends Command {
     cargoLoop = CargoLoop.getInstance();
     cargo = Cargo.getInstance();
     carriage = Carriage.getInstance();
+    carriageLoop = CarriageLoop.getInstance(); 
     timer = new Timer();
+    toggle = new ToggleBoolean(1);
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -64,51 +70,148 @@ public class CargoCommand extends Command {
         cargo.setContains(false);
       }
 
-      if (Robot.m_oi.getToolLeftBumper()) {
+      
+      // if (carriage.getOptic() && !cargo.isCargoPresent()){
+      //   carriageLoop.setFeederSpeed(0);
+      //   carriageLoop.setIsFeeding(true);
+      //   }
+
+      System.out.println(cargo.isCargoPresent()); 
+      
+      if (Robot.m_oi.getToolLeftBumper()) { //outtake
         cargoLoop.setIsIntaking(false);
-        cargoLoop.setRollerSpeed(0.8);
+        cargoLoop.setRollerSpeed(1);
         cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-      } else if (Robot.m_oi.getToolRightBumper()) {
-        if (cargo.getCargoAngle() >= 60 && cargo.isCargoPresent()) {
+
+      } else if (Robot.m_oi.getToolRightBumper()) { //intaking
+
+        if (Math.abs(cargo.getCargoAngle()) <= 500 && !cargo.isCargoPresent()) { //pivot up, has ball
           cargoLoop.setIsIntaking(true);
-          cargoLoop.setRollerSpeed(0.8);
+          cargoLoop.setRollerSpeed(1);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-          carriage.feederIn(0.75);
-        } else if (!cargo.isCargoPresent() && cargo.getCargoAngle() < 60) {
+          carriageLoop.setIsFeeding(true);
+          carriageLoop.setFeederSpeed(1);;
+          carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
+
+        } else if (cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) > 900) { //pivot down, no ball
           cargoLoop.setIsIntaking(true);
-          cargoLoop.setRollerSpeed(0.8);
+          cargoLoop.setRollerSpeed(1);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-        } else {
+
+        } else { //button pressed, no ball
           cargoLoop.setRollerSpeed(0);
+          carriageLoop.setIsFeeding(true);
+          carriageLoop.setFeederSpeed(0);
         }
-      } else {
-        cargoLoop.setPivotSpeed(0);
+      } else { //no ball
+        cargoLoop.setIsIntaking(true);
+        cargoLoop.setRollerSpeed(0);
         cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
       }
 
-      toggle.set(Robot.m_oi.getToolRightTrigger());
+      //open loop      
+      if ((Robot.m_oi.getToolLeftY() > 0.5 || Robot.m_oi.getToolLeftY() < -0.5 && !openLoop)){
+        openLoop = true; 
+      }
+      //not open loop
+      if ((Robot.m_oi.getToolRightTrigger()) && openLoop){
+        openLoop = false; 
+      }
 
-      if (Robot.m_oi.getToolRightTrigger()) {
-        if (toggle.get()) {
-          cargoLoop.setMotionMagic(NumberConstants.CARGO_INTAKING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 1);
+      //Magic Motion   
+      if(!openLoop) {
+        if (!cargo.isCargoPresent()){ //has cargo
+          cargoLoop.setMotionMagic(NumberConstants.CARGO_FEEDING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-        } else {
-          cargoLoop.setMotionMagic(NumberConstants.CARGO_FEEDING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 1);
+          openLoop = false; 
+
+        } else if (Robot.m_oi.getToolRightTrigger()) { //no cargo, pivot button pressed
+          cargoLoop.setMotionMagic(NumberConstants.CARGO_INTAKING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+          openLoop = false; 
+
+        } else if (cargo.isCargoPresent()) { //has no cargo
+          cargoLoop.setMotionMagic(NumberConstants.CARGO_RESTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
+          cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+          openLoop = false; 
         }
       }
 
-      if (Robot.m_oi.getToolLeftY() > 0.5){
-        cargoLoop.setPivotSpeed(0.8);
-        cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
-      } else if (Robot.m_oi.getToolLeftY() < -0.5){
-        cargoLoop.setPivotSpeed(-0.8);
-        cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
-      }
+        if (openLoop){
+          if (Robot.m_oi.getToolLeftY() > 0.5) { //move down
+            cargoLoop.setPivotSpeed(-0.5);
+            cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+          } else if (Robot.m_oi.getToolLeftY() < -0.5) { //move up
+            cargoLoop.setPivotSpeed(0.5);
+            cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+          } else { //don't move
+            cargoLoop.setPivotSpeed(0);
+            cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+          }
+        }
+
+
+      // //feeder wheel 
+      // if(Robot.m_oi.getToolXButton()) {
+      //   carriageLoop.setFeederSpeed(1);
+      //   carriageLoop.setIsFeeding(true);
+      // } else {
+      //   carriageLoop.setFeederSpeed(0);
+      // }
+    }
+
+
+
+    // if (Robot.m_oi.getToolRightTrigger()){
+    //     cargoLoop.setMotionMagic(NumberConstants.CARGO_INTAKING_ANGLE , NumberConstants.CARGO_MAX_SPEED, 0.1);
+    //     cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+    //   } else {
+    //     cargoLoop.setMotionMagic(NumberConstants.CARGO_FEEDING_ANGLE , NumberConstants.CARGO_MAX_SPEED, 0.1);
+    //     cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+    // }
+
+
+
+  //}
+    //   if (Robot.m_oi.getToolLeftY() > 0.5){
+    //     cargoLoop.setPivotSpeed(1);
+    //     cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+    //   } else if (Robot.m_oi.getToolLeftY() < -0.5){
+    //     cargoLoop.setPivotSpeed(-1);
+    //     cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+    //   } else {
+    //     cargoLoop.setPivotSpeed(0);
+    //     cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
+    //   }
+    // }
+
+    /**Non Loop Methods */
+    // if (Robot.m_oi.getToolLeftY() > 0.5){
+    //   cargo.runUp(0.5);
+    // } else if (Robot.m_oi.getToolLeftY() < -0.5){
+    //   cargo.runDown(0.5); 
+    //  } else {
+    //    cargo.runUp(0);
+    //  }
+
+    /**Working Roller */
+    //  if (Robot.m_oi.getToolRightBumper()){
+    //    cargoLoop.setIsIntaking(true);
+    //     cargoLoop.setRollerSpeed(1);
+    //  } else if (Robot.m_oi.getToolLeftBumper()){
+    //    cargoLoop.setIsIntaking(false);
+    //    cargoLoop.setRollerSpeed(1);
+    //  } else {
+    //    cargoLoop.setIsIntaking(false);
+    //    cargoLoop.setRollerSpeed(0);
+    //  }
 
     }
 
-  }
+    // }
+
+  //}
+  
 
   // Make this return true when this Command no longer needs to run execute()
   @Override

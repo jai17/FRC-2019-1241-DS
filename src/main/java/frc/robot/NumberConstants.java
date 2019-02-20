@@ -10,20 +10,20 @@ public class NumberConstants {
     public static final double dTalonDrive = 0.0;
     public static final double fTalonDrive = 0.0;
 
-    public static final double pDrive = 0.0;
+    public static final double pDrive = 0.2;
     public static final double iDrive = 0.0;
     public static final double dDrive = 0.0;
-    public static final double fDrive = 0.0;
+    public static final double fDrive = 0.1;
 
     // turning constants
-    public static final double pTurn = 0.0;
+    public static final double pTurn = 0.01;
     public static final double iTurn = 0.0;
     public static final double dTurn = 0.0;
 
     // gyro constants
-    public static final double pGyro = 0.025;
+    public static final double pGyro = 0.0;
     public static final double iGyro = 0.0;
-    public static final double dGyro = 0.001;
+    public static final double dGyro = 0.0;
 
     // locking constants (lock drive base when scoring)
     public static final double pLock = 0.0;
@@ -37,10 +37,10 @@ public class NumberConstants {
 
     /*********************** ELEVATOR ************************************/
     // PID constants
-    public static final double pTalonElevator = 0.0;
+    public static final double pTalonElevator = 0.4;
     public static final double iTalonElevator = 0.0;
-    public static final double dTalonElevator = 0.0;
-    public static final double fTalonElevator = 0.0;
+    public static final double dTalonElevator = 0.002;
+    public static final double fTalonElevator = 0.2;
 
     public static final double pElevator = 0.0;
     public static final double iElevator = 0.0;
@@ -48,23 +48,25 @@ public class NumberConstants {
     public static final double fElevator = 0.0;
 
     // MotionMagic constants
-    public static final int ELEVATOR_MAX_SPEED = 0;
+    public static final int ELEVATOR_MAX_SPEED = 4534;
     public static final int ELEVATOR_CRUISE_VELOCITY = 0;
     public static final int ELEVATOR_ACCELERATION = 0;
 
     // Position setpoints
-    public static final double ELEVATOR_REST_POSITION = 1; 
-    public static final double ELEVATOR_LOW_POSITION = 5.5; 
-    public static final double ELEVATOR_MID_POSITION = 19.5; 
-    public static final double ELEVATOR_HIGH_POSITION = 33; 
+    public static final double ELEVATOR_REST_POSITION = 3.5; 
+    public static final double HATCH_FINESSE_POSITION = 7.5;
+    public static final double ELEVATOR_LOW_HATCH_POSITION = 14; 
+    public static final double ELEVATOR_HATCH_FEEDER = 14; 
+    public static final double ELEVATOR_MID_HATCH_POSITION = 44; 
+    public static final double ELEVATOR_HIGH_HATCH_POSITION = 75.5; 
     public static final double ELEVATOR_CARGOSHIP_POSITION = 10; 
 
     /*********************** CARGO ************************************/
     // PID constants
-    public static final double pTalonCargo = 0.0;
+    public static final double pTalonCargo = 0.5;
     public static final double iTalonCargo = 0.0;
-    public static final double dTalonCargo = 0.0;
-    public static final double fTalonCargo = 0.0;
+    public static final double dTalonCargo = 0.005;
+    public static final double fTalonCargo = 2.7;
 
     public static final double pCargo = 0.0;
     public static final double iCargo = 0.0;
@@ -72,13 +74,14 @@ public class NumberConstants {
     public static final double fCargo = 0.0;
 
     // MotionMagic constants
-    public static final int CARGO_MAX_SPEED = 0;
-    public static final int CARGO_CRUISE_VELOCITY = 0;
+    public static final int CARGO_MAX_SPEED = 460;
+    public static final int CARGO_CRUISE_VELOCITY = 460;
     public static final int CARGO_ACCELERATION = 0;
 
     // Angle constants 
-    public static final double CARGO_FEEDING_ANGLE = 5; 
-    public static final double CARGO_INTAKING_ANGLE = 90; 
+    public static final double CARGO_FEEDING_ANGLE = 150; 
+    public static final double CARGO_RESTING_ANGLE = 300; 
+    public static final double CARGO_INTAKING_ANGLE = 1700; 
 
     // Soft Limits
     public static final int CARGO_FORWARD_SOFT_LIMIT = 0;

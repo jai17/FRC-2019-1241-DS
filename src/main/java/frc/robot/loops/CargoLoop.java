@@ -13,9 +13,9 @@ public class CargoLoop implements Loop {
 	public boolean isIntaking = true;
 
 	// Motion Magic Constants
-	public double magicSetpoint;
-	public int cruiseVelocity;
-	public double secsToMaxSpeed;
+	public double magicSetpoint = 0;
+	public int cruiseVelocity = 0;
+	public double secsToMaxSpeed = 0;
 
 	// PID Constants
 
@@ -26,7 +26,7 @@ public class CargoLoop implements Loop {
 		PID_SETPOINT, // stock pid control
 	}
 
-	private CargoControlState mControlState = CargoControlState.MOTION_MAGIC;
+	private CargoControlState mControlState = CargoControlState.PID_SETPOINT;
 
 	public static CargoLoop getInstance() {
 		if (mInstance == null) {

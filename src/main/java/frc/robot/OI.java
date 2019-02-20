@@ -26,8 +26,6 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
     {
         drivePad = new Joystick (GamepadConstants.DRIVE_USB_PORT);
         toolPad = new Joystick (GamepadConstants.TOOL_USB_PORT);
-        
-        bButton = new JoystickButton (drivePad, GamepadConstants.B_BUTTON);
     }
 
     /**
@@ -135,24 +133,76 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
             return joy;
     }
 
-    public boolean getDriveDPadX() 
-    {
-        return drivePad.getRawButton(GamepadConstants.DPAD_X);
+    //Drive DPAD up
+    public boolean getDriveDPadUp() {
+        if (drivePad.getPOV(0) == GamepadConstants.DPAD_UP) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public boolean getToolDPadX() 
-    {
-        return toolPad.getRawButton(GamepadConstants.DPAD_X);
+    //Drive DPAD right
+    public boolean getDriveDPadRight() {
+        if (drivePad.getPOV(0) == GamepadConstants.DPAD_RIGHT) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public boolean getDriveDPadY() 
-    {
-        return drivePad.getRawButton(GamepadConstants.DPAD_Y);
+    //Drive DPAD down
+    public boolean getDriveDPadDown() {
+        if (drivePad.getPOV(0) == GamepadConstants.DPAD_DOWN) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public boolean getToolDPadY() 
-    {
-        return toolPad.getRawButton(GamepadConstants.DPAD_Y);
+    //Drive DPAD left
+    public boolean getDriveDPadLeft() {
+        if (drivePad.getPOV(0) == GamepadConstants.DPAD_LEFT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //Tool DPAD up
+    public boolean getToolDPadUp() {
+        if (toolPad.getPOV(0) == GamepadConstants.DPAD_UP) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //Tool DPAD right
+    public boolean getToolDPadRight() {
+        if (toolPad.getPOV(0) == GamepadConstants.DPAD_RIGHT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //Tool DPAD down
+    public boolean getToolDPadDown() {
+        if (toolPad.getPOV(0) == GamepadConstants.DPAD_DOWN) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //Tool DPAD left
+    public boolean getToolDPadLeft() {
+        if (toolPad.getPOV(0) == GamepadConstants.DPAD_LEFT) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /** 

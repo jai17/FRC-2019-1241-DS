@@ -19,61 +19,93 @@ public class ElevatorCommand extends Command {
   Elevator elevator; 
   ElevatorLoop elevatorLoop; 
 
-  ToggleBoolean toggle; 
+  boolean toggle = false; 
+  String state; 
+
+  boolean openLoop = false; 
   
   public ElevatorCommand() {
-    // Use requires() here to declare subsystem dependencies
-    // eg. requires(chassis);
+    requires(Robot.elevator);
   }
 
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
     elevator = Elevator.getInstance(); 
-    elevatorLoop = ElevatorLoop.getInstance(); 
-    toggle = new ToggleBoolean(); 
+    elevatorLoop = ElevatorLoop.getInstance();
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
 
-    toggle.set(Robot.m_oi.getDriveYButton());
-
-    if (!toggle.get()){
-
       if (Robot.m_oi.getToolAButton()){
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_REST_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 1);
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_REST_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+        openLoop = false; 
       }
-      else if (Robot.m_oi.getToolRightY() < -0.5){
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_LOW_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 1);
+      else if (Robot.m_oi.getToolRightY() > 0.5){
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.39);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+        openLoop = false; 
       }
       else if (Robot.m_oi.getToolRightX()>0.5){
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_MID_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 1);
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.39);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+        openLoop = false; 
       } 
-      else if (Robot.m_oi.getToolRightY() > 0.5){
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_HIGH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 1);
-        elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC); 
+      else if (Robot.m_oi.getToolRightY() < -0.5){
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_HIGH_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.39);
+        elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+        openLoop = false; 
+      } 
+      // else if (Robot.m_oi.getToolDPadDown()){
+      //   elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_HATCH_FEEDER, NumberConstants.ELEVATOR_MAX_SPEED, 0.39);
+      //   elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+      //   openLoop = false; 
+      // } 
+
+      if ((Robot.m_oi.getToolStartButton() || Robot.m_oi.getToolBackButton() && !openLoop)){
+        openLoop = true; 
       }
 
-    } else {
-      if (Robot.m_oi.getDriveStartButton()){
-        elevatorLoop.setOpenLoopSpeed(0.25);
-      } else if (Robot.m_oi.getDriveBackButton()){
-        elevatorLoop.setOpenLoopSpeed(-0.25);
+      if (openLoop){
+        if (Robot.m_oi.getToolStartButton()){
+          elevatorLoop.setOpenLoopSpeed(0.5);
+          elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+        } 
+        else if (Robot.m_oi.getToolBackButton()){
+          elevatorLoop.setOpenLoopSpeed(-0.5);
+          elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+        } else {
+          elevatorLoop.setOpenLoopSpeed(0);
+          elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+        }
       }
-        elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+      
     }
-
+/*
     if (elevator.getAtBottom()){
       elevator.resetEncoders();
-    }
+    }*/
+
+    // if (Robot.m_oi.getToolStartButton()){
+    //   elevatorLoop.setOpenLoopSpeed(1);
+    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+    //   System.out.println("START START START");
+    // } else if (Robot.m_oi.getToolBackButton()){
+    //   elevatorLoop.setOpenLoopSpeed(-1);
+    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+    //   System.out.println("BACK BACK BACK");
+    // } else {
+    //   elevatorLoop.setOpenLoopSpeed(0);
+    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+    //   System.out.println("NOTHING NOTHING NOTHING");
+    // }
 
 
-  }
+
+  //}
 
   // Make this return true when this Command no longer needs to run execute()
   @Override

@@ -33,6 +33,7 @@ Hatch hatch;
   protected void execute() {
     //pivot hatch open loop
     if (Robot.m_oi.getToolLeftTrigger()) { //have to hold left trigger for hatch
+      
       if (Robot.m_oi.getToolLeftBumper()) { //outtake
         hatchLoop.setHatchState(HatchControlState.OPEN_LOOP);
         hatchLoop.setRollerSpeed(0.78);

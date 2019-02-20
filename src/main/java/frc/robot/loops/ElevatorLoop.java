@@ -1,5 +1,6 @@
 package frc.robot.loops;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Elevator;;
 
 public class ElevatorLoop implements Loop {
@@ -8,12 +9,15 @@ public class ElevatorLoop implements Loop {
 	private Elevator elevator;
 
 	// Motion Magic Constants
-	public double magicSetpoint;
-	public int cruiseVelocity;
-	public double secsToMaxSpeed;
+	public double magicSetpoint = 0;
+	public int cruiseVelocity = 0;
+	public double secsToMaxSpeed = 0;
 
 	//Open Loop Constants
-	public double openLoopSpeed; 
+	public double openLoopSpeed = 0; 
+
+	//State
+	public static String elevatorState = "Magic Motion"; 
 
 	// The roller would be fixed to all control modes
 	public enum ElevatorControlState {
@@ -46,9 +50,11 @@ public class ElevatorLoop implements Loop {
 		switch (mControlState) {
 		case OPEN_LOOP:
 			elevator.runElevator(openLoopSpeed);
+			elevatorState = "Open Loop"; 
 			return;
 		case MOTION_MAGIC:
 			elevator.setMotionMagicSetpoint(magicSetpoint, cruiseVelocity, secsToMaxSpeed);
+			elevatorState = "Motion Magic"; 
 			return;
 		case PID_SETPOINT:
 			return;
@@ -58,7 +64,6 @@ public class ElevatorLoop implements Loop {
 	@Override
 	public void onStop(double time_stamp) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void setMotionMagic(double magicSetpoint, int cruiseVelocity, double secsToMaxSpeed){

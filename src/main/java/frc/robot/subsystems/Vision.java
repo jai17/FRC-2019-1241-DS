@@ -69,19 +69,19 @@ public class Vision extends Subsystem {
         // }
 
         /** Set the resolution */
-        camera.setResolution(320, 240);
-        //camera.setExposureAuto();
-        //camera.setWhiteBalanceAuto();
-        camera.setExposureManual(-1);
+        camera.setResolution(160,120);
+        // camera.setExposureAuto()
+        // camera.setWhiteBalanceAuto();
+        camera.setExposureManual(-10);
         camera.setExposureHoldCurrent();
         camera.setWhiteBalanceAuto();
-        camera.setBrightness(0);
+        camera.setBrightness(-10);
 
         /**
          * Set the FPS NOTE: Param Set will not necessarily be what is displayed
          */
         camera.setFPS(15);
-        camera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+        camera.setConnectionStrategy(ConnectionStrategy.kAutoManage);
 
         /** Get a CvSink. This will capture Matrixes from the camera */
         CvSink cvSink = CameraServer.getInstance().getVideo();
@@ -153,7 +153,7 @@ public class Vision extends Subsystem {
                  */
                 outputStream.putFrame(frame);
             } else {
-                outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
+               outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
             }
         }
     });
@@ -173,7 +173,7 @@ public double avgArea() {
 
 public double pixelToDegree(double pixel) {
     // return 0.0870234789*pixel-28.5146932592;
-    return Math.toDegrees(Math.atan(((pixel - 160) * Math.tan(Math.toRadians(31.81))) / 160));
+    return Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(31.81))) / 80));//31.81
 }
 
 

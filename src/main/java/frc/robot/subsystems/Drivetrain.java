@@ -92,6 +92,9 @@ public Drivetrain() {
   leftSlave2 = new VictorSPX(ElectricalConstants.LEFT_DRIVE_MIDDLE);
   leftSlave2.set(ControlMode.Follower, ElectricalConstants.LEFT_DRIVE_FRONT);
   leftSlave2.follow(leftMaster);
+  leftSlave2.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+  leftSlave1.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+
 
   //right masters
   rightMaster = new TalonSRX(ElectricalConstants.RIGHT_DRIVE_FRONT);
@@ -107,6 +110,8 @@ public Drivetrain() {
   rightSlave1 = new VictorSPX(ElectricalConstants.RIGHT_DRIVE_BACK);
   rightSlave1.set(ControlMode.Follower, ElectricalConstants.RIGHT_DRIVE_FRONT);
   rightSlave1.follow(rightMaster);
+  rightSlave1.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+  rightSlave2.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
 
    //For Motion Magic set up 
    rightMaster.selectProfileSlot(0, 0);
@@ -125,6 +130,7 @@ public Drivetrain() {
    leftMaster.config_kP(0, NumberConstants.pTalonDrive, 0);
    leftMaster.config_kI(0, NumberConstants.iTalonDrive, 0);
    leftMaster.config_kD(0, NumberConstants.dTalonDrive, 0);
+   leftMaster.setInverted(false);
 
   //Initialize PID controllers
   drivePID = new PIDController(NumberConstants.pDrive, NumberConstants.iDrive, NumberConstants.dDrive);
@@ -163,17 +169,22 @@ public Drivetrain() {
   //encoder methods
   //get left encoder
   public double getLeftPos() {
-	  return leftMaster.getSelectedSensorPosition(0) / ElectricalConstants.DRIVE_TO_INCHES;
+	  return leftMaster.getSelectedSensorPosition(0) / ElectricalConstants.TICKS_PER_INCH;
   }
 
   //get right encoder
   public double getRightPos() {
-		return rightMaster.getSelectedSensorPosition(0) / ElectricalConstants.DRIVE_TO_INCHES;
+		return rightMaster.getSelectedSensorPosition(0) / ElectricalConstants.TICKS_PER_INCH;
   }
 
   // average encoder value
   public double getAveragePos() {
     return (getLeftPos() + getRightPos()) / 2;
+  }
+
+  //average raw encoder ticks
+  public double getAverageRaw() {
+    return ((leftMaster.getSelectedSensorPosition(0) + rightMaster.getSelectedSensorPosition(0)) / 2);
   }
 
   public double getLeftSpeed() {
@@ -242,21 +253,24 @@ public Drivetrain() {
 
   //PID methods
   // drive PID 
-  public void drivePID(double distSetpoint, double angleSetpoint, double epsilon) {
-    drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
-    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+  public void drivePID(double distSetpoint, double angleSetpoint, double speed, double epsilon) {
+    //drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
+    //turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
     
-    double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), epsilon);
-    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), 1.0);
-    driveOut = Math.min(driveOut, 0.25);
+    double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), 1);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), 1);
+    // driveOut = Math.min(driveOut, 0.25);
     
-    if(driveOut > 0) {
-      runLeftDrive(driveOut + angleOut + NumberConstants.fDrive);
-      runRightDrive(driveOut - angleOut + NumberConstants.fDrive);
-    } else if (driveOut < 0) {
-      runLeftDrive(driveOut + angleOut - NumberConstants.fDrive);
-      runRightDrive(driveOut - angleOut - NumberConstants.fDrive);
-    }
+    // if(driveOut > 0) {
+    //   runLeftDrive(driveOut + angleOut + Robot.kF_DRIVE);
+    //   runRightDrive(-driveOut - angleOut + Robot.kF_DRIVE);
+    // } else if (driveOut < 0) {
+    //   runLeftDrive(driveOut + angleOut - Robot.kF_DRIVE);
+    //   runRightDrive(-driveOut - angleOut - Robot.kF_DRIVE);
+    // }
+
+    runLeftDrive(driveOut + angleOut);
+    runRightDrive(-driveOut + angleOut);
     
     System.out.println(this.toString() +":drivePID RUNNING: tracking: "+  angleSetpoint);
   }
@@ -284,19 +298,37 @@ public Drivetrain() {
   }
   
   // turn PID
-  public void turnPID(double angleSetpoint, double epsilon, double timestamp) {
+  public void turnPID(double angleSetpoint, double speed, double epsilon) {
     turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
-    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon) * speed;
     
-    if(angleOut > 0) { //turning right
-      runLeftDrive(angleOut + NumberConstants.fDrive);
-      runRightDrive(-angleOut - NumberConstants.fDrive);
-    } else if (angleOut < 0) { //turning left
-      runLeftDrive(-angleOut - NumberConstants.fDrive);
-      runRightDrive(angleOut + NumberConstants.fDrive);
-    }
+    // if(angleOut > 0) { //turning right
+    //   runLeftDrive(angleOut + NumberConstants.fDrive);
+    //   runRightDrive(angleOut - NumberConstants.fDrive);
+    // } else if (angleOut < 0) { //turning left
+    //   runLeftDrive(angleOut - NumberConstants.fDrive);
+    //   runRightDrive(angleOut + NumberConstants.fDrive);
+    // }
+    runLeftDrive(angleOut);
+    runRightDrive(angleOut);
   }
-  
+
+  //track turn PID
+  public void trackTurnPID(double angleSetpoint, double speed, double epsilon, double stick) {
+    turnPID.changePIDGains(0.02, Robot.kI_TURN, 0.015);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon) * speed;
+    
+    // if(angleOut > 0) { //turning right
+    //   runLeftDrive(angleOut + NumberConstants.fDrive);
+    //   runRightDrive(angleOut - NumberConstants.fDrive);
+    // } else if (angleOut < 0) { //turning left
+    //   runLeftDrive(angleOut - NumberConstants.fDrive);
+    //   runRightDrive(angleOut + NumberConstants.fDrive);
+    // }
+    runLeftDrive(angleOut - stick);
+    runRightDrive(angleOut + stick);
+  }
+
   // turn PID constrained to top speed
   public void regulatedTurnPID(double angleSetpoint, double epsilon, double timestamp, double topSpeed, boolean relative) {
     turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
@@ -360,6 +392,14 @@ public Drivetrain() {
     leftMaster.configMotionAcceleration((int) (NumberConstants.DRIVE_MAX_SPEED / secsToMaxSpeed), 0);
 
     runDriveMotionMagic(setpoint * -ElectricalConstants.DRIVE_TO_INCHES);
+  }
+
+  public double getLeftOutput() {
+    return leftMaster.getMotorOutputPercent();
+  }
+
+  public double getRightOutput() {
+    return rightMaster.getMotorOutputPercent();
   }
 
   /*********** Ramp Rates ****************/
