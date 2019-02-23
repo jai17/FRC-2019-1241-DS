@@ -19,11 +19,21 @@ public class ElectricalConstants {
     public static final int SHIFTER_SOLENOID_LOW = 7;
 
     // encoder constants
+    public static final int RIGHT_ENCODER_A = 55;
+    public static final int RIGHT_ENCODER_B = 35;
+
+    public static final int LEFT_ENCODER_A = 555;
+    public static final int LEFT_ENCODER_B = 3255;
+
+    public static final boolean RIGHT_ENCODER_REVERSE = false;
+    public static final boolean LEFT_ENCODER_REVERSE = false;
+
     public static final double ENCODER_GEAR_RATIO = 1.0;
     public static final double WHEEL_RADIUS = 2.0;
     public static final double ROTATIONS_TO_INCHES = 2 * Math.PI * WHEEL_RADIUS * ENCODER_GEAR_RATIO;
     public static final double DRIVE_TO_INCHES = ROTATIONS_TO_INCHES / 4096;
     public static final double TICKS_PER_INCH =  313.833;
+
 
     // **************************************************************************
     // ******************************* ELEVATOR *********************************

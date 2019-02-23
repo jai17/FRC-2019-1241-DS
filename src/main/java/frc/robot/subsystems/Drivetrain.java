@@ -15,11 +15,16 @@ import frc.robot.commands.drive.TankDrive;
 import frc.robot.loops.Loop;
 import frc.robot.util.Point;
 
+import java.security.interfaces.DSAKey;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
@@ -38,18 +43,31 @@ public class Drivetrain extends Subsystem {
   private double prevLVel = 0, prevRVel = 0;
 	private Point drivePoint;
 	private double prevAvgDist = 0;
-	private double xPos, yPos;
+  private double xPos, yPos;
+  
+  private Encoder rightDriveEncoder;
+  private Encoder leftDriveEncoder;
 
   /* Drive speed controlers */
-  public TalonSRX leftMaster;
-  private VictorSPX leftSlave1;
-  private VictorSPX leftSlave2;
+  // public TalonSRX leftMaster;
+  // private VictorSPX leftSlave1;
+  // private VictorSPX leftSlave2;
 
-  private TalonSRX rightMaster;
-  private VictorSPX rightSlave1;
-  private VictorSPX rightSlave2;
+  // private TalonSRX rightMaster;
+  // private VictorSPX rightSlave1;
+  // private VictorSPX rightSlave2;
+
+  /* Spark Drive Speed Controllers */ 
+  public CANSparkMax leftMaster;
+  private CANSparkMax leftSlave1;
+  private CANSparkMax leftSlave2;
+
+  private CANSparkMax rightMaster;
+  private CANSparkMax rightSlave1;
+  private CANSparkMax rightSlave2;
 
   /* Encoders on the drive */
+
   private boolean leftEncoderConnected = false;
   private boolean rightEncoderConnected = false;  
 
@@ -77,6 +95,36 @@ public class Drivetrain extends Subsystem {
   
 //Drivetrain setup
 public Drivetrain() {
+
+  /*SparkMax Speed Controllers*/
+  leftMaster = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_FRONT, MotorType.kBrushless); 
+  leftSlave1 = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_MIDDLE, MotorType.kBrushless); 
+  leftSlave2 = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_BACK, MotorType.kBrushless); 
+  leftMaster.restoreFactoryDefaults(); 
+  leftSlave1.restoreFactoryDefaults(); 
+  leftSlave2.restoreFactoryDefaults(); 
+  leftSlave1.follow(leftMaster); 
+  leftSlave2.follow(leftMaster); 
+
+  rightMaster = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_FRONT, MotorType.kBrushless); 
+  rightSlave1 = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_MIDDLE, MotorType.kBrushless); 
+  rightSlave2 = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_BACK, MotorType.kBrushless); 
+  rightMaster.restoreFactoryDefaults(); 
+  rightSlave1.restoreFactoryDefaults(); 
+  rightSlave2.restoreFactoryDefaults(); 
+  rightSlave1.follow(leftMaster); 
+  rightSlave2.follow(leftMaster);
+
+  leftDriveEncoder = new Encoder(ElectricalConstants.LEFT_ENCODER_A, ElectricalConstants.LEFT_ENCODER_B,
+				ElectricalConstants.LEFT_ENCODER_REVERSE, Encoder.EncodingType.k4X);
+        leftDriveEncoder.setDistancePerPulse(ElectricalConstants.TICKS_PER_INCH);
+
+  rightDriveEncoder = new Encoder(ElectricalConstants.RIGHT_ENCODER_A, ElectricalConstants.RIGHT_ENCODER_B,
+				ElectricalConstants.RIGHT_ENCODER_REVERSE, Encoder.EncodingType.k4X);
+        rightDriveEncoder.setDistancePerPulse(ElectricalConstants.TICKS_PER_INCH);
+        
+
+  /*
   //Initialize Talons
   //left master
   leftMaster = new TalonSRX(ElectricalConstants.LEFT_DRIVE_FRONT);
@@ -130,8 +178,9 @@ public Drivetrain() {
    leftMaster.config_kP(0, NumberConstants.pTalonDrive, 0);
    leftMaster.config_kI(0, NumberConstants.iTalonDrive, 0);
    leftMaster.config_kD(0, NumberConstants.dTalonDrive, 0);
-   leftMaster.setInverted(false);
-
+   leftMaster.setInverted(false);\
+   */
+  
   //Initialize PID controllers
   drivePID = new PIDController(NumberConstants.pDrive, NumberConstants.iDrive, NumberConstants.dDrive);
   turnPID = new PIDController(NumberConstants.pTurn, NumberConstants.iTurn, NumberConstants.dTurn);
@@ -157,7 +206,7 @@ public Drivetrain() {
   public void initDefaultCommand() {
 		setDefaultCommand(new TankDrive());
   }
-  
+  /* TalonSRX Methods
   public void runLeftDrive(double input) {
     leftMaster.set(ControlMode.PercentOutput, input);
   }
@@ -211,8 +260,110 @@ public Drivetrain() {
 		leftMaster.setSelectedSensorPosition(0, 0, 0);
 		rightMaster.setSelectedSensorPosition(0, 0, 0);
   }
+  */
 
-  //gyro methods
+  
+  public void reset () {
+    rightDriveEncoder.reset();
+    leftDriveEncoder.reset();
+    resetGyro();
+  }
+  
+  public double getRightDriveRaw() {
+		return rightDriveEncoder.getRaw();
+  }
+  
+  public double getleftDriveRaw() {
+		return leftDriveEncoder.getRaw();
+  }
+  
+  public double getAverageRaw()
+  {
+    return (getRightDriveRaw()+getleftDriveRaw())/2;
+  }
+  public double getRightPos(){
+    return getRightDriveRaw()/ElectricalConstants.TICKS_PER_INCH;
+  }
+
+  public double getLeftPos(){
+    return getleftDriveRaw()/ElectricalConstants.TICKS_PER_INCH;
+  }
+
+  public double getAveragePos(){
+    return (getLeftPos() + getRightPos())/2;
+  }
+  
+
+  // drive methods
+  
+  public void setLeftBrakeMode(){
+    leftMaster.setIdleMode(IdleMode.kBrake);
+  }
+
+  public void setRightBrakeMode(){
+    rightMaster.setIdleMode(IdleMode.kBrake);
+  }
+
+  public void setLeftCoastMode(){
+    leftMaster.setIdleMode(IdleMode.kCoast);
+  }
+
+  public void setRightCoastMode(){
+    rightMaster.setIdleMode(IdleMode.kCoast);
+  }
+
+  public void setLeftrampRate(double rate){
+    leftMaster.setOpenLoopRampRate(rate);
+  }
+
+  public void setRightrampRate(double rate){
+    leftMaster.setOpenLoopRampRate(rate);
+  }
+
+  public void runLeftDrive(double speed){
+    leftMaster.set(speed);
+  }
+
+  public void runRightDrive(double speed){
+    rightMaster.set(speed);
+  }
+
+  public double getLeftBusVoltage(){
+    return leftMaster.getBusVoltage();
+  }
+
+  public double getRightBusVoltage(){
+    return rightMaster.getBusVoltage();
+  }
+
+  public double getLeftMotorTemperature(){
+    return leftMaster.getMotorTemperature();
+  }
+
+  public double getRightMotorTemperature(){
+    return rightMaster.getMotorTemperature();
+  }
+
+  public double getLeftOutput(){
+    return leftMaster.getAppliedOutput();
+  }
+
+  public double getRightOutput(){
+    return rightMaster.getAppliedOutput();
+  }
+  
+  public double getLeftVelocityInchesPerSec() {
+		return 0;
+  }
+  
+  public double getRightVelocityInchesPerSec()
+  {
+    return 0;
+  }
+
+ 
+
+    //gyro methods
   //get absolute angle
   public double getAngle() {
 		return gyro.getAngle();
@@ -269,8 +420,8 @@ public Drivetrain() {
     //   runRightDrive(-driveOut - angleOut - Robot.kF_DRIVE);
     // }
 
-    runLeftDrive(driveOut + angleOut);
-    runRightDrive(-driveOut + angleOut);
+    //runLeftDrive(driveOut + angleOut);
+    //runRightDrive(-driveOut + angleOut);
     
     System.out.println(this.toString() +":drivePID RUNNING: tracking: "+  angleSetpoint);
   }
@@ -375,6 +526,7 @@ public Drivetrain() {
 
   
   /************ Motion Magic Methods *******/
+  /*
   public void runDriveMotionMagic(double setpoint) {
     rightMaster.set(ControlMode.MotionMagic, setpoint);
     leftMaster.set(ControlMode.MotionMagic, setpoint);
@@ -401,23 +553,24 @@ public Drivetrain() {
   public double getRightOutput() {
     return rightMaster.getMotorOutputPercent();
   }
+  */
 
   /*********** Ramp Rates ****************/
+  /*
   public void setLeftRampRate(double rampRate) {
 		leftMaster.set(ControlMode.Velocity, rampRate);
 	}
 
 	public void setRightRampRate(double rampRate) {
 		rightMaster.set(ControlMode.Velocity, rampRate);
-	}
+  }
+  */
 
   //reset encoders and gyro
-  public void reset() {
-		resetEncoders();
-		resetGyro();
-  }
+  
 
   //set brake mode
+  /*
   public void setBrakeMode() {
     leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
     rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
@@ -428,6 +581,7 @@ public Drivetrain() {
     leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
     rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
   }
+  */
 
   //POSE
 		// set xPos
