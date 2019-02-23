@@ -360,6 +360,9 @@ public Drivetrain() {
   {
     return 0;
   }
+public double getAverageVelInchesPerSec() {
+  return 0;
+}
 
  
 

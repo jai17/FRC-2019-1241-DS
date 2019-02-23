@@ -43,7 +43,7 @@ public class CameraTrackDrive extends Command {
     protected void initialize() {
     	if(timeOut>0)
         setTimeout(timeOut);
-      drive.resetEncoders();
+      drive.reset();
       timer = new Timer(); 
       driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
     }

@@ -43,7 +43,7 @@ public class DriveTurn extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    drive.resetEncoders();
+    drive.reset();
 
     driveLoop.setPIDType(false);
     driveLoop.setAnglePID(angle);
