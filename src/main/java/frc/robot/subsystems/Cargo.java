@@ -57,6 +57,8 @@ public class Cargo extends Subsystem {
     cargoPivot.config_kD(0, NumberConstants.dTalonCargo, 0);
 
     pivotSlave = new TalonSRX(ElectricalConstants.CARGO_PIVOT_RIGHT); 
+    pivotSlave.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    pivotSlave.setSensorPhase(true);
     pivotSlave.set(ControlMode.Follower, ElectricalConstants.CARGO_PIVOT_LEFT);
     pivotSlave.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
     pivotSlave.follow(cargoPivot); 
@@ -71,7 +73,7 @@ public class Cargo extends Subsystem {
     cargoRoller = new VictorSPX(ElectricalConstants.CARGO_ROLLER_MOTOR);
 
     optical = new DigitalInput(ElectricalConstants.CARGO_OPTICAL);
-    limitSwitch = new DigitalInput(ElectricalConstants.CARGO_LIMIT_SWITCH);
+    //limitSwitch = new DigitalInput(ElectricalConstants.CARGO_LIMIT_SWITCH);
 
     pivotPID = new PIDController(NumberConstants.pCargo, NumberConstants.iCargo, NumberConstants.dCargo);
 
@@ -186,4 +188,16 @@ public class Cargo extends Subsystem {
   public boolean limitSwitch() {
     return limitSwitch.get();
   }
+
+  //Drive Right Encoder 
+  public double getDriveRightRaw(){
+    return pivotSlave.getSelectedSensorPosition(); 
+  }
+  public double getDriveRightInches(){
+    return getDriveRightRaw() / ElectricalConstants.TICKS_PER_INCH; 
+  }
+  public void resetRightDrive(){
+    pivotSlave.setSelectedSensorPosition(0); 
+  }
+  
 }

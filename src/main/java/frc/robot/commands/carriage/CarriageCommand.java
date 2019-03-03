@@ -37,9 +37,9 @@ public class CarriageCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    clawToggle.set(Robot.m_oi.getToolDPadRight());
-    sliderToggle.set(Robot.m_oi.getToolDPadLeft());
-    ejectToggle.set(Robot.m_oi.getToolDPadUp());
+    clawToggle.set(true);
+    sliderToggle.set(true);
+    ejectToggle.set(true);
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -53,7 +53,7 @@ public class CarriageCommand extends Command {
     if(Robot.m_oi.getToolDPadLeft()){ //toggle tray
       sliderToggle.set(Robot.m_oi.getToolDPadLeft());
     }
-    if(Robot.m_oi.getToolDPadUp()){ //shoot hatch
+    if(Robot.m_oi.getToolDPadUp() && carriage.getUltrasonicLeft() <= 5 && carriage.getUltrasonicRight() <=5){ //shoot hatch
       ejectToggle.set(Robot.m_oi.getToolDPadUp());
       clawToggle.set(false);
     }
@@ -68,10 +68,13 @@ public class CarriageCommand extends Command {
     // }
 
     //shooting
-    if (Robot.m_oi.getToolBButton()) { 
-      shooterSpeed = 1.0;
+    if (Robot.m_oi.getToolBButton()) { //rocket shot
+      shooterSpeed = Robot.shooterSpeed;
       carriageLoop.setIsShooting(true);
-    } else {
+    } else if (Robot.m_oi.getToolXButton()) { //cargo shot
+      shooterSpeed = 0.4039; //power move
+      carriageLoop.setIsShooting(true);
+    } else { //no  shot
       shooterSpeed = 0;
       carriageLoop.setIsShooting(false);
     }
@@ -83,7 +86,6 @@ public class CarriageCommand extends Command {
 
     //set shooter
     carriageLoop.setShooterSpeed(shooterSpeed);
-
     carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
   }
 

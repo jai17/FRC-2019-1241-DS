@@ -31,13 +31,13 @@ public class Elevator extends Subsystem {
 
   PIDController elevatorPID; 
 
-   //Create a single instance of the Elevator
-   public static Elevator getInstance() {
-		if (mInstance == null) {
-			mInstance = new Elevator();
-			return mInstance;
-		} else
-			return mInstance;
+  //Create a single instance of the Elevator
+  public static Elevator getInstance() {
+    if (mInstance == null) {
+      mInstance = new Elevator();
+      return mInstance;
+    } else
+      return mInstance;
   }
 
   public Elevator(){
@@ -46,8 +46,8 @@ public class Elevator extends Subsystem {
 
     //Set up Mag Encoders
     magEncoderTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		magEncoderTalon.setInverted(false);
-		magEncoderTalon.setSensorPhase(false);
+    magEncoderTalon.setInverted(false);
+    magEncoderTalon.setSensorPhase(false);
     magEncoderTalon.setNeutralMode(NeutralMode.Brake);
   
     // Method in order to set a default Motion Magic Velocity and Acceleration 
@@ -69,10 +69,12 @@ public class Elevator extends Subsystem {
 
     
     tachTalon = new TalonSRX(ElectricalConstants.LEFT_ELEVATOR_MOTOR);
+    tachTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     // tachTalon.configSelectedFeedbackSensor(FeedbackDevice.Tachometer, 0, 0); 
     // tachTalon.set(ControlMode.Follower, ElectricalConstants.RIGHT_ELEVATOR_MOTOR);
     tachTalon.setNeutralMode(NeutralMode.Brake);
     tachTalon.setInverted(true); 
+    tachTalon.setSensorPhase(false);
     tachTalon.follow(magEncoderTalon);
 
     elevatorPID = new PIDController(NumberConstants.pElevator, NumberConstants.iElevator, NumberConstants.dElevator);
@@ -80,7 +82,7 @@ public class Elevator extends Subsystem {
 
   @Override
   public void initDefaultCommand() {
-     setDefaultCommand(new ElevatorCommand());
+    setDefaultCommand(new ElevatorCommand());
   }
 
   public boolean getAtBottom(){
@@ -91,70 +93,83 @@ public class Elevator extends Subsystem {
     magEncoderTalon.set(ControlMode.PercentOutput, val);
   }
 
-public void runElevatorMotionMagic(double setpoint){
-  magEncoderTalon.set(ControlMode.MotionMagic, setpoint);
-}
+  public void runElevatorMotionMagic(double setpoint){
+    magEncoderTalon.set(ControlMode.MotionMagic, setpoint);
+  }
 
-public void setSetpoint(double power){
-    magEncoderTalon.set(ControlMode.PercentOutput,power);
-}
+  public void setSetpoint(double power){
+      magEncoderTalon.set(ControlMode.PercentOutput,power);
+  }
 
-public void setMotionMagicSetpoint(double setpoint, int cruiseVelocity, double secsToMaxSpeed) {
-		
-    magEncoderTalon.configMotionCruiseVelocity(cruiseVelocity, 0);
+  public void setMotionMagicSetpoint(double setpoint, int cruiseVelocity, double secsToMaxSpeed) {
+      
+      magEncoderTalon.configMotionCruiseVelocity(cruiseVelocity, 0);
 
-    if ((this.getElevatorEncoder() > 70) && setpoint > this.getElevatorEncoder()){
-      magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/3.5), 0);
-    } else {
-    magEncoderTalon.configMotionAcceleration((int)(NumberConstants.ELEVATOR_MAX_SPEED/secsToMaxSpeed), 0);
-    }
+      if ((this.getElevatorEncoder() > 50) && setpoint > this.getElevatorEncoder()){
+        //3 second acceleration at top
+        magEncoderTalon.configMotionAcceleration((int) ((NumberConstants.ELEVATOR_MAX_SPEED / 5)/secsToMaxSpeed), 0); 
+      } else {
+        //regular acceleration
+        magEncoderTalon.configMotionAcceleration((int) (NumberConstants.ELEVATOR_MAX_SPEED / secsToMaxSpeed), 0);
+      }
 
-		runElevatorMotionMagic(setpoint*ElectricalConstants.ELEVATOR_TO_INCHES);
-}
+      runElevatorMotionMagic(setpoint * ElectricalConstants.ELEVATOR_TO_INCHES);
+  }
 
-public double getMotionMagicError(){
-  return magEncoderTalon.getClosedLoopError(0); 
-}
+  public double getMotionMagicError(){
+    return magEncoderTalon.getClosedLoopError(0); 
+  }
 
-// ************************** PID Functions ******************************
-public void changeElevatorGains(double p, double i, double d) {
-  elevatorPID.changePIDGains(p, i, d);
-}
+  // ************************** PID Functions ******************************
+  public void changeElevatorGains(double p, double i, double d) {
+    elevatorPID.changePIDGains(p, i, d);
+  }
 
-public void resetPID() {
-  elevatorPID.resetPID();
-}
+  public void resetPID() {
+    elevatorPID.resetPID();
+  }
 
-public void elevatorSetpoint(double setPoint, double speed, double tolerance) {
-  double output = elevatorPID.calcPID(setPoint, getElevatorEncoder(), tolerance);
+  public void elevatorSetpoint(double setPoint, double speed, double tolerance) {
+    double output = elevatorPID.calcPID(setPoint, getElevatorEncoder(), tolerance);
 
-  runElevator(output * speed);
-}
+    runElevator(output * speed);
+  }
 
-// ************************Mag Encoder Functions************************
-public boolean isEncoderConnected() {
-  return encoderConnected;
-}
+  // ************************Mag Encoder Functions************************
+  public boolean isEncoderConnected() {
+    return encoderConnected;
+  }
 
-public double getElevatorEncoder() {
-  return magEncoderTalon.getSelectedSensorPosition(0) / ElectricalConstants.ELEVATOR_TO_INCHES;
-}
+  public double getElevatorEncoder() {
+    return magEncoderTalon.getSelectedSensorPosition(0) / ElectricalConstants.ELEVATOR_TO_INCHES;
+  }
 
-public double getElevatorRotations() {
-  return magEncoderTalon.getSelectedSensorPosition(0);
-}
+  public double getElevatorRotations() {
+    return magEncoderTalon.getSelectedSensorPosition(0);
+  }
 
-public double getElevatorSpeed() {
-  return magEncoderTalon.getSelectedSensorVelocity(0);
-}
+  public double getElevatorSpeed() {
+    return magEncoderTalon.getSelectedSensorVelocity(0);
+  }
 
-public void resetEncoders() {
-  magEncoderTalon.setSelectedSensorPosition(0, 0, 0);
-}
+  public void resetEncoders() {
+    magEncoderTalon.setSelectedSensorPosition(0, 0, 0);
+  }
 
-public double elevatorCurrentDraw(){
-  return magEncoderTalon.getOutputCurrent();
-}
+  public double elevatorCurrentDraw(){
+    return magEncoderTalon.getOutputCurrent();
+  }
+
+  //Drive Left Encoder 
+  public double getDriveLeftRaw(){
+    return tachTalon.getSelectedSensorPosition(); 
+  }
+  public double getDriveLeftInches(){
+    return getDriveLeftRaw() / ElectricalConstants.TICKS_PER_INCH; 
+  }
+  public void resetLeftDrive(){
+    tachTalon.setSelectedSensorPosition(0); 
+  }
 
 
 }

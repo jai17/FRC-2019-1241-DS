@@ -11,6 +11,7 @@ import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
 
@@ -28,6 +29,9 @@ public class DriveDistance extends Command {
   boolean track;
   double xVal;
   double degreesToTarget;
+
+  Timer timer; 
+  boolean started = true; 
 
   public DriveDistance(double distance, double angle, double timeOut,  double speed, double tolerance) {
     this.distance = distance; 
@@ -64,6 +68,8 @@ public class DriveDistance extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+   timer = new Timer(); 
+
     drive.reset();
 
     driveLoop.setPIDType(true);
@@ -71,8 +77,10 @@ public class DriveDistance extends Command {
     driveLoop.setAnglePID(angle);
     driveLoop.setTolerancePID(tolerance);
     driveLoop.setSpeedPID(speed);
-    driveLoop.selectGear(true);
+    driveLoop.selectGear(false);
     driveLoop.setDriveState(DriveControlState.PID);
+    drive.setRightrampRate(0);
+    drive.setLeftrampRate(0);
 
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal);
@@ -84,14 +92,35 @@ public class DriveDistance extends Command {
     if(track) {
      driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     }
+
+    driveLoop.selectGear(false);
+
+    if(Math.abs(drive.getAveragePos()) < 50){
+      drive.setLeftrampRate(1);
+      drive.setRightrampRate(1);
+    } else {
+      drive.setLeftrampRate(0);
+      drive.setRightrampRate(0);
+    }
+
+    if(Math.abs(drive.getAveragePos()) >= (Math.abs(distance) - tolerance) && started == false) {
+      timer.start(); 
+      started = true; 
+    } else {
+      timer.reset(); 
+    }
+
   }
 
   // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
-    if(Math.abs(drive.getAveragePos()) >= (Math.abs(distance) - tolerance)) {
-      return true;
-    } else {
+  
+    if (started == true && timer.get() > 0.75){
+      return true; 
+    }
+    else {
+      started = false; 
       return false;
     }
   }

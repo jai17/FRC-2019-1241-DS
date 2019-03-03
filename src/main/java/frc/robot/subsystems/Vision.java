@@ -77,11 +77,17 @@ public class Vision extends Subsystem {
         camera.setWhiteBalanceAuto();
         camera.setBrightness(-10);
 
+        //carriage camera settings
+        carriageCamera.setResolution(320,240);
+        carriageCamera.setExposureAuto();
+        carriageCamera.setFPS(15);
+        carriageCamera.setBrightness(60);
+
         /**
          * Set the FPS NOTE: Param Set will not necessarily be what is displayed
          */
         camera.setFPS(15);
-        camera.setConnectionStrategy(ConnectionStrategy.kAutoManage);
+        camera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 
         /** Get a CvSink. This will capture Matrixes from the camera */
         CvSink cvSink = CameraServer.getInstance().getVideo();

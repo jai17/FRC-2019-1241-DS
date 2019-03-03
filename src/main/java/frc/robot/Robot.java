@@ -10,6 +10,7 @@ package frc.robot;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -19,7 +20,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.auto.DriveDistance;
+import frc.robot.commands.auto.DriveToGoal;
 import frc.robot.commands.auto.DriveTurn;
+import frc.robot.commands.auto.TurnToGoal;
 import frc.robot.commands.auto.routines.FarRightShipHatch;
 import frc.robot.commands.auto.routines.HatchFinesse;
 import frc.robot.loops.CargoLoop;
@@ -36,6 +39,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Hatch;
 import frc.robot.subsystems.Vision;
 import frc.robot.util.Logger;
+import frc.robot.util.Point;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -69,6 +73,12 @@ public class Robot extends TimedRobot {
 
   public static double kP_DRIVE, kI_DRIVE, kD_DRIVE, kF_DRIVE;
   public static double kP_TURN, kI_TURN, kD_TURN;
+  public static double kP_VISION, kI_VISION, kD_VISION;
+
+
+  //Carriage Preferences
+  public static double shooterSpeed;
+  public static double shooterSpeedSlow;
 
   // Vision Preferences
   public static double[] hsvThresholdHue = new double[2];
@@ -121,11 +131,13 @@ public class Robot extends TimedRobot {
     logger.openFile("Robot Init");
     looper = new Looper();
 
-    m_chooser.addDefault("Drive Test", new DriveDistance(70, 30 , 2, 1, 1));
-    m_chooser.addObject("Drive Turn Test", new DriveTurn(105, 0.5, 2, 1) );
+    m_chooser.addDefault("Drive Test", new DriveDistance(150, 0 , 2, 0.8, 1));
+    m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1) );
     m_chooser.addObject("FarRightShipHatch", new FarRightShipHatch());
     m_chooser.addObject("Hatch Finnesse", new HatchFinesse()); 
-    SmartDashboard.putData("Auto mode", m_chooser);
+    m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56,0), 2, 0.5));
+    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(50,100), 5, 0.4));
+    SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
     try {
@@ -144,7 +156,7 @@ public class Robot extends TimedRobot {
     drive.reset();
     elevator.resetEncoders();
     cargo.resetAngle();
-
+    drive.resetXY();
   }
 
   /**
@@ -198,6 +210,11 @@ public class Robot extends TimedRobot {
     logger.openFile("Auton Init");
 
     //carriageLoop.setClawPos(true);
+    drive.reset();
+    drive.resetXY();
+    drive.resetXY();
+    drive.resetXY();
+    drive.resetXY();
     carriageLoop.setSliderPos(true);
     carriageLoop.setEjectorPos(true);
     driveLoop.selectGear(true);
@@ -234,12 +251,12 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     updateSmartDashboard();
-   logger.openFile("Teleop init");
+    logger.openFile("Teleop init");
     looper.start();
 
-    carriageLoop.setClawPos(false);
-    carriageLoop.setSliderPos(false);
-    carriageLoop.setEjectorPos(false);
+    // carriageLoop.setClawPos(false);
+    // carriageLoop.setSliderPos(false);
+    // carriageLoop.setEjectorPos(false);
     driveLoop.selectGear(true);
   }
 
@@ -250,6 +267,9 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     Scheduler.getInstance().run();
     updateSmartDashboard();
+
+    // Joystick joy = new Joystick(0);
+    // drive.runLeftDrive(joy.getRawAxis(1));
   }
 
   /**
@@ -259,15 +279,28 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
   }
 
+  /*
+   * Updates the smart dashboard
+   */
   public void updateSmartDashboard() {
     // // ROBOT
     SmartDashboard.putNumber("Battery Voltage",Math.round(DriverStation.getInstance().getBatteryVoltage() * 100.0) / 100.0); // Battery Voltage
 
     // DRIVE
-    SmartDashboard.putNumber("Robot Angle", drive.getYaw()); // Gyro Yaw
+    SmartDashboard.putNumber("Robot Yaw", drive.getYaw()); // Gyro Yaw
+    SmartDashboard.putNumber("Robot Angle", drive.getAngle()); //Gyro angle
     SmartDashboard.putNumber("Drive Encoder Inches", drive.getAveragePos()); // distance drive has travelled in inches
-    SmartDashboard.putNumber("Drive Encoder Raw Average", drive.getAverageRaw());
+    SmartDashboard.putNumber("Drive Encoder Right", drive.getRightPos()); //right encoder
+    SmartDashboard.putNumber("Drive Encoder Left", drive.getLeftPos()); //left encoder
 
+    double[] xy = drive.getXY();
+
+    SmartDashboard.putNumber("xPos", xy[0]);
+    SmartDashboard.putNumber("yPos", xy[1]);
+
+    SmartDashboard.putString("Robot Pose", 
+      "X: " + xy[0] +" Y: "+ xy[1] +" θ: "+ drive.getYaw());
+    //θ
     SmartDashboard.putNumber("Left Drive Output", drive.getLeftOutput());
     SmartDashboard.putNumber("Right Drive Output", drive.getRightOutput());   
     SmartDashboard.putString("Drivetrain State", driveLoop.getControlState().toString());
@@ -282,18 +315,21 @@ public class Robot extends TimedRobot {
     kI_TURN = prefs.getDouble("kI_TURN", 0);
     kD_TURN = prefs.getDouble("kD_TURN", 0);
 
+    kP_VISION = prefs.getDouble("kP_VISION", 0);
+    kI_VISION = prefs.getDouble("kI_VISION", 0);
+    kD_VISION = prefs.getDouble("kD_VISION", 0);
+
     //ELEVATOR
     if (maxElevatorSpeed < elevator.getElevatorSpeed()) {
       maxElevatorSpeed = Math.abs(elevator.getElevatorSpeed());
     }
     SmartDashboard.putString("Elevator State", elevatorLoop.getControlState().toString()); 
-
     SmartDashboard.putNumber("Elevator Max Speed", maxElevatorSpeed);
     SmartDashboard.putNumber("Elevator Raw Units", elevator.getElevatorRotations());
     SmartDashboard.putNumber("Elevator Inches", elevator.getElevatorEncoder());
 
     //Cargo
-    SmartDashboard.putNumber("Cargo Pivot Raw", cargo.getRawCargoPivot());
+    SmartDashboard.putNumber("Cargo Pivot Raw", Math.abs(cargo.getRawCargoPivot()));
     SmartDashboard.putNumber("Cargo Pivot Speed", cargo.getRawPivotSpeed());
     SmartDashboard.putString("Cargo State", cargoLoop.getControlState().toString());
 
@@ -302,12 +338,17 @@ public class Robot extends TimedRobot {
     }
 
     SmartDashboard.putNumber("Max Pivot Speed", maxPivotSpeed);
-    SmartDashboard.putBoolean("Cargo Present Intake", cargo.getOptic()); 
-
-    SmartDashboard.putBoolean("Claw Solenoid", carriage.getClaw());
+    SmartDashboard.putBoolean("Cargo Present Intake", cargo.getOptic());
 
     //Carriage
-    SmartDashboard.putBoolean("Cargo Present Carriage", carriage.getOptic()); 
+    SmartDashboard.putBoolean("Cargo Present Carriage", !carriage.getOptic()); 
+    SmartDashboard.putBoolean("Tray Position", carriageLoop.getSliderPos());
+    SmartDashboard.putBoolean("Ejector Position", carriageLoop.getEjectorPos());
+    SmartDashboard.putBoolean("Claw Position", carriageLoop.getClawPos());
+    SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight()); 
+    SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft()); 
+    shooterSpeed = prefs.getDouble("shooterSpeed", 1); 
+    shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
 
     // //Field Relative Positioning
     // SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 

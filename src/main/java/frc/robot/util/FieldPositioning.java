@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * FieldPositioning
  * @author Neil
@@ -37,11 +39,12 @@ public class FieldPositioning {
 			if (dy < 0) { //point is behind you
 				if (dx > 0) {
 					goalYaw = 90 - Math.toDegrees(Math.atan(dy/dx)); //behind and right
-				} else if (dy < 0) {
+				} else if (dx < 0) {
 					goalYaw = -90 - Math.toDegrees(Math.atan(dy/dx)); //behind and left
 				}
 			} else { //anywhere else
-				goalYaw = Math.toDegrees(Math.atan(dx/dy));
+				goalYaw = Math.toDegrees(Math.atan(dy/dx));
+				SmartDashboard.putString("Afro Angle", "Afro Angle" + goalYaw); 
 			}
 		}
 		return goalYaw;

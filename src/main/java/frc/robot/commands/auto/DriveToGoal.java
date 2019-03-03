@@ -14,9 +14,10 @@ import java.io.PrintWriter;
 import frc.robot.util.FieldPositioning;
 import frc.robot.Robot;
 import frc.robot.loops.DrivetrainLoop;
+import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Point;
-
+import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
@@ -48,13 +49,13 @@ public class DriveToGoal extends Command {
 	 */
     public DriveToGoal(Point goal, double epsilon, double topSpeed) {
         requires(Robot.drive);
-        goalPoint = goal;
+        this.goalPoint = goal;
         this.epsilon = epsilon;
         this.topSpeed = topSpeed;
 		printCounter = 0;
 		
-		driveLoop = Robot.driveLoop;
-		drive = Robot.drive;
+		driveLoop = DrivetrainLoop.getInstance();
+		drive = Drivetrain.getInstance();
     }
 
     /* INITIALIZE
@@ -66,20 +67,29 @@ public class DriveToGoal extends Command {
     protected void initialize() {
         totalDist = Point.calcDistance(drive.getXYPoint(), goalPoint);
         initTotalDist = totalDist;
+		
+        // //debug
+        // try {
+		// 	pw = new PrintWriter(new File("/home/lvuser/tests/driveToGoal.csv"));
+	    //     pw.println("time,x,y,avgVel,goalAngle,totalDist");
+		// } catch (FileNotFoundException e) {
+		// 	System.out.println(this.toString() +": ERROR: could not create file!");
+		// }
         
-        //debug
-        try {
-			pw = new PrintWriter(new File("/home/lvuser/tests/driveToGoal.csv"));
-	        pw.println("time,x,y,avgVel,goalAngle,totalDist");
-		} catch (FileNotFoundException e) {
-			System.out.println(this.toString() +": ERROR: could not create file!");
-		}
-        
-        goalYaw = frc.robot.util.FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		//cartesian left is 0, yaw left is 90
         initTime = System.currentTimeMillis();
         System.out.println("\n" + this.toString() +": INITIALIZING: "+ goalPoint.getxPos() +","+ goalPoint.getyPos()); //dbg
-        System.out.println("initTotalDist:" + initTotalDist +" initYaw:" + goalYaw + " @ " + Robot.drive.getYaw());
-        System.out.println("x y goalYaw currentYaw");
+        System.out.println("initTotalDist:" + initTotalDist +" initYaw:" + (goalYaw-90) + " @ " + Robot.drive.getYaw());
+		System.out.println("x y goalYaw currentYaw");
+		
+		//loops
+		driveLoop.setDistancePID(totalDist);
+		driveLoop.setAnglePID(goalYaw - 90);
+		driveLoop.setTolerancePID(epsilon);
+		driveLoop.setTopSpeed(topSpeed);
+		driveLoop.setPIDType(true); //true for drive
+		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING);
     }
 
     /*EXECUTE
@@ -89,39 +99,46 @@ public class DriveToGoal extends Command {
      * dbg - print data to file
      */
     protected void execute() {
-    	robotPoint = Robot.drive.getXYPoint();
+    	robotPoint = drive.getXYPoint();
     	
     	//(1) live update distance
-    	totalDist = Point.calcDistance(Robot.drive.getXYPoint(), goalPoint); //live update distance when far from point
-    	
+    	totalDist = Point.calcDistance(robotPoint, goalPoint); //live update distance when far from point
+		
     	//(2) when close to point, maintain current heading
     	if(totalDist >= (initTotalDist*0.15)) { //if point distance is greater than 15% of total distance (not too close to point)
-    		goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update goal angle when far from point
-    		currentSetpoint = Robot.drive.getAveragePos() + totalDist;
+    		// goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update goal angle when far from point
+			if ((goalPoint.getxPos() - robotPoint.getxPos()) != 0) {
+				goalYaw = Math.atan((goalPoint.getyPos() - robotPoint.getyPos()) / 
+				(goalPoint.getxPos() - robotPoint.getxPos()));
+			} else {
+				goalYaw = 0;
+			}
+			currentSetpoint = drive.getAveragePos() + totalDist;
     	}
-    	
+		
+		driveLoop.setAnglePID(goalYaw);
+		driveLoop.setDistancePID(currentSetpoint);
+
     	//drive setpoint is *ahead* of where you are
-    	Robot.drive.regulatedDrivePID(currentSetpoint, goalYaw, epsilon, (System.currentTimeMillis() - initTime), topSpeed);
     		
-    	//print to .csv file
-    	pw.println((System.currentTimeMillis() - initTime) +","+ robotPoint.getxPos() +","+ robotPoint.getyPos() +","+
-    		Robot.drive.getAverageVelInchesPerSec() +","+ goalYaw +","+ totalDist);
+    	// //print to .csv file
+    	// pw.println((System.currentTimeMillis() - initTime) +","+ robotPoint.getxPos() +","+ robotPoint.getyPos() +","+
+    	// 	Robot.drive.getAverageVelInchesPerSec() +","+ goalYaw +","+ totalDist);
     	
     	//print to console
-    	if(printCounter % 10 == 0) {
-    		System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos() +" "+ goalYaw +" "+ Robot.drive.getYaw());
+    	if(printCounter % 2 == 0) {
+    		System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos() +" "+ (goalYaw - 90) +" "+ Robot.drive.getYaw());
     	}
     	printCounter++;
     }
 
     /* FINISHED
-     * drive until within circle around point and moving slowly
+     * drive until within circle around point
      */
     protected boolean isFinished() {
         
-      if (Point.isWithinBounds(goalPoint, Robot.drive.getXYPoint(), epsilon)) { //within radius of circle
+      if (Point.isWithinBounds(goalPoint, drive.getXYPoint(), epsilon)) { //within radius of circle
         	return true;
-        	
         } else {
         	return false;
         }
@@ -129,16 +146,19 @@ public class DriveToGoal extends Command {
 
     //run when finished
     protected void end() {
-    	pw.close();
-    	Point endPoint = Robot.drive.getXYPoint();
+    	// pw.close();
+    	Point endPoint = drive.getXYPoint();
     	System.out.println(this.toString() +": FINISHED: drove to "+ goalPoint.getxPos() +","+ goalPoint.getyPos() 	
     		+" @ "+ endPoint.getxPos() +","+ endPoint.getyPos() +","+ Robot.drive.getYaw());
-    	System.out.println();
+		System.out.println();
+		driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+		driveLoop.setLeftDrive(0);
+		driveLoop.setRightDrive(0);
     }
 
     //don't interrupt me 
     protected void interrupted() {
-    	pw.close();
+    	// pw.close();
     	System.out.println(this.toString() +": interrupted");
     }
 }

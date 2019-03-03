@@ -14,6 +14,9 @@ import java.io.PrintWriter;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.loops.DrivetrainLoop;
+import frc.robot.loops.DrivetrainLoop.DriveControlState;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.FieldPositioning;
 import frc.robot.util.Point;
 
@@ -29,21 +32,27 @@ public class TurnToGoal extends Command {
 	private double epsilon; //tolerance in degrees for final heading
 	private double topSpeed; //top speed limit for PID
 	private int printCounter; //counter for prints
-	private PrintWriter pw; //print to .csv
+	// private PrintWriter pw; //print to .csv
 	private double goalAngle;
+
+	DrivetrainLoop driveLoop; 
+	Drivetrain drive; 
 	
 	/**
 	 * Turn towards a goal point at a regulated speed with a tolerance.
 	 * @param goal - goal point to turn to.
 	 * @param epsilon - tolerance (+/-) to which the robot must turn.
-	 * @param topSpeed - maximum magnitude of left/right side of robot.
+	 * @param topSpeed - maximum magnitude of left/right side of robot between -1 and 1.
 	 */
     public TurnToGoal(Point goal, double epsilon, double topSpeed) {
         requires(Robot.drive);
         goalPoint = goal;
         this.epsilon = epsilon;
         this.topSpeed = topSpeed;
-        printCounter = 0;
+		printCounter = 0;
+		
+		driveLoop = DrivetrainLoop.getInstance(); 
+		drive = Drivetrain.getInstance(); 
     }
 
    	//called in autonInit() ONCE
@@ -52,30 +61,35 @@ public class TurnToGoal extends Command {
         goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //setpoint
         
         //debug
-        try {
-			pw = new PrintWriter(new File("/home/lvuser/tests/turnToGoal.csv"));
-	        pw.println("time,goalAngle,currentAngle,sideVel,isAngle,isSpeed");
-		} catch (FileNotFoundException e) {
-			System.out.println(this.toString() + ": ERROR: could not create file!");
-		}
+        // try {
+		// 	pw = new PrintWriter(new File("/home/lvuser/tests/turnToGoal.csv"));
+	    //     pw.println("time,goalAngle,currentAngle,sideVel,isAngle,isSpeed");
+		// } catch (FileNotFoundException e) {
+		// 	System.out.println(this.toString() + ": ERROR: could not create file!");
+		// }
         
         System.out.println(this.toString() +": INITIALIZING: "+ goalYaw +" "+ goalPoint.getxPos() +" "+ goalPoint.getyPos());
         initTime = System.currentTimeMillis();
         
         //get change in angle from yaw
-        goalAngle = Robot.drive.getAngle() - Math.min(goalYaw - Robot.drive.getYaw(), goalYaw + Robot.drive.getYaw());
-    }
+        goalAngle = Robot.drive.getAngle() + Math.min(goalYaw - Robot.drive.getYaw(), goalYaw + Robot.drive.getYaw());
+		
+		driveLoop.setAnglePID(goalAngle);
+		driveLoop.setTolerancePID(epsilon);
+		driveLoop.setTopSpeed(topSpeed);
+		driveLoop.setPIDType(false);
+		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING);
+	}
 
     //repeatedly called when required to execute
     protected void execute() {
-    	Robot.drive.regulatedTurnPID(goalAngle, epsilon, (System.currentTimeMillis() - initTime), topSpeed, false);
-    	
+		
     	SmartDashboard.putNumber("goalYaw", goalAngle);
     	
     	//print to file
-    	pw.println((System.currentTimeMillis()-initTime) +","+ goalYaw +","+ Robot.drive.getYaw() +","+ Robot.drive.getLeftVelocityInchesPerSec()
-    			+","+ ((Robot.drive.getYaw() >= (goalYaw - epsilon) && Robot.drive.getYaw() <= (goalYaw + epsilon)) 
-    			+","+ (Math.abs(Robot.drive.getLeftVelocityInchesPerSec()) <= 20)));
+    	// pw.println((System.currentTimeMillis()-initTime) +","+ goalYaw +","+ Robot.drive.getYaw() +","+ Robot.drive.getLeftVelocityInchesPerSec()
+    	// 		+","+ ((Robot.drive.getYaw() >= (goalYaw - epsilon) && Robot.drive.getYaw() <= (goalYaw + epsilon)) 
+    	// 		+","+ (Math.abs(Robot.drive.getLeftVelocityInchesPerSec()) <= 20)));
     	
     	//print to console
     	if(printCounter % 20 == 0) {
@@ -87,7 +101,7 @@ public class TurnToGoal extends Command {
     //end condition for command
     protected boolean isFinished() {
     	if((Robot.drive.getAngle() >= (goalAngle - epsilon) && Robot.drive.getAngle() <= (goalAngle + epsilon)) && //if heading is in range
-    			(Math.abs(Robot.drive.getLeftVelocityInchesPerSec()) <= 20)) { //and low oscillation on PID; getting side vel bc average vel when turning is 0 
+    			(Math.abs(drive.getRightOutput()) <= 0.1241)) { //and low oscillation on PID; getting side vel bc average vel when turning is 0 
     		return true;    		
     	} else {
     		return false;
@@ -96,7 +110,7 @@ public class TurnToGoal extends Command {
 
     //called at the end
     protected void end() {
-    	pw.close();
+    	// pw.close();
     	Point robotPoint = Robot.drive.getXYPoint();
     	System.out.println(this.toString() +": FINISHED: turned to "+ goalYaw +" @ "+ Robot.drive.getYaw());
     	System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos());
@@ -105,7 +119,7 @@ public class TurnToGoal extends Command {
 
     //called when interrupted
     protected void interrupted() {
-    	pw.close();
+    	// pw.close();
     	System.out.println(this.toString() +": interrupted");
     }
 }

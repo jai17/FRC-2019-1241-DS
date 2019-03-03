@@ -45,13 +45,13 @@ public class TankDrive extends Command {
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal);
 
-    if (Robot.m_oi.getDriveLeftBumper()) {
+    if (Robot.m_oi.getDriveLeftBumper()) { //tracking
       driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
       driveLoop.setPIDType(false);
       driveLoop.selectGear(true);
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
       driveLoop.setSpeedPID(1);
-      driveLoop.setStick(Robot.m_oi.getDriveRightY()  * 0.4);
+      driveLoop.setStick(Robot.m_oi.getDriveRightY()  * 0.5);
       driveLoop.setTolerancePID(1);
 
     } else if (Robot.m_oi.getDriveRightBumper()) { // half speed
@@ -63,6 +63,7 @@ public class TankDrive extends Command {
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
       driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
       driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+
     } else if (Robot.m_oi.getDriveAButton()) {
       // drive.changeGyroGains(0.5, 0, 0);
       // drive.turnPID(drive.getAngle() - degreesToTarget, 1,1, 2);
@@ -79,11 +80,7 @@ public class TankDrive extends Command {
     }
 
     // shift gears
-    if (Robot.m_oi.getDriveRightTrigger()) {
-      toggle.set(Robot.m_oi.getDriveRightTrigger());
-    }
-
-    driveLoop.selectGear(!toggle.get());
+    driveLoop.selectGear(Robot.m_oi.getDriveRightTrigger());
 
     // //drive motors
     // if (Robot.m_oi.getDriveRightBumper()) { //half speed

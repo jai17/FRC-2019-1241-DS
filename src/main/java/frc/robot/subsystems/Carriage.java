@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.can.*;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.ElectricalConstants;
@@ -35,6 +36,10 @@ public class Carriage extends Subsystem {
   //Digital inputs
   DigitalInput hatchSensor;
   DigitalInput cargoOptical; 
+
+  //RangeFinder
+  Ultrasonic hatchDetectorRight; 
+  Ultrasonic hatchDetectorLeft; 
 
    //Store state of ball in Carriage
    private boolean contains = false;
@@ -65,6 +70,11 @@ public class Carriage extends Subsystem {
     sliderSolenoid= new DoubleSolenoid(ElectricalConstants.SLIDER_SOLENOID_A, ElectricalConstants.SLIDER_SOLENOID_B);
 
     cargoOptical = new DigitalInput(ElectricalConstants.CARGO_DETECTOR_CARRIAGE);
+
+    hatchDetectorRight = new Ultrasonic(ElectricalConstants.HATCH_PANEL_DETECTOR_TRIGGER_RIGHT, ElectricalConstants.HATCH_PANEL_DETECTOR_ECHO_RIGHT); 
+    hatchDetectorLeft = new Ultrasonic(ElectricalConstants.HATCH_PANEL_DETECTOR_TRIGGER_LEFT, ElectricalConstants.HATCH_PANEL_DETECTOR_ECHO_LEFT);
+    hatchDetectorRight.setAutomaticMode(true);
+    hatchDetectorLeft.setAutomaticMode(true);
 
     retractCarriage();
     retractEjector();
@@ -154,6 +164,13 @@ public class Carriage extends Subsystem {
   //Gets the state of the Cargo from the sensor 
   public boolean getOptic() { 
     return cargoOptical.get();
+  }
+
+  public double getUltrasonicRight(){
+    return hatchDetectorRight.getRangeInches(); 
+  }
+  public double getUltrasonicLeft(){
+    return hatchDetectorLeft.getRangeInches(); 
   }
 
 }

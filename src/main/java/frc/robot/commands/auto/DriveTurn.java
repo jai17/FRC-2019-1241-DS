@@ -60,7 +60,7 @@ public class DriveTurn extends Command {
   // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
-    if ((Math.abs(drive.getAngle()) - Math.abs(angle)) > Math.abs(angle)) {
+    if ((Math.abs(drive.getAngle()) - Math.abs(angle)) > 1) {
       return true;
     } else {
       return false;

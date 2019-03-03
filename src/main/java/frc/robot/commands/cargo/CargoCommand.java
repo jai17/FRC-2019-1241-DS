@@ -75,8 +75,6 @@ public class CargoCommand extends Command {
       //   carriageLoop.setFeederSpeed(0);
       //   carriageLoop.setIsFeeding(true);
       //   }
-
-      System.out.println(cargo.isCargoPresent()); 
       
       if (Robot.m_oi.getToolLeftBumper()) { //outtake
         cargoLoop.setIsIntaking(false);
@@ -85,17 +83,30 @@ public class CargoCommand extends Command {
 
       } else if (Robot.m_oi.getToolRightBumper()) { //intaking
 
-        if (Math.abs(cargo.getCargoAngle()) <= 500 && !cargo.isCargoPresent()) { //pivot up, has ball
-          cargoLoop.setIsIntaking(true);
+        if (Math.abs(cargo.getCargoAngle()) <= 900 && !cargo.isCargoPresent()) { //pivot up, has ball
+          cargoLoop.setIsIntaking(true); //intaking
           cargoLoop.setRollerSpeed(1);
-          cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-          carriageLoop.setIsFeeding(true);
-          carriageLoop.setFeederSpeed(1);;
+          carriageLoop.setIsFeeding(true); //feeding
+          carriageLoop.setFeederSpeed(1);
+
+          carriageLoop.setIsShooting(true); //need isShooting, not shooting
+          carriageLoop.setShooterSpeed(0);
           carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
+
+        }  else if (Math.abs(cargo.getCargoAngle()) <= 1500 && !cargo.isCargoPresent()) { //pivot down, has ball
+          cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+          carriageLoop.setIsFeeding(true); //feeding
+          carriageLoop.setFeederSpeed(1);
+          carriageLoop.setIsShooting(true); //need isShooting, not shooting
+          carriageLoop.setShooterSpeed(0);
+          cargoLoop.setIsIntaking(false); //intaking
+          cargoLoop.setRollerSpeed(0);
 
         } else if (cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) > 900) { //pivot down, no ball
           cargoLoop.setIsIntaking(true);
           cargoLoop.setRollerSpeed(1);
+          carriageLoop.setIsFeeding(false);
+          carriageLoop.setFeederSpeed(0);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
 
         } else { //button pressed, no ball
@@ -106,6 +117,8 @@ public class CargoCommand extends Command {
       } else { //no ball
         cargoLoop.setIsIntaking(true);
         cargoLoop.setRollerSpeed(0);
+        carriageLoop.setIsFeeding(false);
+        carriageLoop.setFeederSpeed(0);
         cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
       }
 
@@ -113,9 +126,14 @@ public class CargoCommand extends Command {
       if ((Robot.m_oi.getToolLeftY() > 0.5 || Robot.m_oi.getToolLeftY() < -0.5 && !openLoop)){
         openLoop = true; 
       }
+
       //not open loop
       if ((Robot.m_oi.getToolRightTrigger()) && openLoop){
         openLoop = false; 
+      }  else if (Robot.m_oi.getToolLeftX() < -0.6 && openLoop) {
+        openLoop = false;
+      } else if (Robot.m_oi.getToolLeftX() > 0.6 && openLoop) {
+        openLoop = false;
       }
 
       //Magic Motion   
@@ -131,10 +149,19 @@ public class CargoCommand extends Command {
           openLoop = false; 
 
         } else if (cargo.isCargoPresent()) { //has no cargo
-          cargoLoop.setMotionMagic(NumberConstants.CARGO_RESTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
-          cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-          openLoop = false; 
-        }
+          if (Robot.m_oi.getToolLeftX() < -0.6) { //no cargo, left x
+            cargoLoop.setMotionMagic(NumberConstants.CARGO_STATION_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
+            cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+            openLoop = false; 
+          } else if (Robot.m_oi.getToolLeftX() > 0.6) { //no cargo, lifting
+            cargoLoop.setMotionMagic(NumberConstants.CARGO_LIFTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
+            cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+          } else { //no cargo, no x
+            cargoLoop.setMotionMagic(NumberConstants.CARGO_RESTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
+            cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+            openLoop = false;
+          }
+        } 
       }
 
         if (openLoop){

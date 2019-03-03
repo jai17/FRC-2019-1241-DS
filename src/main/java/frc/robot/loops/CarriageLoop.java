@@ -54,7 +54,7 @@ public class CarriageLoop implements Loop{
 		switch (mControlState) {
 			case OPEN_LOOP:
 			if (!DriverStation.getInstance().isAutonomous()){
-				if (!isRetracted) { //slider
+				if (isRetracted) { //slider
 					carriage.extendCarriage();
 					// System.out.println("EXTEND CARRIAGE");
 				} else {
@@ -76,10 +76,11 @@ public class CarriageLoop implements Loop{
 				}
 			}
 
-			if (!carriage.getOptic() && isShooting) { //feeder
+			if (!carriage.getOptic() && isShooting) { //if ball in and is shooting
 				carriage.feederIn(1);
 			} 
-			else if (!carriage.getOptic()) {
+			
+			else if (!carriage.getOptic()) { //if ball in
 				this.setFeederSpeed(0);
 				carriage.feederOut(0);
 			}
@@ -93,7 +94,7 @@ public class CarriageLoop implements Loop{
 				carriage.shootForward(0);
 			}
 
-				return;
+				return; //end OPEN_LOOP
 		}
 	}
 	
@@ -116,14 +117,29 @@ public void setCarriageState(CarriageControlState state) {
 		isRetracted = val;
 	}
 
+	//get slider position
+	public boolean getSliderPos() {
+		return isRetracted;
+	}
+
 	//set claw position
 	public void setClawPos(boolean val) {
 		isClosed = val;
 	}
 
+	//get claw position
+	public boolean getClawPos() {
+		return isClosed;
+	}
+
 	//set ejector pos
 	public void setEjectorPos(boolean val) {
 		isEngaged = val;
+	}
+
+	//get ejector position
+	public boolean getEjectorPos() {
+		return isEngaged;
 	}
 
 	//set feeder speed

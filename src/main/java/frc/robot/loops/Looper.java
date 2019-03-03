@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * match.
  */
 public class Looper {
-    public final double kPeriod = 0.02; //300hz loop
+    public final double kPeriod = 0.03; //300hz loop
 
     private boolean running_;
 

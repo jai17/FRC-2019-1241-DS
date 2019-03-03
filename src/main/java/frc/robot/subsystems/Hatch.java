@@ -48,8 +48,8 @@ public class Hatch extends Subsystem {
 
     hatchRoller = new VictorSPX(ElectricalConstants.HATCH_ROLLER);
 
-    hatchLimit = new DigitalInput(ElectricalConstants.HATCH_LIMIT_SWITCH);
-    hatchDetector = new DigitalInput(ElectricalConstants.HATCH_PANEL_DETECTOR_INTAKE);
+    // hatchLimit = new DigitalInput(ElectricalConstants.HATCH_LIMIT_SWITCH);
+    // hatchDetector = new DigitalInput(ElectricalConstants.HATCH_PANEL_DETECTOR_INTAKE);
 
     // For Motion Magic set up
     hatchPivot.selectProfileSlot(0, 0);
@@ -145,7 +145,7 @@ public class Hatch extends Subsystem {
     runHatchMotionMagic(setpoint * -ElectricalConstants.HATCH_TO_DEGREES);
   }
 
-  public boolean getIsBack() {
-    return hatchLimit.get();
-  }
+  // public boolean getIsBack() {
+  //   return hatchLimit.get();
+  // }
 }

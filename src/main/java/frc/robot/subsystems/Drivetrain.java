@@ -34,6 +34,8 @@ public class Drivetrain extends Subsystem {
 
   //Drive instance
   private static Drivetrain mInstance; 
+  private Cargo cargo; 
+  private Elevator elevator; 
   //Robot State 
   private RobotState robotState; 
   //Talon Control Mode constant
@@ -45,8 +47,6 @@ public class Drivetrain extends Subsystem {
 	private double prevAvgDist = 0;
   private double xPos, yPos;
   
-  private Encoder rightDriveEncoder;
-  private Encoder leftDriveEncoder;
 
   /* Drive speed controlers */
   // public TalonSRX leftMaster;
@@ -60,11 +60,11 @@ public class Drivetrain extends Subsystem {
   /* Spark Drive Speed Controllers */ 
   public CANSparkMax leftMaster;
   private CANSparkMax leftSlave1;
-  private CANSparkMax leftSlave2;
+  // private CANSparkMax leftSlave2;
 
   private CANSparkMax rightMaster;
   private CANSparkMax rightSlave1;
-  private CANSparkMax rightSlave2;
+  // private CANSparkMax rightSlave2;
 
   /* Encoders on the drive */
 
@@ -96,33 +96,29 @@ public class Drivetrain extends Subsystem {
 //Drivetrain setup
 public Drivetrain() {
 
+  cargo = Cargo.getInstance(); 
+  elevator = Elevator.getInstance(); 
+
   /*SparkMax Speed Controllers*/
   leftMaster = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_FRONT, MotorType.kBrushless); 
+  //leftMaster.setInverted(true);
   leftSlave1 = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_MIDDLE, MotorType.kBrushless); 
-  leftSlave2 = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_BACK, MotorType.kBrushless); 
-  leftMaster.restoreFactoryDefaults(); 
-  leftSlave1.restoreFactoryDefaults(); 
-  leftSlave2.restoreFactoryDefaults(); 
+  // leftSlave2 = new CANSparkMax(ElectricalConstants.LEFT_DRIVE_BACK, MotorType.kBrushless); 
+  // leftMaster.restoreFactoryDefaults(); 
+  // leftSlave1.restoreFactoryDefaults(); 
+  // leftSlave2.restoreFactoryDefaults(); 
   leftSlave1.follow(leftMaster); 
-  leftSlave2.follow(leftMaster); 
+  // leftSlave2.follow(leftMaster); 
 
   rightMaster = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_FRONT, MotorType.kBrushless); 
+  //rightMaster.setInverted(true);
   rightSlave1 = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_MIDDLE, MotorType.kBrushless); 
-  rightSlave2 = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_BACK, MotorType.kBrushless); 
-  rightMaster.restoreFactoryDefaults(); 
-  rightSlave1.restoreFactoryDefaults(); 
-  rightSlave2.restoreFactoryDefaults(); 
-  rightSlave1.follow(leftMaster); 
-  rightSlave2.follow(leftMaster);
-
-  leftDriveEncoder = new Encoder(ElectricalConstants.LEFT_ENCODER_A, ElectricalConstants.LEFT_ENCODER_B,
-				ElectricalConstants.LEFT_ENCODER_REVERSE, Encoder.EncodingType.k4X);
-        leftDriveEncoder.setDistancePerPulse(ElectricalConstants.TICKS_PER_INCH);
-
-  rightDriveEncoder = new Encoder(ElectricalConstants.RIGHT_ENCODER_A, ElectricalConstants.RIGHT_ENCODER_B,
-				ElectricalConstants.RIGHT_ENCODER_REVERSE, Encoder.EncodingType.k4X);
-        rightDriveEncoder.setDistancePerPulse(ElectricalConstants.TICKS_PER_INCH);
-        
+  // rightSlave2 = new CANSparkMax(ElectricalConstants.RIGHT_DRIVE_BACK, MotorType.kBrushless); 
+  // rightMaster.restoreFactoryDefaults(); 
+  // rightSlave1.restoreFactoryDefaults(); 
+  // rightSlave2.restoreFactoryDefaults(); 
+  rightSlave1.follow(rightMaster); 
+  // rightSlave2.follow(rightMaster);
 
   /*
   //Initialize Talons
@@ -200,6 +196,9 @@ public Drivetrain() {
   //reset encoders, gyro, shift high
   reset();
   shiftHigh();
+
+  this.setRightBrakeMode();
+  this.setLeftBrakeMode();
 }
 
   @Override
@@ -264,52 +263,45 @@ public Drivetrain() {
 
   
   public void reset () {
-    rightDriveEncoder.reset();
-    leftDriveEncoder.reset();
+    resetDriveEncoders();
     resetGyro();
   }
-  
-  public double getRightDriveRaw() {
-		return rightDriveEncoder.getRaw();
-  }
-  
-  public double getleftDriveRaw() {
-		return leftDriveEncoder.getRaw();
-  }
-  
-  public double getAverageRaw()
-  {
-    return (getRightDriveRaw()+getleftDriveRaw())/2;
-  }
+
   public double getRightPos(){
-    return getRightDriveRaw()/ElectricalConstants.TICKS_PER_INCH;
+    return (cargo.getDriveRightInches()); 
   }
-
   public double getLeftPos(){
-    return getleftDriveRaw()/ElectricalConstants.TICKS_PER_INCH;
-  }
-
-  public double getAveragePos(){
-    return (getLeftPos() + getRightPos())/2;
+    return (elevator.getDriveLeftInches()); 
   }
   
+  public double getAveragePos(){
+    return (getRightPos() + getLeftPos())/2;
+  }
+  public void resetDriveEncoders(){
+    cargo.resetRightDrive();
+    elevator.resetLeftDrive();
+  }
 
   // drive methods
   
   public void setLeftBrakeMode(){
     leftMaster.setIdleMode(IdleMode.kBrake);
+    leftSlave1.setIdleMode(IdleMode.kBrake);
   }
 
   public void setRightBrakeMode(){
     rightMaster.setIdleMode(IdleMode.kBrake);
+    rightSlave1.setIdleMode(IdleMode.kBrake);
   }
 
   public void setLeftCoastMode(){
     leftMaster.setIdleMode(IdleMode.kCoast);
+    leftSlave1.setIdleMode(IdleMode.kCoast);
   }
 
   public void setRightCoastMode(){
     rightMaster.setIdleMode(IdleMode.kCoast);
+    rightSlave1.setIdleMode(IdleMode.kCoast);
   }
 
   public void setLeftrampRate(double rate){
@@ -351,6 +343,10 @@ public Drivetrain() {
   public double getRightOutput(){
     return rightMaster.getAppliedOutput();
   }
+
+  public double getAverageOutput(){
+    return (getRightOutput() + getLeftOutput()) / 2; 
+  }
   
   public double getLeftVelocityInchesPerSec() {
 		return 0;
@@ -360,13 +356,12 @@ public Drivetrain() {
   {
     return 0;
   }
-public double getAverageVelInchesPerSec() {
-  return 0;
-}
 
- 
+  public double getAverageVelInchesPerSec() {
+    return 0;
+  }
 
-    //gyro methods
+   //gyro methods
   //get absolute angle
   public double getAngle() {
 		return gyro.getAngle();
@@ -408,8 +403,8 @@ public double getAverageVelInchesPerSec() {
   //PID methods
   // drive PID 
   public void drivePID(double distSetpoint, double angleSetpoint, double speed, double epsilon) {
-    //drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
-    //turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
+    turnPID.changePIDGains(Robot.kP_TURN - 0.005, Robot.kI_TURN, Robot.kD_TURN - 0.);
     
     double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), 1);
     double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), 1);
@@ -423,14 +418,14 @@ public double getAverageVelInchesPerSec() {
     //   runRightDrive(-driveOut - angleOut - Robot.kF_DRIVE);
     // }
 
-    //runLeftDrive(driveOut + angleOut);
-    //runRightDrive(-driveOut + angleOut);
+    runLeftDrive((driveOut + angleOut)*speed);
+    runRightDrive((-driveOut + angleOut)*speed);
     
     System.out.println(this.toString() +":drivePID RUNNING: tracking: "+  angleSetpoint);
   }
   
   // drive PID constrained to top speed
-  public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double timestamp, double topSpeed) {
+  public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double topSpeed) {
     drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
     turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
     
@@ -456,35 +451,28 @@ public double getAverageVelInchesPerSec() {
     turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
     double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon) * speed;
     
-    // if(angleOut > 0) { //turning right
-    //   runLeftDrive(angleOut + NumberConstants.fDrive);
-    //   runRightDrive(angleOut - NumberConstants.fDrive);
-    // } else if (angleOut < 0) { //turning left
-    //   runLeftDrive(angleOut - NumberConstants.fDrive);
-    //   runRightDrive(angleOut + NumberConstants.fDrive);
-    // }
     runLeftDrive(angleOut);
     runRightDrive(angleOut);
   }
 
   //track turn PID
   public void trackTurnPID(double angleSetpoint, double speed, double epsilon, double stick) {
-    turnPID.changePIDGains(0.02, Robot.kI_TURN, 0.015);
+    turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
     double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon) * speed;
     
-    // if(angleOut > 0) { //turning right
-    //   runLeftDrive(angleOut + NumberConstants.fDrive);
-    //   runRightDrive(angleOut - NumberConstants.fDrive);
-    // } else if (angleOut < 0) { //turning left
-    //   runLeftDrive(angleOut - NumberConstants.fDrive);
-    //   runRightDrive(angleOut + NumberConstants.fDrive);
-    // }
+    //Max speed clamping to 50%
+    if (angleOut > 0) {
+      angleOut = Math.min(angleOut, 0.5);
+    } else if (angleOut < 0) {
+      angleOut = Math.max(angleOut, -0.5);
+    }
+
     runLeftDrive(angleOut - stick);
     runRightDrive(angleOut + stick);
   }
 
-  // turn PID constrained to top speed
-  public void regulatedTurnPID(double angleSetpoint, double epsilon, double timestamp, double topSpeed, boolean relative) {
+  // turn PID constrained to top speed for P2P
+  public void regulatedTurnPID(double angleSetpoint, double epsilon, double topSpeed, boolean relative) {
     turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
     
     double currentVal;
@@ -626,8 +614,7 @@ public double getAverageVelInchesPerSec() {
 		
 		//get field relative position of drive as a point
 		public Point getXYPoint() {
-			double[] xy = getXY();
-			return new Point(xy[0], xy[1]);
+			return new Point(xPos, yPos);
 		}
 		
 		//get previous average distance

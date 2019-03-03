@@ -4,7 +4,7 @@ import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Point;
 
-public class 	DrivetrainLoop implements Loop {
+public class DrivetrainLoop implements Loop {
 
 	private static DrivetrainLoop mInstance;
 	private Drivetrain drive;
@@ -17,6 +17,7 @@ public class 	DrivetrainLoop implements Loop {
 	// Point following constants
 	private Point goal = new Point();
 	private double topSpeed = 0;
+	private boolean isTurning = false; 
 
 	// Lock constants
 	private double lockPos = 0;
@@ -29,6 +30,9 @@ public class 	DrivetrainLoop implements Loop {
 	private double tolerance;
 	private double angle;
 	private double stick;
+
+	//Point Following
+	private double[] xy;
 
 	public enum DriveControlState {
 		OPEN_LOOP, // open loop voltage control
@@ -61,6 +65,8 @@ public class 	DrivetrainLoop implements Loop {
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 		case OPEN_LOOP:
+			updateXY();
+
 			if (wantLow) {
 				drive.shiftLow();
 			} else {
@@ -70,23 +76,28 @@ public class 	DrivetrainLoop implements Loop {
 			drive.runRightDrive(openLoopRight);
 			return;
 		case POINT_FOLLOWING:
+			updateXY();
+			drive.shiftLow();
+			if (drivePID){
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed);
+			} else {
+				drive.regulatedTurnPID(angle, tolerance, topSpeed, false);
+			}
+
 			// add point following code here
 			return;
 		case VISION_TRACKING:
-			//drive.regulatedDrivePID(distance, angle, tolerance, 1, 0.5);
-			//drive.drivePID(distance, angle, speed, tolerance);
-			// drive.changeGyroGains(0.5, 0, 0.01);`
-			if (wantLow) {
-				drive.shiftLow();
-			} else {
-				drive.shiftHigh();
-			}
+			updateXY();
+
+			drive.shiftLow();
 			drive.trackTurnPID(angle, speed, tolerance, stick);
 			return;
 		case LOCK:
 			//drive.drivePID(lockPos, lockAng, speed, 0);
 			return;
 		case PID:
+			updateXY();
+
 			if (drivePID){
 				drive.drivePID(distance, angle, speed, tolerance);
 			} else {
@@ -171,6 +182,14 @@ public class 	DrivetrainLoop implements Loop {
 	public void setTopSpeed(double topSpeed) {
 		this.topSpeed = topSpeed;
 	}
+
+	//update xy
+	public void updateXY() {
+		xy = drive.getXY();
+	}
+
+
+
 
 	// VISION TRACKING
 
