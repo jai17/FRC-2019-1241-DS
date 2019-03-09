@@ -43,7 +43,7 @@ public class FieldPositioning {
 					goalYaw = -90 - Math.toDegrees(Math.atan(dy/dx)); //behind and left
 				}
 			} else { //anywhere else
-				goalYaw = Math.toDegrees(Math.atan(dy/dx));
+				goalYaw = Math.toDegrees(Math.atan(dx/dy));
 				SmartDashboard.putString("Afro Angle", "Afro Angle" + goalYaw); 
 			}
 		}

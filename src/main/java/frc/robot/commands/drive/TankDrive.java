@@ -7,7 +7,9 @@
 
 package frc.robot.commands.drive;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
@@ -24,6 +26,7 @@ public class TankDrive extends Command {
 
   // For Vision
   double xVal, degreesToTarget;
+  double yVal, degreesToTargetY;
 
   public TankDrive() {
     driveLoop = DrivetrainLoop.getInstance();
@@ -42,8 +45,18 @@ public class TankDrive extends Command {
   @Override
   protected void execute() {
 
+    if (!DriverStation.getInstance().isAutonomous()){
+
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal);
+
+    
+    yVal = vision.avgY();
+    degreesToTargetY = vision.pixelToDegreeY(yVal);
+    SmartDashboard.putNumber("Degrees to Target Y", degreesToTargetY); 
+    SmartDashboard.putNumber("Camera Angle ", vision.getCameraAngle(degreesToTargetY, 42, 28.5, 77)); 
+    SmartDashboard.putNumber("Camera Distance", vision.getDistance(160, Math.toRadians(31.81), vision.getWidth()));
+    // SmartDashboard.putNumber("Camera Distance", vision.getDistance(a1, a2, h1, h2));
 
     if (Robot.m_oi.getDriveLeftBumper()) { //tracking
       driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
@@ -78,9 +91,11 @@ public class TankDrive extends Command {
       driveLoop.setLeftDrive(0);
       driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
     }
+    driveLoop.selectGear(Robot.m_oi.getDriveRightTrigger());
+
+  }
 
     // shift gears
-    driveLoop.selectGear(Robot.m_oi.getDriveRightTrigger());
 
     // //drive motors
     // if (Robot.m_oi.getDriveRightBumper()) { //half speed

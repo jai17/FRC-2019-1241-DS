@@ -32,7 +32,10 @@ public class VisionPipeline {
 	//Outputs
 			private Mat hsvThresholdOutput = new Mat();
 			private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
+			
 			private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+			private ArrayList<MatOfPoint2f> filterContoursOutput2f = new ArrayList<MatOfPoint2f>();
+
 
 			static {
 				System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -53,7 +56,8 @@ public class VisionPipeline {
 
 				// Step Filter_Contours0:
 				ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-				double filterContoursMinArea = 20.0;
+
+				double filterContoursMinArea = 60.0;
 				double filterContoursMinPerimeter = 0;
 				double filterContoursMinWidth = 0;
 				double filterContoursMaxWidth = 1000;
@@ -64,7 +68,7 @@ public class VisionPipeline {
 				double filterContoursMinVertices = 0;
 				double filterContoursMinRatio = 0;
 				double filterContoursMaxRatio = 1000;
-				filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+				filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput, filterContoursOutput2f);
 
 			}
 
@@ -92,6 +96,10 @@ public class VisionPipeline {
 				return filterContoursOutput;
 			}
 
+			public ArrayList<MatOfPoint2f> filterContoursOutput2f() {
+				return filterContoursOutput2f;
+			}
+
 
 			/**
 			 * Segment an image based on hue, saturation, and value ranges.
@@ -116,8 +124,7 @@ public class VisionPipeline {
 			 * @param maskSize the size of the mask.
 			 * @param output The image in which to store the output.
 			 */
-			private void findContours(Mat input, boolean externalOnly,
-				List<MatOfPoint> contours) {
+			private void findContours(Mat input, boolean externalOnly,List<MatOfPoint> contours) {
 				Mat hierarchy = new Mat();
 				contours.clear();
 				int mode;
@@ -151,9 +158,10 @@ public class VisionPipeline {
 			private void filterContours(List<MatOfPoint> inputContours, double minArea,
 				double minPerimeter, double minWidth, double maxWidth, double minHeight, double
 				maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double
-				minRatio, double maxRatio, List<MatOfPoint> output) {
+				minRatio, double maxRatio, List<MatOfPoint> output, List<MatOfPoint2f> output2f) {
 				final MatOfInt hull = new MatOfInt();
 				output.clear();
+				output2f.clear();
 				//operation
 				for (int i = 0; i < inputContours.size(); i++) {
 					final MatOfPoint contour = inputContours.get(i);
@@ -176,7 +184,10 @@ public class VisionPipeline {
 					if (contour.rows() < minVertexCount || contour.rows() > maxVertexCount)	continue;
 					final double ratio = bb.width / (double)bb.height;
 					if (ratio < minRatio || ratio > maxRatio) continue;
+
 					output.add(contour);
+					MatOfPoint2f  NewMtx = new MatOfPoint2f(contour.toArray());
+					output2f.add(NewMtx); 
 				}
 			}
 	}

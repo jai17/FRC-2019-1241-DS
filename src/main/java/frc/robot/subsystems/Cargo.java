@@ -196,6 +196,9 @@ public class Cargo extends Subsystem {
   public double getDriveRightInches(){
     return getDriveRightRaw() / ElectricalConstants.TICKS_PER_INCH; 
   }
+  public double getRightVelocityInchesPerSec(){
+    return (pivotSlave.getSelectedSensorVelocity() / ElectricalConstants.TICKS_PER_INCH) * 10; 
+  }
   public void resetRightDrive(){
     pivotSlave.setSelectedSensorPosition(0); 
   }

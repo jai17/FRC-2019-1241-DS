@@ -7,6 +7,7 @@
 
 package frc.robot.commands.carriage;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 import frc.robot.loops.CarriageLoop;
@@ -37,15 +38,16 @@ public class CarriageCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    clawToggle.set(true);
-    sliderToggle.set(true);
-    ejectToggle.set(true);
+    // clawToggle.set(true);
+    // sliderToggle.set(true);
+    // ejectToggle.set(true);
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
 
+    if (!DriverStation.getInstance().isAutonomous()){
     //pneumatic toggles
     if(Robot.m_oi.getToolDPadRight()){ //toggle claw 
       clawToggle.set(Robot.m_oi.getToolDPadRight());
@@ -80,14 +82,15 @@ public class CarriageCommand extends Command {
     }
 
     //set pneumatics
-    carriageLoop.setClawPos(clawToggle.get());
-    carriageLoop.setSliderPos(sliderToggle.get());
-    carriageLoop.setEjectorPos(ejectToggle.get());
+    carriageLoop.setClawPos(!clawToggle.get());
+    carriageLoop.setSliderPos(!sliderToggle.get());
+    carriageLoop.setEjectorPos(!ejectToggle.get());
 
     //set shooter
     carriageLoop.setShooterSpeed(shooterSpeed);
     carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
   }
+}
 
   // Make this return true when this Command no longer needs to run execute()
   @Override

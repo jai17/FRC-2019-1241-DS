@@ -167,6 +167,9 @@ public class Elevator extends Subsystem {
   public double getDriveLeftInches(){
     return getDriveLeftRaw() / ElectricalConstants.TICKS_PER_INCH; 
   }
+  public double getLeftVelocityInchesPerSec(){
+    return (tachTalon.getSelectedSensorVelocity() / ElectricalConstants.TICKS_PER_INCH) * 10; 
+  }
   public void resetLeftDrive(){
     tachTalon.setSelectedSensorPosition(0); 
   }

@@ -42,7 +42,7 @@ public class DrivetrainLoop implements Loop {
 		PID //PIDSetpoint
 	}
 
-	private DriveControlState mControlState = DriveControlState.PID;
+	private DriveControlState mControlState = DriveControlState.OPEN_LOOP;
 
 	public static DrivetrainLoop getInstance() {
 		if (mInstance == null) {
@@ -67,7 +67,7 @@ public class DrivetrainLoop implements Loop {
 		case OPEN_LOOP:
 			updateXY();
 
-			if (wantLow) {
+			if (!wantLow) {
 				drive.shiftLow();
 			} else {
 				drive.shiftHigh();

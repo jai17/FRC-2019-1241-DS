@@ -72,6 +72,7 @@ public class Robot extends TimedRobot {
   Preferences prefs;
 
   public static double kP_DRIVE, kI_DRIVE, kD_DRIVE, kF_DRIVE;
+  public static double kP_DRIVETURN, kI_DRIVETURN, kD_DRIVETURN;
   public static double kP_TURN, kI_TURN, kD_TURN;
   public static double kP_VISION, kI_VISION, kD_VISION;
 
@@ -136,7 +137,7 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("FarRightShipHatch", new FarRightShipHatch());
     m_chooser.addObject("Hatch Finnesse", new HatchFinesse()); 
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56,0), 2, 0.5));
-    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(50,100), 5, 0.4));
+    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(0,100), 5, 0.8));
     SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
@@ -215,9 +216,10 @@ public class Robot extends TimedRobot {
     drive.resetXY();
     drive.resetXY();
     drive.resetXY();
-    carriageLoop.setSliderPos(true);
-    carriageLoop.setEjectorPos(true);
-    driveLoop.selectGear(true);
+    carriage.extendCarriage();
+    carriage.prisonBreak();
+    //drive.shiftLow(); 
+    //driveLoop.selectGear(true);
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
@@ -310,6 +312,10 @@ public class Robot extends TimedRobot {
     kI_DRIVE = prefs.getDouble("kI_DRIVE", 0);
     kD_DRIVE = prefs.getDouble("kD_DRIVE", 0);
     kF_DRIVE = prefs.getDouble("kF_DRIVE", 0.12);
+
+    kP_DRIVETURN = prefs.getDouble("kP_DRIVETURN", 0);
+    kI_DRIVETURN = prefs.getDouble("kI_DRIVETURN", 0);
+    kD_DRIVETURN = prefs.getDouble("kD_DRIVETURN", 0);
     
     kP_TURN = prefs.getDouble("kP_TURN", 0);
     kI_TURN = prefs.getDouble("kI_TURN", 0);
@@ -350,10 +356,10 @@ public class Robot extends TimedRobot {
     shooterSpeed = prefs.getDouble("shooterSpeed", 1); 
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
 
-    // //Field Relative Positioning
-    // SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
-    // SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven()); 
-    // SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta()); 
+    //Field Relative Positioning
+    SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
+    SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven()); 
+    SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta()); 
 
     //VISION
     SmartDashboard.putNumber("X", vision.avg());

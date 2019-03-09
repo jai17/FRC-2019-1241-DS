@@ -14,9 +14,9 @@ public class CarriageLoop implements Loop{
 	private Cargo cargo;
 
 	//Open loop constants
-	private boolean isRetracted = false; //slider
-	private boolean isEngaged =  false; //ejector
-	private boolean isClosed =  false; //claw
+	private boolean isRetracted = true; //slider
+	private boolean isEngaged =  true; //ejector
+	private boolean isClosed =  true; //claw
 
 	private double feederSpeed = 0;
 	private double shooterSpeed  = 0;
@@ -103,7 +103,7 @@ public class CarriageLoop implements Loop{
 		// TODO Auto-generated method stub
 	}
 	
-public void setCarriageState(CarriageControlState state) {
+	public void setCarriageState(CarriageControlState state) {
 		mControlState = state;
 	}
 

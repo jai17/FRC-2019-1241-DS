@@ -195,7 +195,7 @@ public Drivetrain() {
   
   //reset encoders, gyro, shift high
   reset();
-  shiftHigh();
+  //shiftLow();
 
   this.setRightBrakeMode();
   this.setLeftBrakeMode();
@@ -349,12 +349,11 @@ public Drivetrain() {
   }
   
   public double getLeftVelocityInchesPerSec() {
-		return 0;
+		return elevator.getLeftVelocityInchesPerSec();
   }
-  
-  public double getRightVelocityInchesPerSec()
-  {
-    return 0;
+
+  public double getRightVelocityInchesPerSec(){
+    return cargo.getRightVelocityInchesPerSec();
   }
 
   public double getAverageVelInchesPerSec() {
@@ -427,7 +426,7 @@ public Drivetrain() {
   // drive PID constrained to top speed
   public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double topSpeed) {
     drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
-    turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
+    turnPID.changePIDGains(Robot.kP_DRIVETURN, Robot.kI_DRIVETURN, Robot.kD_DRIVETURN);
     
     double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), epsilon);
     //limit driving PID output to top speed
