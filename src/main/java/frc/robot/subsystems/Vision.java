@@ -7,6 +7,10 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -25,6 +29,8 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.util.VisionPipeline;
+import frc.robot.util.RotanglePair;
+import frc.robot.util.Rotangle;
 
 /**
  * Add your docs here.
@@ -41,12 +47,21 @@ public class Vision extends Subsystem {
     public static final double CAMERA_ANGLE = 16.1;
     public double targetWidth;
 
+    public VisionTrackingState mTrackingState = VisionTrackingState.NO_TARGET;
+
     public static Vision getInstance() {
         if (mInstance == null) {
             mInstance = new Vision();
             return mInstance;
         } else
             return mInstance;
+    }
+
+    //States for Vision to report to Dashboard
+    public enum VisionTrackingState {
+        CARGO_SHIP,
+        ROCKET,
+        NO_TARGET
     }
 
     public Vision() {
@@ -142,162 +157,113 @@ public class Vision extends Subsystem {
                 // System.out.println(filterContoursOutput.size()); USED TO
                 // OUTPUT HOW MANY CONTOURS YOU HAVE TO BOUND
 
+                //number of contours on the screen
+                int numContours = VisionPipeline.filterContoursOutput().size();
+                
                 /** More Than Two: Cargo Ship */
-                if (VisionPipeline.filterContoursOutput().size() > 2) {
+                if (numContours > 2) {
+                    mTrackingState = VisionTrackingState.CARGO_SHIP;
 
-                    // as many rotangles as there are contours
-                    RotatedRect[] rotangles = new RotatedRect[VisionPipeline.filterContoursOutput().size()];
+                    //all rotangles
+                    List<Rotangle> rotangles = new ArrayList<Rotangle>();
 
-                    RotatedRect[] lefts = new RotatedRect[6];
-                    RotatedRect[] rights = new RotatedRect[6];
-                    int leftIndex = 0;
-                    int rightIndex = 0;
+                    for (int r = 0; r < numContours; r++) {
+                        rotangles.add(new Rotangle(Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(r))));
+                    }
 
-                    System.out.println("created rotangle arrays");
+                    //sort rotangles from left to right
+                    Collections.sort(rotangles);
 
-                    // pump rotangles into array
-                    for (int i = 0; i < VisionPipeline.filterContoursOutput().size(); i++) {
-                        rotangles[i] = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(i));
+                    int loop = 0;
+                    for (Rotangle rot : rotangles) {
+                        Imgproc.putText(frame, Integer.toString(loop), rot.getRect().center, 1, 2.0, new Scalar(0,0,255));
+                        loop++;
+                    }
 
-                        // Rect r = Imgproc.boundingRect(VisionPipeline.filterContoursOutput().get(0));
-                        // RotatedRect rRotangle =
-                        // Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(i));
-                        // Imgproc.rectangle(frame, new Point(r.x, r.y), new Point(r.x + r.width, r.y +
-                        // r.height),
-                        // new Scalar(0, 0, 255), 2);
-                        double angle = rotangles[i].angle;
-                        System.out.println(i + " Angle: " + angle);
+                    //find all pairs
+                    RotanglePair[] pairs = new RotanglePair[numContours-1];
 
-                        // angle ranges
-                        double minRight = -60;
-                        double maxRight = -90;
-                        double minLeft = -0;
-                        double maxLeft = -30;
+                    for(int n = 0; n < (numContours-1); n++) {
+                        pairs[n] = new RotanglePair(rotangles.get(n).getRect(), rotangles.get(n+1).getRect());
+                        Imgproc.putText(frame, Integer.toString(n), pairs[n].getCenterPoint(), 1, 1.0, new Scalar(0,255,0));
+                    }
 
-                        // save wanted rotangles into respective left and right arrays
-                        if (angle >= maxLeft && angle <= minLeft) { // if left angled rectangle
-                            
-                            lefts[leftIndex] = rotangles[i];
-                            leftIndex++;
-                            System.out.println("saved left");
-                        } else if (angle >= maxRight && angle <= minRight && (i != 0)) { // if right angled rectangle
-                            if (rightIndex >= leftIndex) {
-                                lefts[leftIndex] = rotangles[i];
-                                leftIndex++;
-                            } else {
-                                rights[rightIndex] = rotangles[i];
-                                rightIndex++;
-                            }
-                            System.out.println("saved right");
-                        }
-                    } // rotangles
-                    System.out.println("Saved pairs of rotangles");
+                    //find all targets
+                    ArrayList<RotanglePair> targets = new ArrayList<RotanglePair>();
 
-                    double[] centers = new double[rightIndex]; // center positions from each pairs
-                    int kevinSpacey = 0; // index of desired pair of targets
-                    double closestCenter = 0; // smallest difference from pair's center x to center (80 pixels)
-
-                    // find pairs
-                    for (int i = 0; i < centers.length; i++) {
-                        centers[i] = (lefts[i].center.x + rights[i].center.x) / 2;
-
-                        if (i == 0) { // assign closest center first run
-                            closestCenter = Math.abs(centers[i] - 80);
-                        } else if (Math.abs(centers[i] - 80) < closestCenter) { // if closer to center
-                            kevinSpacey = i;
+                    for (int t = 0; t < (numContours - 1); t++) {
+                        if(VisionPipeline.calcSlope(pairs[t].getLeftRotangle()) == -1) { //if left is left sloped and right is right sloped
+                            targets.add(pairs[t]);
+                        } else {
                         }
                     }
-                    System.out.println("found pairs of rotangles");
 
-                    // DRAWING ROTANGLES
+                    //choose closest target
+                    int wanted = 0; // index of desired pair of targets
+                    double closestCenter = 0; // smallest difference from pair's center x to center
+
+                    //find target
+                    for (int i = 0; i < targets.size(); i++) {
+                        if (i == 0) { // assign closest center first run
+                            closestCenter = Math.abs(targets.get(i).getCenterX() - 80);
+                        } else if ((targets.get(i).getCenterX() - 80) < closestCenter) { // if closer to center
+                            wanted = i;
+                        }
+                    } //found pairs
+
+                    //set average x and y
+                    if (targets.size() != 0) {
+                        avgX = targets.get(wanted).getCenterX();
+                        avgY = targets.get(wanted).getCenterY();
+
+                        //draw rotangles
+                        Point[] leftVertices = new Point[4];
+                        targets.get(wanted).getLeftRotangle().points(leftVertices);
+    
+                        Point[] rightVertices = new Point[4];
+                        targets.get(wanted).getRightRotangle().points(rightVertices);
+    
+                        for (int z = 0; z < 4; z++) {
+                            Imgproc.line(frame, leftVertices[z], leftVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
+                            Imgproc.line(frame, rightVertices[z], rightVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
+                        } //drew lines
+                    }
+
+                    outputStream.putFrame(frame);
+                /** Less than 3 but greater than 0: Rocket Ship */
+                } else if (numContours == 2) {
+                    mTrackingState = VisionTrackingState.ROCKET;
+                    
+                    //get both rotangles
+                    RotatedRect rRot = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(0));
+                    RotatedRect rRot2 = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(1));
+
+                    //create target object
+                    RotanglePair target = new RotanglePair(rRot, rRot2);
+                    
+                    //get average x and y
+                    avgX = target.getCenterX();
+                    avgY = target.getCenterY();
+
+                    //fill rotangle points into arrays for drawing
                     Point[] leftVertices = new Point[4];
-                    lefts[kevinSpacey].points(leftVertices);
+                    target.getLeftRotangle().points(leftVertices);
 
                     Point[] rightVertices = new Point[4];
-                    rights[kevinSpacey].points(rightVertices);
+                    target.getRightRotangle().points(rightVertices);
 
-                    // draw pair of lines
-                    for (int z = 0; z < 4; z++) {
-                        Imgproc.line(frame, leftVertices[z], leftVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
-                        Imgproc.line(frame, rightVertices[z], rightVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
+                    //draw rotangles
+                    for(int d = 0; d < 4; d++) {
+                        Imgproc.line(frame, leftVertices[d], leftVertices[(d+1) %4], new Scalar(255, 255, 0));
+                        Imgproc.line(frame, rightVertices[d], rightVertices[(d+1) %4], new Scalar(255, 255, 0));                        
                     }
 
-                    System.out.println("Drew rotangles");
-
-                    // assign center points
-                    avgX = (lefts[kevinSpacey].center.x + rights[kevinSpacey].center.x) / 2;
-                    avgY = (lefts[kevinSpacey].center.y + rights[kevinSpacey].center.y) / 2;
-
-                    // put frame
+                    //put the frame to the screen
                     outputStream.putFrame(frame);
-                    System.out.println("put frame");
-
-                    /** Less than 3 but greater than 0: Rocket Ship */
-                } else if (VisionPipeline.filterContoursOutput().size() == 2) {
-                    // if (VisionPipeline.filterContoursOutput().size() > 0) {
-                    // Rect r = Imgproc.boundingRect(VisionPipeline.filterContoursOutput().get(0));
-                    RotatedRect rRot = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(0));
-                    System.out.println("left rotangle " + rRot.angle);
-                    // Imgproc.rectangle(frame, new Point(r.x, r.y), new Point(r.x + r.width, r.y +
-                    // r.height),
-                    // new Scalar(0, 0, 255), 2);
-                    Point[] vertices = new Point[4];
-                    rRot.points(vertices);
-
-                    for (int i = 0; i < 4; i++) {
-                        Imgproc.line(frame, vertices[i], vertices[(i + 1) % 4], new Scalar(230, 31, 177), 2);
-                    }
-
-                    avgX = rRot.center.x; // Takes the x cordinate of the first rectangle
-                    avgY = rRot.center.y; // Takes the y cordinate of the first rectangle
-
-                    // if (VisionPipeline.filterContoursOutput().size() > 1) {
-                    // Rect r2 = Imgproc.boundingRect(VisionPipeline.filterContoursOutput().get(1));
-                    RotatedRect rRot2 = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(1));
-                    System.out.println("right rotangle " + rRot2.angle);
-
-                    // Imgproc.rectangle(frame, new Point(r2.x, r2.y), new Point(r2.x + r.width,
-                    // r2.y + r2.height),
-                    // new Scalar(0, 0, 255), 2);
-
-                    Point[] vertices2 = new Point[4];
-                    rRot2.points(vertices2);
-
-                    for (int i = 0; i < 4; i++) {
-                        Imgproc.line(frame, vertices2[i], vertices2[(i + 1) % 4], new Scalar(230, 31, 177), 2); // bgr
-                    }
-
-                    // avgX += r2.width + r2.x; // Adds the width and X
-                    // // cordinate of the second
-                    // // rectangle
-                    // avgY += r2.height + r2.y; // Adds the height and Y
-                    // // cordinate of the second
-                    // // rectangle
-
-                    avgX += rRot2.center.x; // Adds the width and X
-                                            // cordinate of the second
-                                            // rectangle
-                    avgY += rRot2.center.y; // Adds the height and Y
-                                            // cordinate of the second
-                                            // rectangle
-
-                    targetWidth = (rRot2.center.x + rRot2.size.width / 2) - (rRot.center.x - rRot.size.width / 2);
-                    // System.out.println(targetWidth +" "+ this.toString());
-
-                    avgX = avgX / 2; // Divides the Average X cordinate by
-                                     // two for half of the image center
-                    avgY = avgY / 2; // Divides the Average Y cordinate by
-                                     // two for half of the image center
-
-                    // avgArea = (r.area() + r2.area()) / 2;
-
-                    /**
-                     * Outputs Bounding Rectangles if there are any or outputs hsv Threshold output
-                     */
-                    outputStream.putFrame(frame);
-
+                    
                     /** ELSE: No Targets */
                 } else {
+                    mTrackingState = VisionTrackingState.NO_TARGET;
                     outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                 }
             }
@@ -359,5 +325,13 @@ public class Vision extends Subsystem {
     public void initDefaultCommand() {
         // Set the default command for a subsystem here.
         // setDefaultCommand(new MySpecialCommand());
+    }
+
+    /**
+     * Returns the state of the vision tracking system
+     * @return mTrackingState - state the vision system is in
+     */
+    public VisionTrackingState getTrackingState() {
+        return mTrackingState;
     }
 }

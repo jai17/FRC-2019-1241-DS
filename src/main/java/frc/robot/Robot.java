@@ -374,6 +374,8 @@ public class Robot extends TimedRobot {
     hsvThresholdVal[0] = prefs.getDouble("ValMin", 0);
     hsvThresholdVal[1] = prefs.getDouble("ValMax", 255);
 
+    SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());
+
     // Shuffleboard.getTab("Vision").add("H", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
     // Shuffleboard.getTab("Vision").add("S", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
     // Shuffleboard.getTab("Vision").add("V", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();

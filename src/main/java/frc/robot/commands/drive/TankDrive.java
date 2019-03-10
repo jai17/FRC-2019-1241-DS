@@ -77,19 +77,10 @@ public class TankDrive extends Command {
       driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
       driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
 
-    } else if (Robot.m_oi.getDriveAButton()) {
-      // drive.changeGyroGains(0.5, 0, 0);
-      // drive.turnPID(drive.getAngle() - degreesToTarget, 1,1, 2);
-      driveLoop.setDriveState(DriveControlState.PID);
-      driveLoop.setPIDType(false);
-      driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      driveLoop.setSpeedPID(1);
-      driveLoop.setTolerancePID(1);
-      // driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
-    } else {
+    }  else { // no drive
+      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
       driveLoop.setRightDrive(0);
       driveLoop.setLeftDrive(0);
-      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
     }
     driveLoop.selectGear(Robot.m_oi.getDriveRightTrigger());
 
