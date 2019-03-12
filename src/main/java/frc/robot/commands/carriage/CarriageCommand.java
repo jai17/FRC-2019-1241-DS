@@ -8,6 +8,7 @@
 package frc.robot.commands.carriage;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 import frc.robot.loops.CarriageLoop;
@@ -25,6 +26,11 @@ public class CarriageCommand extends Command {
 
   boolean claw = false; 
 
+  Timer timer; 
+  Timer timerTray; 
+  boolean hasStarted = false; 
+  boolean trayStarted = false; 
+
   public CarriageCommand() {
     sliderToggle = new ToggleBoolean(0.5);
     clawToggle = new ToggleBoolean(0.5);
@@ -38,6 +44,8 @@ public class CarriageCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    timer = new Timer(); 
+    timerTray = new Timer();
     // clawToggle.set(true);
     // sliderToggle.set(true);
     // ejectToggle.set(true);
@@ -55,10 +63,32 @@ public class CarriageCommand extends Command {
     if(Robot.m_oi.getToolDPadLeft()){ //toggle tray
       sliderToggle.set(Robot.m_oi.getToolDPadLeft());
     }
-    if(Robot.m_oi.getToolDPadUp() && carriage.getUltrasonicLeft() <= 5 && carriage.getUltrasonicRight() <=5){ //shoot hatch
-      ejectToggle.set(Robot.m_oi.getToolDPadUp());
+
+    if(Robot.m_oi.getToolDPadUp()){ //shoot hatch
       clawToggle.set(false);
+      if (!hasStarted){
+        timer.start(); 
+        timerTray.start();
+      }
+      hasStarted = true; 
+      trayStarted = true; 
     }
+
+    if (hasStarted){
+      if (timer.get() > 0.1){
+        ejectToggle.set(true);
+        hasStarted = false; 
+        timer.reset(); 
+      }
+    }
+    if (trayStarted){
+      if (timerTray.get() > 0.6){
+        if (sliderToggle.get())
+        sliderToggle.set(false);
+        trayStarted = false; 
+      }
+    }
+
     if(Robot.m_oi.getToolDPadDown()) { //retract everything
       clawToggle.set(false);
       ejectToggle.set(false);

@@ -102,5 +102,5 @@ public class ElectricalConstants {
     //public static final int HATCH_PANEL_DETECTOR_INTAKE = 9;
 
     // encoder constants
-    public static final double HATCH_TO_DEGREES = 0.0;
+    public static final double HATCH_TO_DEGREES = 1.0;
 }

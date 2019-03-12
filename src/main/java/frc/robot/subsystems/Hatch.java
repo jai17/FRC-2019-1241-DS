@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import frc.robot.ElectricalConstants;
 import frc.robot.NumberConstants;
 import frc.robot.PID.PIDController;
+import frc.robot.commands.hatch.HatchCommand;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -42,7 +43,7 @@ public class Hatch extends Subsystem {
 
   public Hatch() {
     hatchPivot = new TalonSRX(ElectricalConstants.HATCH_PIVOT_MOTOR);
-    hatchPivot.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
+    hatchPivot.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     hatchPivot.setInverted(false);
     hatchPivot.setSensorPhase(false);
 
@@ -61,10 +62,10 @@ public class Hatch extends Subsystem {
     hatchPivot.config_kD(0, NumberConstants.dTalonHatch, 0);
 
     // FOR SOFT LIMITS
-    hatchPivot.configForwardSoftLimitEnable(true, 0);
-    hatchPivot.configForwardSoftLimitThreshold(NumberConstants.HATCH_FORWARD_SOFT_LIMIT, 0);
-    hatchPivot.configReverseSoftLimitEnable(true, 0);
-    hatchPivot.configReverseSoftLimitThreshold(NumberConstants.HATCH_BACK_SOFT_LIMIT, 0);
+    hatchPivot.configForwardSoftLimitEnable(false, 0);
+    //hatchPivot.configForwardSoftLimitThreshold(NumberConstants.HATCH_FORWARD_SOFT_LIMIT, 0);
+    hatchPivot.configReverseSoftLimitEnable(false, 0);
+    //hatchPivot.configReverseSoftLimitThreshold(NumberConstants.HATCH_BACK_SOFT_LIMIT, 0);
 
     pivotPID = new PIDController(NumberConstants.pHatch, NumberConstants.iHatch, NumberConstants.dHatch);
 
@@ -72,8 +73,7 @@ public class Hatch extends Subsystem {
 
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
+    setDefaultCommand(new HatchCommand());
   }
 
   // Intake
@@ -87,7 +87,7 @@ public class Hatch extends Subsystem {
   }
 
   // Hatch is off (0)
-  public void stop(double output) {
+  public void stop() {
     hatchRoller.set(ControlMode.PercentOutput, 0);
   }
 
@@ -103,6 +103,10 @@ public class Hatch extends Subsystem {
 
   public double getAngle() {
     return hatchPivot.getSelectedSensorPosition(0) / ElectricalConstants.HATCH_TO_DEGREES;
+  }
+
+  public double getHatchPivotSpeed(){
+    return hatchPivot.getSelectedSensorVelocity(0); 
   }
 
   public void resetAngle() {
@@ -142,7 +146,7 @@ public class Hatch extends Subsystem {
   public void magicMotionSetpoint(double setpoint, int cruiseVelocity, double secsToMaxSpeed) {
     hatchPivot.configMotionCruiseVelocity(cruiseVelocity, 0);
     hatchPivot.configMotionAcceleration((int) (NumberConstants.HATCH_MAX_SPEED / secsToMaxSpeed), 0);
-    runHatchMotionMagic(setpoint * -ElectricalConstants.HATCH_TO_DEGREES);
+    runHatchMotionMagic(setpoint * ElectricalConstants.HATCH_TO_DEGREES);
   }
 
   // public boolean getIsBack() {

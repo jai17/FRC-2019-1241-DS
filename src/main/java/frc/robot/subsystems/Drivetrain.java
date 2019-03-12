@@ -455,15 +455,15 @@ public Drivetrain() {
   }
 
   //track turn PID
-  public void trackTurnPID(double angleSetpoint, double speed, double epsilon, double stick) {
+  public void trackTurnPID(double angleSetpoint, double speed, double epsilon, double stick, double maxOutput) {
     turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
-    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getYaw(), epsilon) * speed;
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, getAngle(), epsilon) * speed;
     
     //Max speed clamping to 50%
     if (angleOut > 0) {
-      angleOut = Math.min(angleOut, 0.5);
+      angleOut = Math.min(angleOut, maxOutput);
     } else if (angleOut < 0) {
-      angleOut = Math.max(angleOut, -0.5);
+      angleOut = Math.max(angleOut, -maxOutput);
     }
 
     runLeftDrive(angleOut - stick);

@@ -57,7 +57,7 @@ public class Robot extends TimedRobot {
   public static Carriage carriage;
   public static Elevator elevator;
   public static Hatch hatch;
-  public static Vision vision; 
+  public static Vision vision;
 
   // Loops
   public static DrivetrainLoop driveLoop;
@@ -76,8 +76,7 @@ public class Robot extends TimedRobot {
   public static double kP_TURN, kI_TURN, kD_TURN;
   public static double kP_VISION, kI_VISION, kD_VISION;
 
-
-  //Carriage Preferences
+  // Carriage Preferences
   public static double shooterSpeed;
   public static double shooterSpeedSlow;
 
@@ -95,7 +94,7 @@ public class Robot extends TimedRobot {
   Looper looper;
 
   double maxElevatorSpeed = 0;
-  double maxPivotSpeed = 0; 
+  double maxPivotSpeed = 0;
 
   Command m_autonomousCommand;
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -113,7 +112,7 @@ public class Robot extends TimedRobot {
     carriage = Carriage.getInstance();
     elevator = Elevator.getInstance();
     hatch = Hatch.getInstance();
-    vision = Vision.getInstance(); 
+    vision = Vision.getInstance();
 
     // // Loop Instances
     driveLoop = DrivetrainLoop.getInstance();
@@ -132,12 +131,12 @@ public class Robot extends TimedRobot {
     logger.openFile("Robot Init");
     looper = new Looper();
 
-    m_chooser.addDefault("Drive Test", new DriveDistance(150, 0 , 2, 0.8, 1));
-    m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1) );
+    m_chooser.addDefault("Drive Test", new DriveDistance(150, 0, 2, 0.8, 1));
+    m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1));
     m_chooser.addObject("FarRightShipHatch", new FarRightShipHatch());
-    m_chooser.addObject("Hatch Finnesse", new HatchFinesse()); 
-    m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56,0), 2, 0.5));
-    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(0,100), 5, 0.8));
+    m_chooser.addObject("Hatch Finnesse", new HatchFinesse());
+    m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
+    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(0, 100), 5, 0.8));
     SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
@@ -157,6 +156,7 @@ public class Robot extends TimedRobot {
     drive.reset();
     elevator.resetEncoders();
     cargo.resetAngle();
+    hatch.resetAngle();
     drive.resetXY();
   }
 
@@ -180,10 +180,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-   logger.close();
+    logger.close();
     looper.stop();
     maxElevatorSpeed = 0;
-    maxPivotSpeed = 0; 
+    maxPivotSpeed = 0;
   }
 
   @Override
@@ -210,7 +210,7 @@ public class Robot extends TimedRobot {
     looper.start();
     logger.openFile("Auton Init");
 
-    //carriageLoop.setClawPos(true);
+    // carriageLoop.setClawPos(true);
     drive.reset();
     drive.resetXY();
     drive.resetXY();
@@ -218,8 +218,8 @@ public class Robot extends TimedRobot {
     drive.resetXY();
     carriage.extendCarriage();
     carriage.prisonBreak();
-    //drive.shiftLow(); 
-    //driveLoop.selectGear(true);
+    // drive.shiftLow();
+    // driveLoop.selectGear(true);
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
@@ -286,25 +286,25 @@ public class Robot extends TimedRobot {
    */
   public void updateSmartDashboard() {
     // // ROBOT
-    SmartDashboard.putNumber("Battery Voltage",Math.round(DriverStation.getInstance().getBatteryVoltage() * 100.0) / 100.0); // Battery Voltage
+    SmartDashboard.putNumber("Battery Voltage",
+        Math.round(DriverStation.getInstance().getBatteryVoltage() * 100.0) / 100.0); // Battery Voltage
 
     // DRIVE
     SmartDashboard.putNumber("Robot Yaw", drive.getYaw()); // Gyro Yaw
-    SmartDashboard.putNumber("Robot Angle", drive.getAngle()); //Gyro angle
+    SmartDashboard.putNumber("Robot Angle", drive.getAngle()); // Gyro angle
     SmartDashboard.putNumber("Drive Encoder Inches", drive.getAveragePos()); // distance drive has travelled in inches
-    SmartDashboard.putNumber("Drive Encoder Right", drive.getRightPos()); //right encoder
-    SmartDashboard.putNumber("Drive Encoder Left", drive.getLeftPos()); //left encoder
+    SmartDashboard.putNumber("Drive Encoder Right", drive.getRightPos()); // right encoder
+    SmartDashboard.putNumber("Drive Encoder Left", drive.getLeftPos()); // left encoder
 
     double[] xy = drive.getXY();
 
     SmartDashboard.putNumber("xPos", xy[0]);
     SmartDashboard.putNumber("yPos", xy[1]);
 
-    SmartDashboard.putString("Robot Pose", 
-      "X: " + xy[0] +" Y: "+ xy[1] +" θ: "+ drive.getYaw());
-    //θ
+    SmartDashboard.putString("Robot Pose", "X: " + xy[0] + " Y: " + xy[1] + " θ: " + drive.getYaw());
+    // θ
     SmartDashboard.putNumber("Left Drive Output", drive.getLeftOutput());
-    SmartDashboard.putNumber("Right Drive Output", drive.getRightOutput());   
+    SmartDashboard.putNumber("Right Drive Output", drive.getRightOutput());
     SmartDashboard.putString("Drivetrain State", driveLoop.getControlState().toString());
     SmartDashboard.putBoolean("Drive Gear", !drive.getIsLow());
 
@@ -316,7 +316,7 @@ public class Robot extends TimedRobot {
     kP_DRIVETURN = prefs.getDouble("kP_DRIVETURN", 0);
     kI_DRIVETURN = prefs.getDouble("kI_DRIVETURN", 0);
     kD_DRIVETURN = prefs.getDouble("kD_DRIVETURN", 0);
-    
+
     kP_TURN = prefs.getDouble("kP_TURN", 0);
     kI_TURN = prefs.getDouble("kI_TURN", 0);
     kD_TURN = prefs.getDouble("kD_TURN", 0);
@@ -325,16 +325,16 @@ public class Robot extends TimedRobot {
     kI_VISION = prefs.getDouble("kI_VISION", 0);
     kD_VISION = prefs.getDouble("kD_VISION", 0);
 
-    //ELEVATOR
+    // ELEVATOR
     if (maxElevatorSpeed < elevator.getElevatorSpeed()) {
       maxElevatorSpeed = Math.abs(elevator.getElevatorSpeed());
     }
-    SmartDashboard.putString("Elevator State", elevatorLoop.getControlState().toString()); 
+    SmartDashboard.putString("Elevator State", elevatorLoop.getControlState().toString());
     SmartDashboard.putNumber("Elevator Max Speed", maxElevatorSpeed);
     SmartDashboard.putNumber("Elevator Raw Units", elevator.getElevatorRotations());
     SmartDashboard.putNumber("Elevator Inches", elevator.getElevatorEncoder());
 
-    //Cargo
+    // Cargo
     SmartDashboard.putNumber("Cargo Pivot Raw", Math.abs(cargo.getRawCargoPivot()));
     SmartDashboard.putNumber("Cargo Pivot Speed", cargo.getRawPivotSpeed());
     SmartDashboard.putString("Cargo State", cargoLoop.getControlState().toString());
@@ -346,22 +346,22 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Max Pivot Speed", maxPivotSpeed);
     SmartDashboard.putBoolean("Cargo Present Intake", cargo.getOptic());
 
-    //Carriage
-    SmartDashboard.putBoolean("Cargo Present Carriage", !carriage.getOptic()); 
+    // Carriage
+    SmartDashboard.putBoolean("Cargo Present Carriage", !carriage.getOptic());
     SmartDashboard.putBoolean("Tray Position", carriageLoop.getSliderPos());
     SmartDashboard.putBoolean("Ejector Position", carriageLoop.getEjectorPos());
     SmartDashboard.putBoolean("Claw Position", carriageLoop.getClawPos());
-    SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight()); 
-    SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft()); 
-    shooterSpeed = prefs.getDouble("shooterSpeed", 1); 
+    SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight());
+    SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft());
+    shooterSpeed = prefs.getDouble("shooterSpeed", 1);
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
 
-    //Field Relative Positioning
-    SmartDashboard.putString("Position", state.getFieldToRobot().toString()); 
-    SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven()); 
-    SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta()); 
+    // Field Relative Positioning
+    SmartDashboard.putString("Position", state.getFieldToRobot().toString());
+    SmartDashboard.putNumber("Distance Driven", state.getDistanceDriven());
+    SmartDashboard.putNumber("Robot Angle FRP", state.getFieldToRobot().getTheta());
 
-    //VISION
+    // VISION
     SmartDashboard.putNumber("X", vision.avg());
     SmartDashboard.putNumber("Degrees To Target", vision.pixelToDegree(vision.avg()));
 
@@ -376,8 +376,16 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());
 
-    // Shuffleboard.getTab("Vision").add("H", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
-    // Shuffleboard.getTab("Vision").add("S", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
-    // Shuffleboard.getTab("Vision").add("V", 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
+    //Hatch 
+    SmartDashboard.putNumber("Hatch Angle", hatch.getAngle()); 
+    SmartDashboard.putNumber("Hatch Speed", hatch.getHatchPivotSpeed()); 
+
+
+    // Shuffleboard.getTab("Vision").add("H",
+    // 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
+    // Shuffleboard.getTab("Vision").add("S",
+    // 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
+    // Shuffleboard.getTab("Vision").add("V",
+    // 1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
   }
 }

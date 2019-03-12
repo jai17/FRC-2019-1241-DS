@@ -5,22 +5,22 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.cargo;
+package frc.robot.commands.hatch;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
-import frc.robot.loops.CargoLoop;
-import frc.robot.loops.CargoLoop.CargoControlState;
+import frc.robot.loops.HatchLoop;
+import frc.robot.loops.HatchLoop.HatchControlState;
 
-public class SetIntakePivotCommand extends Command {
-  	CargoLoop cargoLoop; 
+public class SetHatchPivotCommand extends Command {
+  HatchLoop hatchLoop; 
 
 	private double setpoint;
 	private int cruiseVelocity;
 	private double timeToMax;
 	private double timeOut;
 
-	public SetIntakePivotCommand(double setPoint, int cruiseVelocity, double timeToMax, double timeOut) {
+	public SetHatchPivotCommand(double setPoint, int cruiseVelocity, double timeToMax, double timeOut) {
 		this.setpoint = setPoint;
 		this.cruiseVelocity = cruiseVelocity;
 		this.timeToMax = timeToMax;
@@ -31,18 +31,18 @@ public class SetIntakePivotCommand extends Command {
 	// Called just before this Command runs the first time
 	protected void initialize() {
 		setTimeout(timeOut);
-		cargoLoop = CargoLoop.getInstance(); 
-    cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+		hatchLoop = HatchLoop.getInstance(); 
+    hatchLoop.setHatchState(HatchControlState.MOTION_MAGIC);
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		cargoLoop.setMotionMagic(setpoint, cruiseVelocity, timeToMax);
+		hatchLoop.setMotionMagic(setpoint, cruiseVelocity, timeToMax);
 	}
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-		return isTimedOut() || Math.abs(Robot.cargo.getMotionMagicError()) < 100 ;// Robot.elevator.elevatorPIDDone() || isTimedOut();
+		return isTimedOut() || Math.abs(Robot.hatch.getMotionMagicError()) < 100 ;// Robot.elevator.elevatorPIDDone() || isTimedOut();
 	}
 
   // Called once after isFinished returns true

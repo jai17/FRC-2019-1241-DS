@@ -30,6 +30,7 @@ public class DrivetrainLoop implements Loop {
 	private double tolerance;
 	private double angle;
 	private double stick;
+	double maxOutput = 0; 
 
 	//Point Following
 	private double[] xy;
@@ -90,7 +91,7 @@ public class DrivetrainLoop implements Loop {
 			updateXY();
 
 			drive.shiftLow();
-			drive.trackTurnPID(angle, speed, tolerance, stick);
+			drive.trackTurnPID(angle, speed, tolerance, stick, maxOutput);
 			return;
 		case LOCK:
 			//drive.drivePID(lockPos, lockAng, speed, 0);
@@ -162,6 +163,9 @@ public class DrivetrainLoop implements Loop {
 
 	public void setStick(double stick) {
 		this.stick = stick;
+	}
+	public void setMaxOutput(double maxOutput) {
+		this.maxOutput = maxOutput;
 	}
 
 	//set the gear desired for the drive (true is high, false is low) 

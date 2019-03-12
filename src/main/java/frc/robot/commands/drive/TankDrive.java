@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------*/
+  /*----------------------------------------------------------------------------*/
 /* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
@@ -15,6 +15,7 @@ import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.Vision.VisionTrackingState;
 import frc.robot.util.ToggleBoolean;
 
 public class TankDrive extends Command {
@@ -45,46 +46,52 @@ public class TankDrive extends Command {
   @Override
   protected void execute() {
 
-    if (!DriverStation.getInstance().isAutonomous()){
+    if (!DriverStation.getInstance().isAutonomous()) {
 
-    xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal);
+      xVal = vision.avg();
+      degreesToTarget = vision.pixelToDegree(xVal);
 
-    
-    yVal = vision.avgY();
-    degreesToTargetY = vision.pixelToDegreeY(yVal);
-    SmartDashboard.putNumber("Degrees to Target Y", degreesToTargetY); 
-    SmartDashboard.putNumber("Camera Angle ", vision.getCameraAngle(degreesToTargetY, 42, 28.5, 77)); 
-    SmartDashboard.putNumber("Camera Distance", vision.getDistance(160, Math.toRadians(31.81), vision.getWidth()));
-    // SmartDashboard.putNumber("Camera Distance", vision.getDistance(a1, a2, h1, h2));
+      yVal = vision.avgY();
+      degreesToTargetY = vision.pixelToDegreeY(yVal);
+      SmartDashboard.putNumber("Degrees to Target Y", degreesToTargetY);
+      SmartDashboard.putNumber("Camera Angle ", vision.getCameraAngle(degreesToTargetY, 42, 28.5, 77));
+      SmartDashboard.putNumber("Camera Distance", vision.getDistance(160, Math.toRadians(31.81), vision.getWidth()));
+      // SmartDashboard.putNumber("Camera Distance", vision.getDistance(a1, a2, h1,
+      // h2));
 
-    if (Robot.m_oi.getDriveLeftBumper()) { //tracking
-      driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
-      driveLoop.setPIDType(false);
-      driveLoop.selectGear(true);
-      driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      driveLoop.setSpeedPID(1);
-      driveLoop.setStick(Robot.m_oi.getDriveRightY()  * 0.5);
-      driveLoop.setTolerancePID(1);
+      if (Robot.m_oi.getDriveLeftBumper()) { // tracking
+        driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
+        driveLoop.setPIDType(false);
+        driveLoop.selectGear(true);
+        driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
+        System.out.println("Angle To Target: " + (drive.getAngle() - degreesToTarget) + "Current Angle: " + drive.getAngle());
+        driveLoop.setSpeedPID(1);
+        if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setMaxOutput(0.4);
+        } else {
+          driveLoop.setMaxOutput(0.5);
+        }
+        driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.5);
+        driveLoop.setTolerancePID(1);
 
-    } else if (Robot.m_oi.getDriveRightBumper()) { // half speed
-      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-      driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
-      driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
+      } else if (Robot.m_oi.getDriveRightBumper()) { // half speed
+        driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
+        driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
 
-    } else if ((Math.abs(Robot.m_oi.getDriveRightY()) > 0.05) || (Math.abs(Robot.m_oi.getDriveLeftY()) > 0.05)) { // regular
-      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-      driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
-      driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+      } else if ((Math.abs(Robot.m_oi.getDriveRightY()) > 0.05) || (Math.abs(Robot.m_oi.getDriveLeftY()) > 0.05)) { // regular
+        driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
+        driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
 
-    }  else { // no drive
-      driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-      driveLoop.setRightDrive(0);
-      driveLoop.setLeftDrive(0);
+      } else { // no drive
+        driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        driveLoop.setRightDrive(0);
+        driveLoop.setLeftDrive(0);
+      }
+      driveLoop.selectGear(!  Robot.m_oi.getDriveRightTrigger());
+
     }
-    driveLoop.selectGear(Robot.m_oi.getDriveRightTrigger());
-
-  }
 
     // shift gears
 

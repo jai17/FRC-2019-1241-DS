@@ -167,6 +167,7 @@ public class Vision extends Subsystem {
                     //all rotangles
                     List<Rotangle> rotangles = new ArrayList<Rotangle>();
 
+                    //Add all rotangles from filtered contours
                     for (int r = 0; r < numContours; r++) {
                         rotangles.add(new Rotangle(Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(r))));
                     }
@@ -174,18 +175,21 @@ public class Vision extends Subsystem {
                     //sort rotangles from left to right
                     Collections.sort(rotangles);
 
+                    //For Judges: Draw numbers associated to rotangles 
+                    /*
                     int loop = 0;
                     for (Rotangle rot : rotangles) {
                         Imgproc.putText(frame, Integer.toString(loop), rot.getRect().center, 1, 2.0, new Scalar(0,0,255));
                         loop++;
-                    }
+                    }*/
 
                     //find all pairs
                     RotanglePair[] pairs = new RotanglePair[numContours-1];
 
                     for(int n = 0; n < (numContours-1); n++) {
                         pairs[n] = new RotanglePair(rotangles.get(n).getRect(), rotangles.get(n+1).getRect());
-                        Imgproc.putText(frame, Integer.toString(n), pairs[n].getCenterPoint(), 1, 1.0, new Scalar(0,255,0));
+                        //For Judges: Draw numbers of paired rotangles
+                        // Imgproc.putText(frame, Integer.toString(n), pairs[n].getCenterPoint(), 1, 1.0, new Scalar(0,255,0));
                     }
 
                     //find all targets
@@ -224,8 +228,8 @@ public class Vision extends Subsystem {
                         targets.get(wanted).getRightRotangle().points(rightVertices);
     
                         for (int z = 0; z < 4; z++) {
-                            Imgproc.line(frame, leftVertices[z], leftVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
-                            Imgproc.line(frame, rightVertices[z], rightVertices[(z + 1) % 4], new Scalar(230, 31, 177), 2);
+                            Imgproc.line(frame, leftVertices[z], leftVertices[(z + 1) % 4], new Scalar(0, 0, 255), 2); //Purple: (230, 31, 177)
+                            Imgproc.line(frame, rightVertices[z], rightVertices[(z + 1) % 4], new Scalar(0, 0, 255), 2);
                         } //drew lines
                     }
 
@@ -234,6 +238,17 @@ public class Vision extends Subsystem {
                 } else if (numContours == 2) {
                     mTrackingState = VisionTrackingState.ROCKET;
                     
+                    Rect rectLeft = Imgproc.boundingRect(VisionPipeline.filterContoursOutput().get(0)); 
+                    Rect rectRight = Imgproc.boundingRect(VisionPipeline.filterContoursOutput().get(1));
+
+                    avgX = (rectLeft.x + rectRight.x)/2; 
+                    avgY  = (rectLeft.y + rectRight.y)/2;  
+
+                    Imgproc.rectangle(frame, new Point (rectLeft.x, rectLeft.y), new Point (rectLeft.x + rectLeft.width, rectLeft.y + rectLeft.height), new Scalar(0, 0, 255), 2);
+                    Imgproc.rectangle(frame, new Point (rectRight.x, rectRight.y), new Point (rectRight.x + rectRight.width, rectLeft.y + rectLeft.height), new Scalar(0, 0, 255), 2);
+
+                    //Using the rotangle method for rocket mode
+                    /*
                     //get both rotangles
                     RotatedRect rRot = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(0));
                     RotatedRect rRot2 = Imgproc.minAreaRect(VisionPipeline.filterContoursOutput2f().get(1));
@@ -256,7 +271,7 @@ public class Vision extends Subsystem {
                     for(int d = 0; d < 4; d++) {
                         Imgproc.line(frame, leftVertices[d], leftVertices[(d+1) %4], new Scalar(255, 255, 0));
                         Imgproc.line(frame, rightVertices[d], rightVertices[(d+1) %4], new Scalar(255, 255, 0));                        
-                    }
+                    }*/
 
                     //put the frame to the screen
                     outputStream.putFrame(frame);
@@ -288,7 +303,7 @@ public class Vision extends Subsystem {
 
     public double pixelToDegree(double pixel) {
         // return 0.0870234789*pixel-28.5146932592;
-        return -Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(31.81))) / 80));// 31.81
+        return -Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(28))) / 80));// 31.81
     }
 
     public double pixelToDegreeY(double pixel) {
