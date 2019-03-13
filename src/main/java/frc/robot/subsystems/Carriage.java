@@ -30,7 +30,7 @@ public class Carriage extends Subsystem {
 
   //Solonoids
   DoubleSolenoid clawSolenoid;
-  DoubleSolenoid ejectorSolenoid;
+  Solenoid ejectorSolenoid;
   DoubleSolenoid sliderSolenoid;
 
   //Digital inputs
@@ -66,7 +66,7 @@ public class Carriage extends Subsystem {
 
     //Intializes the solenoids
     clawSolenoid= new DoubleSolenoid(ElectricalConstants.CLAW_SOLENOID_A, ElectricalConstants.CLAW_SOLENOID_B);
-    ejectorSolenoid = new DoubleSolenoid(ElectricalConstants.EJECTOR_SOLENOID_A, ElectricalConstants.EJECTOR_SOLENOID_B);
+    ejectorSolenoid = new Solenoid(ElectricalConstants.EJECTOR_SOLENOID_B);
     sliderSolenoid= new DoubleSolenoid(ElectricalConstants.SLIDER_SOLENOID_A, ElectricalConstants.SLIDER_SOLENOID_B);
 
     cargoOptical = new DigitalInput(ElectricalConstants.CARGO_DETECTOR_CARRIAGE);
@@ -76,9 +76,9 @@ public class Carriage extends Subsystem {
     hatchDetectorRight.setAutomaticMode(true);
     hatchDetectorLeft.setAutomaticMode(true);
 
-    retractCarriage();
-    retractEjector();
-    holdAndSecure();
+    // retractCarriage();
+    // ejectHatch();
+    // holdAndSecure();
   }
 
   @Override
@@ -144,11 +144,13 @@ public class Carriage extends Subsystem {
 
   public void ejectHatch()
   {
-    ejectorSolenoid.set(DoubleSolenoid.Value.kForward);
+    ejectorSolenoid.set(false);
+   //ejectorSolenoid.set(DoubleSolenoid.Value.kForward);
   }
   public void retractEjector()
   {
-    ejectorSolenoid.set(DoubleSolenoid.Value.kReverse);
+    ejectorSolenoid.set(true);
+    //ejectorSolenoid.set(DoubleSolenoid.Value.kReverse);
   }
 
   //Sets the state of the ball in the Carriage

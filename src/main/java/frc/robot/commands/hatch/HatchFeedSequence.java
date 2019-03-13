@@ -13,9 +13,7 @@ import frc.robot.commands.carriage.SetClawCommand;
 import frc.robot.commands.elevator.ElevatorSetpoint;
 
 public class HatchFeedSequence extends CommandGroup {
-  /**
-   * Add your docs here.
-   */
+  
   public HatchFeedSequence() {
     //bring elevator to height, point fingers
     addSequential(new ElevatorSetpoint(NumberConstants.HINTAKE_FEEDING_HEIGHT, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));

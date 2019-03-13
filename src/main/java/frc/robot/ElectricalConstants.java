@@ -64,11 +64,11 @@ public class ElectricalConstants {
     public static final int SLIDER_SOLENOID_B = 3;
 
     // digital sensors
-    public static final int HATCH_PANEL_DETECTOR_TRIGGER_LEFT = 8;
-    public static final int HATCH_PANEL_DETECTOR_ECHO_LEFT = 9;
+    public static final int HATCH_PANEL_DETECTOR_TRIGGER_LEFT = 2;
+    public static final int HATCH_PANEL_DETECTOR_ECHO_LEFT = 3;
 
-    public static final int HATCH_PANEL_DETECTOR_TRIGGER_RIGHT = 6;
-    public static final int HATCH_PANEL_DETECTOR_ECHO_RIGHT = 7;
+    public static final int HATCH_PANEL_DETECTOR_TRIGGER_RIGHT = 4;
+    public static final int HATCH_PANEL_DETECTOR_ECHO_RIGHT = 5;
 
     public static final int CARGO_DETECTOR_CARRIAGE = 0;
 

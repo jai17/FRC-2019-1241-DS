@@ -30,13 +30,12 @@ public class DriveToGoal extends Command {
 	private double totalDist; //total distance for PID to drive
 	private double initTotalDist; //initial total distance (1st hypotenuse of first current point - now)
 	private double goalYaw; //goal angle to maintain; updated based on robot field position
-	private long initTime; //initial time
 	private double epsilon; //tolerance; radius of circle about goal point which you can exist in
 	private double topSpeed; //top speed limit for PID
-	private PrintWriter pw; //print to .csv
 	private int printCounter; //counter to save memory
 	private Point robotPoint; //point for robot position
 	private double currentSetpoint; //current distance you are tracking right now
+	private boolean reverse; //whether the robot is driving in reverse or not
 
 	DrivetrainLoop driveLoop;
 	Drivetrain drive;
@@ -47,11 +46,12 @@ public class DriveToGoal extends Command {
 	 * topSpeed - top speed for PID value to pseudo-circumvent the inherent assumption of instantaneous acceleration
 	 *		- may be changed to an acceleration profile at beginning (end behavious of PID adheres to robot constraints closely enough)
 	 */
-    public DriveToGoal(Point goal, double epsilon, double topSpeed) {
+    public DriveToGoal(Point goal, double epsilon, double topSpeed, boolean reverse) {
         requires(Robot.drive);
         this.goalPoint = goal;
         this.epsilon = epsilon;
-        this.topSpeed = topSpeed;
+		this.topSpeed = topSpeed;
+		this.reverse = reverse;
 		printCounter = 0;
 		
 		driveLoop = DrivetrainLoop.getInstance();
@@ -78,11 +78,19 @@ public class DriveToGoal extends Command {
         
 		goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
 		//cartesian left is 0, yaw left is 90
-        initTime = System.currentTimeMillis();
         System.out.println("\n" + this.toString() +": INITIALIZING: "+ goalPoint.getxPos() +","+ goalPoint.getyPos()); //dbg
         System.out.println("initTotalDist:" + initTotalDist +" initYaw:" + (goalYaw) + " @ " + Robot.drive.getYaw());
 		System.out.println("x y goalYaw currentYaw");
 		
+		if (reverse) {
+			if (Math.signum(goalYaw) == 1){
+				goalYaw -= 180; 
+			} else {
+				goalYaw += 180;
+			}
+			totalDist = -totalDist;
+		}
+
 		//loops
 		driveLoop.setDistancePID(totalDist);
 		driveLoop.setAnglePID(goalYaw);
@@ -103,9 +111,12 @@ public class DriveToGoal extends Command {
     	
     	//(1) live update distance
     	totalDist = Point.calcDistance(robotPoint, goalPoint); //live update distance when far from point
-		
+		if (reverse){
+			totalDist = -totalDist; 
+		}
+
     	//(2) when close to point, maintain current heading
-    	if(totalDist >= (initTotalDist*0.15)) { //if point distance is greater than 15% of total distance (not too close to point)
+    	if(totalDist >= (initTotalDist*0.1)) { //if point distance is greater than 15% of total distance (not too close to point)
     		goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update goal angle when far from point
 			// if ((goalPoint.getxPos() - robotPoint.getxPos()) != 0) {
 			// 	goalYaw = Math.atan((goalPoint.getyPos() - robotPoint.getyPos()) / 
@@ -114,20 +125,28 @@ public class DriveToGoal extends Command {
 			// 	goalYaw = 0;
 			// }
 			currentSetpoint = drive.getAveragePos() + totalDist;
-    	}
+		}
 		
-		driveLoop.setAnglePID(goalYaw);
+		if (reverse){
+			if (Math.signum(goalYaw) == 1){
+				goalYaw -= 180; 
+			} else {
+				goalYaw += 180;
+			}
+		} else {
+			driveLoop.setAnglePID(goalYaw);
+		}
+		
 		driveLoop.setDistancePID(currentSetpoint);
-
-    	//drive setpoint is *ahead* of where you are
+		//drive setpoint is *ahead* of where you are
     		
     	// //print to .csv file
     	// pw.println((System.currentTimeMillis() - initTime) +","+ robotPoint.getxPos() +","+ robotPoint.getyPos() +","+
     	// 	Robot.drive.getAverageVelInchesPerSec() +","+ goalYaw +","+ totalDist);
     	
     	//print to console
-    	if(printCounter % 2 == 0) {
-    		System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos() +" "+ (goalYaw) +" "+ Robot.drive.getYaw());
+    	if(printCounter % 5 == 0) {
+    		System.out.println(goalPoint.getxPos() +" "+ goalPoint.getyPos() +" "+ robotPoint.getxPos() +" "+ robotPoint.getyPos() +" "+ (goalYaw) +" "+ Robot.drive.getYaw());
     	}
     	printCounter++;
     }

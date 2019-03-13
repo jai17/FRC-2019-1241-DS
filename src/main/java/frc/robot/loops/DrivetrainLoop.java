@@ -1,5 +1,6 @@
 package frc.robot.loops;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Point;
@@ -12,7 +13,7 @@ public class DrivetrainLoop implements Loop {
 	// Open loop constants
 	private double openLoopLeft = 0;
 	private double openLoopRight = 0;
-	private boolean wantLow = true;
+	private boolean wantLow = false;
 
 	// Point following constants
 	private Point goal = new Point();
@@ -66,19 +67,21 @@ public class DrivetrainLoop implements Loop {
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 		case OPEN_LOOP:
-			updateXY();
+			if (!DriverStation.getInstance().isAutonomous()){
+				updateXY();
 
-			if (!wantLow) {
-				drive.shiftLow();
-			} else {
-				drive.shiftHigh();
+				if (!wantLow) {
+					drive.shiftLow();
+				} else {
+					drive.shiftHigh();
+				}
+				drive.runLeftDrive(openLoopLeft);
+				drive.runRightDrive(openLoopRight);
 			}
-			drive.runLeftDrive(openLoopLeft);
-			drive.runRightDrive(openLoopRight);
 			return;
 		case POINT_FOLLOWING:
 			updateXY();
-			drive.shiftLow();
+			
 			if (drivePID){
 				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed);
 			} else {
@@ -100,15 +103,9 @@ public class DrivetrainLoop implements Loop {
 			updateXY();
 
 			if (drivePID){
-				drive.drivePID(distance, angle, speed, tolerance);
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed);
 			} else {
 				drive.turnPID(angle, speed, tolerance);
-			}
-
-			if (wantLow) {
-				drive.shiftLow();
-			} else {
-				drive.shiftHigh();
 			}
 			return;
 		}
@@ -190,6 +187,9 @@ public class DrivetrainLoop implements Loop {
 	//update xy
 	public void updateXY() {
 		xy = drive.getXY();
+	}
+	public boolean getGear(){
+		return wantLow; 
 	}
 
 

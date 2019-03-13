@@ -23,8 +23,10 @@ import frc.robot.commands.auto.DriveDistance;
 import frc.robot.commands.auto.DriveToGoal;
 import frc.robot.commands.auto.DriveTurn;
 import frc.robot.commands.auto.TurnToGoal;
+import frc.robot.commands.auto.YeetOffSequence;
 import frc.robot.commands.auto.routines.FarRightShipHatch;
-import frc.robot.commands.auto.routines.HatchFinesse;
+import frc.robot.commands.auto.routines.RightRocketCloseLow;
+import frc.robot.commands.auto.routines.RightRocketCloseMid;
 import frc.robot.loops.CargoLoop;
 import frc.robot.loops.CarriageLoop;
 import frc.robot.loops.DrivetrainLoop;
@@ -131,12 +133,14 @@ public class Robot extends TimedRobot {
     logger.openFile("Robot Init");
     looper = new Looper();
 
-    m_chooser.addDefault("Drive Test", new DriveDistance(150, 0, 2, 0.8, 1));
+    m_chooser.addObject("Drive Test", new DriveDistance(150, 0, 2, 0.8, 1));
     m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1));
     m_chooser.addObject("FarRightShipHatch", new FarRightShipHatch());
-    m_chooser.addObject("Hatch Finnesse", new HatchFinesse());
+    m_chooser.addObject("Yeet Off Sequence", new YeetOffSequence());
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
-    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(0, 100), 5, 0.8));
+    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(0, 100), 5, 0.8, false));
+    m_chooser.addDefault("RightRocketCloseMid", new RightRocketCloseMid());
+    m_chooser.addObject("Drive Track Test", new DriveDistance(60, 0, 0.25, 10, true));
     SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
@@ -218,8 +222,6 @@ public class Robot extends TimedRobot {
     drive.resetXY();
     carriage.extendCarriage();
     carriage.prisonBreak();
-    // drive.shiftLow();
-    // driveLoop.selectGear(true);
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
@@ -256,8 +258,8 @@ public class Robot extends TimedRobot {
     logger.openFile("Teleop init");
     looper.start();
 
-    // carriageLoop.setClawPos(false);
-    // carriageLoop.setSliderPos(false);
+    // carriageLoop.setClawPos(true);
+    // carriageLoop.setSliderPos(true);
     // carriageLoop.setEjectorPos(false);
     driveLoop.selectGear(true);
   }
@@ -302,11 +304,11 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("yPos", xy[1]);
 
     SmartDashboard.putString("Robot Pose", "X: " + xy[0] + " Y: " + xy[1] + " θ: " + drive.getYaw());
-    // θ
+    // 
     SmartDashboard.putNumber("Left Drive Output", drive.getLeftOutput());
     SmartDashboard.putNumber("Right Drive Output", drive.getRightOutput());
     SmartDashboard.putString("Drivetrain State", driveLoop.getControlState().toString());
-    SmartDashboard.putBoolean("Drive Gear", !drive.getIsLow());
+    SmartDashboard.putBoolean("Drive Gear", driveLoop.getGear());
 
     kP_DRIVE = prefs.getDouble("kP_DRIVE", 0);
     kI_DRIVE = prefs.getDouble("kI_DRIVE", 0);

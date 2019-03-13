@@ -46,18 +46,15 @@ public class CarriageCommand extends Command {
   protected void initialize() {
     timer = new Timer(); 
     timerTray = new Timer();
-    // clawToggle.set(true);
-    // sliderToggle.set(true);
-    // ejectToggle.set(true);
+    //clawToggle.set(false);
+    //sliderToggle.set(false);    // ejectToggle.set(true)  ;
   }
-
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-
     if (!DriverStation.getInstance().isAutonomous()){
     //pneumatic toggles
-    if(Robot.m_oi.getToolDPadRight()){ //toggle claw 
+    if(Robot.m_oi.getToolDPadRight()) { //toggle claw 
       clawToggle.set(Robot.m_oi.getToolDPadRight());
     }
     if(Robot.m_oi.getToolDPadLeft()){ //toggle tray
@@ -73,31 +70,22 @@ public class CarriageCommand extends Command {
       hasStarted = true; 
       trayStarted = true; 
     }
-
-    if (hasStarted){
+        
+    if (hasStarted){ //ejector timer
       if (timer.get() > 0.1){
         ejectToggle.set(true);
         hasStarted = false; 
         timer.reset(); 
       }
     }
-    if (trayStarted){
+
+    if (trayStarted){ //tray timer
       if (timerTray.get() > 0.6){
         if (sliderToggle.get())
         sliderToggle.set(false);
         trayStarted = false; 
       }
     }
-
-    if(Robot.m_oi.getToolDPadDown()) { //retract everything
-      clawToggle.set(false);
-      ejectToggle.set(false);
-      sliderToggle.set(false);
-    }
-
-    // if(Robot.m_oi.getToolDPadRight()){
-    //   claw = !claw; 
-    // }
 
     //shooting
     if (Robot.m_oi.getToolBButton()) { //rocket shot
@@ -106,6 +94,10 @@ public class CarriageCommand extends Command {
     } else if (Robot.m_oi.getToolXButton()) { //cargo shot
       shooterSpeed = 0.4039; //power move
       carriageLoop.setIsShooting(true);
+    } else if (Robot.m_oi.getToolDPadDown()) { //run feeder
+      carriageLoop.setIsShooting(true);
+      carriageLoop.setIsFeeding(true);
+      carriageLoop.setFeederSpeed(0.5);
     } else { //no  shot
       shooterSpeed = 0;
       carriageLoop.setIsShooting(false);
@@ -114,7 +106,7 @@ public class CarriageCommand extends Command {
     //set pneumatics
     carriageLoop.setClawPos(!clawToggle.get());
     carriageLoop.setSliderPos(!sliderToggle.get());
-    carriageLoop.setEjectorPos(!ejectToggle.get());
+    carriageLoop.setEjectorPos(ejectToggle.get());
 
     //set shooter
     carriageLoop.setShooterSpeed(shooterSpeed);

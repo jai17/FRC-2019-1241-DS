@@ -5,34 +5,23 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.carriage;
+package frc.robot.commands.auto;
 
 import edu.wpi.first.wpilibj.command.Command;
-import frc.robot.loops.CarriageLoop;
-import frc.robot.subsystems.Carriage;
+import frc.robot.Robot;
+import frc.robot.util.Point;
 
-public class SetEjectorCommand extends Command {
+public class SetXY extends Command {
+  private Point start;
 
-  Carriage carriage;
-  CarriageLoop carriageLoop;
-  boolean forward;
-
-  public SetEjectorCommand(boolean forward) {
-    carriage = Carriage.getInstance();
-    carriageLoop = CarriageLoop.getInstance();
-
-    this.forward = forward;
-    requires(carriage);
+  public SetXY(Point start) {
+    this.start = start;
   }
 
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    if (forward){
-      carriage.ejectHatch();
-    } else {
-      carriage.retractEjector();
-    }
+    Robot.drive.setXY(start.getxPos(), start.getyPos());
   }
 
   // Called repeatedly when this Command is scheduled to run

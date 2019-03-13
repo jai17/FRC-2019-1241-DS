@@ -111,7 +111,10 @@ public class TurnToGoal extends Command {
     //called at the end
     protected void end() {
     	// pw.close();
-    	Point robotPoint = Robot.drive.getXYPoint();
+		Point robotPoint = Robot.drive.getXYPoint();
+		drive.runLeftDrive(0);
+		drive.runRightDrive(0);
+		driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
     	System.out.println(this.toString() +": FINISHED: turned to "+ goalYaw +" @ "+ Robot.drive.getYaw());
     	System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos());
     	System.out.println();

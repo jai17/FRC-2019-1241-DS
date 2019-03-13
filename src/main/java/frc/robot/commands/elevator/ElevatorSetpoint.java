@@ -29,11 +29,11 @@ public class ElevatorSetpoint extends Command {
 		setTimeout(timeOut);
 		elevatorLoop = ElevatorLoop.getInstance(); 
 		elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
+		elevatorLoop.setMotionMagic(setpoint, cruiseVelocity, timeToMax);
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		elevatorLoop.setMotionMagic(setpoint, cruiseVelocity, timeToMax);
 	}
 
 	// Make this return true when this Command no longer needs to run execute()

@@ -29,7 +29,11 @@ public class SetTrayCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    carriageLoop.setSliderPos(extend);
+    if (extend) {
+      carriage.extendCarriage();
+    } else {
+      carriage.retractCarriage();
+    }
   }
 
   // Called repeatedly when this Command is scheduled to run
