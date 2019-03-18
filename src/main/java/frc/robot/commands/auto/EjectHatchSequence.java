@@ -12,17 +12,18 @@ import frc.robot.commands.carriage.SetClawCommand;
 import frc.robot.commands.carriage.SetEjectorCommand;
 import frc.robot.commands.carriage.SetTrayCommand;
 
-public class EjectHatchRocketSequence extends CommandGroup {
+public class EjectHatchSequence extends CommandGroup {
   /**
    * Add your docs here.
    */
-  public EjectHatchRocketSequence() {
+  public EjectHatchSequence() {
     addSequential(new SetClawCommand(true));
-    addSequential(new WaitCommand(0.05));
-    addSequential(new SetEjectorCommand(true));
-    addSequential(new WaitCommand(0.05));
-    addParallel(new SetEjectorCommand(false));
+    addSequential(new SetEjectorCommand(false));
+    addSequential(new WaitCommand(0.1));
     addSequential(new SetTrayCommand(true));
+    addSequential(new WaitCommand(0.25));
+    addSequential(new SetEjectorCommand(true));
+    addSequential(new SetClawCommand(false));
     addSequential(new WaitCommand(0.5));
   }
 }

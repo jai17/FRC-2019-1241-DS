@@ -31,6 +31,9 @@ public class CarriageCommand extends Command {
   boolean hasStarted = false; 
   boolean trayStarted = false; 
 
+  double ejectDelay = 0.05;
+  double trayDelay = 0.5;
+
   public CarriageCommand() {
     sliderToggle = new ToggleBoolean(0.5);
     clawToggle = new ToggleBoolean(0.5);
@@ -72,7 +75,7 @@ public class CarriageCommand extends Command {
     }
         
     if (hasStarted){ //ejector timer
-      if (timer.get() > 0.1){
+      if (timer.get() > ejectDelay){
         ejectToggle.set(true);
         hasStarted = false; 
         timer.reset(); 
@@ -80,7 +83,7 @@ public class CarriageCommand extends Command {
     }
 
     if (trayStarted){ //tray timer
-      if (timerTray.get() > 0.6){
+      if (timerTray.get() > (ejectDelay + trayDelay)){
         if (sliderToggle.get())
         sliderToggle.set(false);
         trayStarted = false; 
@@ -89,15 +92,17 @@ public class CarriageCommand extends Command {
 
     //shooting
     if (Robot.m_oi.getToolBButton()) { //rocket shot
-      shooterSpeed = Robot.shooterSpeed;
+      shooterSpeed = 0.70;
+      carriageLoop.setFeederSpeed(1);
       carriageLoop.setIsShooting(true);
     } else if (Robot.m_oi.getToolXButton()) { //cargo shot
-      shooterSpeed = 0.4039; //power move
+      shooterSpeed = 0.3560; //jash
+      carriageLoop.setFeederSpeed(0.5);
       carriageLoop.setIsShooting(true);
     } else if (Robot.m_oi.getToolDPadDown()) { //run feeder
       carriageLoop.setIsShooting(true);
       carriageLoop.setIsFeeding(true);
-      carriageLoop.setFeederSpeed(0.5);
+      carriageLoop.setFeederSpeed(1);
     } else { //no  shot
       shooterSpeed = 0;
       carriageLoop.setIsShooting(false);

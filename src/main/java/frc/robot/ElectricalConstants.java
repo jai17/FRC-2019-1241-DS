@@ -29,10 +29,11 @@ public class ElectricalConstants {
     public static final boolean LEFT_ENCODER_REVERSE = false;
 
     public static final double ENCODER_GEAR_RATIO = 1.0;
-    public static final double WHEEL_RADIUS = 2.0;
+    public static final double WHEEL_RADIUS = 2.0; 
     public static final double ROTATIONS_TO_INCHES = 2 * Math.PI * WHEEL_RADIUS * ENCODER_GEAR_RATIO;
-    public static final double DRIVE_TO_INCHES = ROTATIONS_TO_INCHES / 4096;
-    public static final double TICKS_PER_INCH =  308;//313.833
+    // public static final double TICKS_PER_INCH =  4096/ROTATIONS_TO_INCHES;//308
+    public static final double TICKS_PER_INCH =  332.02;//308
+
  
 
     // **************************************************************************

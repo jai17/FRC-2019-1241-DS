@@ -18,7 +18,7 @@ public class YeetOffSequence extends CommandGroup {
    * Add your docs here.
    */
   public YeetOffSequence() {
-    addParallel(new DriveDistance(77, 0, 0.9, 5));
+    addParallel(new DriveDistance(84, 0, 0.9, 4));
     addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
   }
 }

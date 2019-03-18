@@ -4,6 +4,7 @@ import javax.lang.model.util.ElementScanner6;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Scheduler;
+import frc.robot.commands.hatch.HatchFeedSequence;
 import frc.robot.subsystems.Cargo;
 import frc.robot.subsystems.Carriage;
 
@@ -53,7 +54,7 @@ public class CarriageLoop implements Loop{
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 			case OPEN_LOOP:
-			if (!DriverStation.getInstance().isAutonomous()){
+			if (!DriverStation.getInstance().isAutonomous() && !HatchFeedSequence.getInstance().isRunning()){
 				if (isRetracted) { //slider
 					carriage.extendCarriage();
 					// System.out.println("EXTEND CARRIAGE");

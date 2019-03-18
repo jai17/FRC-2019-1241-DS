@@ -33,7 +33,7 @@ public class RightRocketCloseLow extends CommandGroup {
     // addSequential(new TurnToGoal (FieldPoints.RIGHT_ROCKET, 10, 0.9));
     
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(0.8, 1, true));
-    addSequential(new DriveDistance(40, 0, 0.4, 3, true));  
+    addSequential(new DriveTurn(0.8, 1, true, false));
+    addSequential(new DriveDistance(40, 0, 0.4, FieldPoints.ROCKET_EJECT_DIST, true, false));  
   }
 }

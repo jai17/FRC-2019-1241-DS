@@ -98,12 +98,12 @@ public class QuinticBezierDrivePath extends Command {
 			if (-Robot.drive.getAveragePos() > curve.findHypotenuse(counter) && counter <= curve.size())
 				counter++;
 
-			Robot.drive.regulatedDrivePID(-distance, curve.findAngle(counter), 1, speed);
+			Robot.drive.regulatedDrivePID(-distance, curve.findAngle(counter), 1, speed, true, false);
 		} else {
 			if (Robot.drive.getAveragePos() > curve.findHypotenuse(counter) && counter < curve.size())
 				counter++;
 
-			Robot.drive.regulatedDrivePID(distance, curve.findAngle(counter), 1, speed);
+			Robot.drive.regulatedDrivePID(distance, curve.findAngle(counter), 1, speed, true, false);
 		}
 	
 	}

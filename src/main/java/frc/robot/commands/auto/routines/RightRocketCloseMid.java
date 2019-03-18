@@ -12,7 +12,7 @@ import frc.robot.NumberConstants;
 import frc.robot.commands.auto.DriveDistance;
 import frc.robot.commands.auto.DriveToGoal;
 import frc.robot.commands.auto.DriveTurn;
-import frc.robot.commands.auto.EjectHatchRocketSequence;
+import frc.robot.commands.auto.EjectHatchSequence;
 import frc.robot.commands.auto.ElevatorSetpointWait;
 import frc.robot.commands.auto.SetXY;
 import frc.robot.commands.auto.TurnToGoal;
@@ -36,19 +36,19 @@ public class RightRocketCloseMid extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.RIGHT_CLOSE_ROCKET, 6, 1, false));
     
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(0.8, 5, true));
+    addSequential(new DriveTurn(0.5, 5, true, false));
 
-    addParallel(new DriveDistance(40, 0, 0.25, 3, true)); 
+    addParallel(new DriveDistance(30, 0, 0.2, FieldPoints.ROCKET_EJECT_DIST, true, false)); 
     addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
     
-    addSequential(new EjectHatchRocketSequence());
+    addSequential(new EjectHatchSequence());
     addSequential(new SetXY(FieldPoints.CLOSE_RIGHT_ROCKET_SCORE));
 
-    addParallel(new DriveToGoal(FieldPoints.PRE_FEEDER_RIGHT, 5, 0.75, true));
+    addParallel(new DriveToGoal(FieldPoints.RIGHT_FEEDER, 4, 1, true));
     addSequential(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1));
     
-    addSequential(new TurnToGoal(FieldPoints.PRE_FEEDER_RIGHT, 8, 0.75));
-    addSequential(new DriveDistance(60, 0, 0.25, 10, true)); 
+    addSequential(new TurnToGoal(FieldPoints.RIGHT_FEEDER, 4, 0.9));
+    addSequential(new DriveDistance(60, 0, 0.25, 10, true, false)); 
     addSequential(new SetClawCommand(false));
   }
 }

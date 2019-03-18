@@ -25,6 +25,7 @@ public class DriveTurn extends Command {
   double timeOut; 
   double tolerance; 
   boolean track = false; 
+  boolean relative; 
 
   double xVal; 
   double degreesToTarget; 
@@ -35,6 +36,7 @@ public class DriveTurn extends Command {
     this.speed = speed; 
     this.tolerance = tolerance; 
     this.track = false; 
+    this.relative = true; 
     requires(drive);
   }
 
@@ -44,12 +46,15 @@ public class DriveTurn extends Command {
     this.speed = speed; 
     this.tolerance = tolerance; 
     this.track = false; 
+    this.relative = true; 
     requires(drive);
   }
-  public DriveTurn(double speed, double tolerance, boolean track){
+
+  public DriveTurn(double speed, double tolerance, boolean track, boolean relative){
     this.speed = speed; 
     this.tolerance = tolerance; 
     this.track = track; 
+    this.relative = relative; 
   }
 
   // Called just before this Command runs the first time
@@ -61,6 +66,7 @@ public class DriveTurn extends Command {
 
 
     driveLoop.setPIDType(false);
+    driveLoop.setRelativePID(relative);
     if (track){
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     } else {
@@ -93,7 +99,7 @@ public class DriveTurn extends Command {
       }
     } else {
 
-    if ((Math.abs(drive.getAngle()) - Math.abs(angle)) > 1) {
+    if (Math.abs(angle) - (Math.abs(drive.getYaw())) < tolerance) {
       return true;
     } else {
       return false;
@@ -104,6 +110,8 @@ public class DriveTurn extends Command {
   // Called once after isFinished returns true
   @Override
   protected void end() {
+    drive.runLeftDrive(0);
+    drive.runRightDrive(0);
     driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
     System.out.println(this.toString() + " HAS FINISHED");
   }

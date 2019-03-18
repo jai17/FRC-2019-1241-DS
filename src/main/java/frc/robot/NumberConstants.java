@@ -39,7 +39,7 @@ public class NumberConstants {
     // PID constants
     public static final double pTalonElevator = 0.1; //0.4
     public static final double iTalonElevator = 0.0;
-    public static final double dTalonElevator = 0.004; //0.004
+    public static final double dTalonElevator = 0.012; //0.004
     public static final double fTalonElevator = 0.2;
 
     public static final double pElevator = 0.0;
@@ -53,14 +53,14 @@ public class NumberConstants {
     public static final int ELEVATOR_ACCELERATION = 0;
 
     // Position setpoints
-    public static final double ELEVATOR_REST_POSITION = 3.5; //3.5
+    public static final double ELEVATOR_REST_POSITION = 3.5; 
     public static final double HATCH_FINESSE_POSITION = 7.5;
-    public static final double ELEVATOR_LOW_HATCH_POSITION = 15; 
+    public static final double ELEVATOR_LOW_HATCH_POSITION = 15.5; 
     public static final double ELEVATOR_HATCH_FEEDER = 15; 
-    public static final double HINTAKE_FEEDING_HEIGHT = 14.5;
-    public static final double ELEVATOR_MID_HATCH_POSITION = 45; 
+    public static final double HINTAKE_FEEDING_HEIGHT = 12;
+    public static final double ELEVATOR_MID_HATCH_POSITION = 46; 
     public static final double ELEVATOR_HIGH_HATCH_POSITION = 74.5;
-    public static final double ELEVATOR_CARGOSHIP_POSITION = 33; // jim zondag 
+    public static final double ELEVATOR_CARGOSHIP_POSITION = 30; // jim zondag 
 
     /*********************** CARGO ************************************/
     // PID constants
@@ -82,8 +82,8 @@ public class NumberConstants {
     // Angle constants 
     public static final double CARGO_FEEDING_ANGLE = 50; //HOT
     public static final double CARGO_RESTING_ANGLE = 300; 
-    public static final double CARGO_STATION_ANGLE = 1000; 
-    public static final double CARGO_INTAKING_ANGLE = 1700; 
+    public static final double CARGO_STATION_ANGLE = 900; 
+    public static final double CARGO_INTAKING_ANGLE = 1600; 
     public static final double CARGO_LIFTING_ANGLE = 2935; //ROCK SOLID DEFENCE
 
     // Soft Limits
@@ -91,9 +91,9 @@ public class NumberConstants {
     public static final int CARGO_BACK_SOFT_LIMIT = 0;
 
     /*********************** HATCH ************************************/
-    public static final double pTalonHatch = 0.6;
+    public static final double pTalonHatch = 1.5;
     public static final double iTalonHatch = 0.0;
-    public static final double dTalonHatch = 0.01;
+    public static final double dTalonHatch = 0.02;
     public static final double fTalonHatch = 1.9486;
 
     public static final double pHatch = 0.0;

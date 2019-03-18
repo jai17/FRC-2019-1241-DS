@@ -83,7 +83,7 @@ public class CargoCommand extends Command {
 
       } else if (Robot.m_oi.getToolRightBumper()) { //intaking
 
-        if (Math.abs(cargo.getCargoAngle()) <= 900 && !cargo.isCargoPresent()) { //pivot up, has ball
+        if (Math.abs(cargo.getCargoAngle()) <= 700 && !cargo.isCargoPresent()) { //pivot up, has ball
           cargoLoop.setIsIntaking(true); //intaking
           cargoLoop.setRollerSpeed(1);
           carriageLoop.setIsFeeding(true); //feeding
@@ -150,12 +150,9 @@ public class CargoCommand extends Command {
 
         } else if (cargo.isCargoPresent()) { //has no cargo
           if (Robot.m_oi.getToolLeftX() < -0.6) { //no cargo, left x
-            cargoLoop.setMotionMagic(NumberConstants.CARGO_STATION_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
-            cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-            openLoop = false; 
-          } else if (Robot.m_oi.getToolLeftX() > 0.6) { //no cargo, lifting
-            cargoLoop.setMotionMagic(NumberConstants.CARGO_LIFTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
-            cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+            // cargoLoop.setMotionMagic(NumberConstants.CARGO_STATION_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
+            // cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+            // openLoop = false; 
           } else { //no cargo, no x
             cargoLoop.setMotionMagic(NumberConstants.CARGO_RESTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.1);
             cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
@@ -165,11 +162,11 @@ public class CargoCommand extends Command {
       }
 
         if (openLoop){
-          if (Robot.m_oi.getToolLeftY() > 0.5) { //move down
-            cargoLoop.setPivotSpeed(-0.5);
+          if (Robot.m_oi.getToolLeftY() > 0.1) { //move down
+            cargoLoop.setPivotSpeed(0.75 * -Robot.m_oi.getToolLeftY());
             cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
-          } else if (Robot.m_oi.getToolLeftY() < -0.5) { //move up
-            cargoLoop.setPivotSpeed(0.5);
+          } else if (Robot.m_oi.getToolLeftY() < -0.1) { //move up
+            cargoLoop.setPivotSpeed(-Robot.m_oi.getToolLeftY());
             cargoLoop.setCargoState(CargoControlState.OPEN_LOOP);
           } else { //don't move
             cargoLoop.setPivotSpeed(0);

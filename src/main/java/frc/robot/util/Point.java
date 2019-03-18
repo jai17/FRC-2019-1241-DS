@@ -100,10 +100,19 @@ public class Point {
 		double xDiff = Math.abs(target.getxPos() - current.getxPos());
 		double yDiff = Math.abs(target.getyPos() - current.getyPos());
 		
+
+		
+		System.out.println("X Diff: " + xDiff + "Y Diff: " + yDiff); 
 		if(xDiff < range && yDiff < range) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	//return coordinates as a string in "x,y" format
+	public String toString() {
+		String coords = this.getxPos() +","+ this.getyPos();
+		return coords;
 	}
 }

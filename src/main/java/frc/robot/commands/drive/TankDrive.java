@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.commands.hatch.HatchFeedSequence;
 import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
@@ -28,6 +29,10 @@ public class TankDrive extends Command {
   // For Vision
   double xVal, degreesToTarget;
   double yVal, degreesToTargetY;
+
+  //hatch pick up test
+  HatchFeedSequence hatchPickup = HatchFeedSequence.getInstance();
+  boolean pickingUp = false;
 
   public TankDrive() {
     driveLoop = DrivetrainLoop.getInstance();
@@ -49,15 +54,15 @@ public class TankDrive extends Command {
     if (!DriverStation.getInstance().isAutonomous()) {
 
       xVal = vision.avg();
-      degreesToTarget = vision.pixelToDegree(xVal);
+      degreesToTarget = vision.pixelToDegree(xVal); 
+      //added offset to compensate for camera
 
       yVal = vision.avgY();
       degreesToTargetY = vision.pixelToDegreeY(yVal);
       SmartDashboard.putNumber("Degrees to Target Y", degreesToTargetY);
       SmartDashboard.putNumber("Camera Angle ", vision.getCameraAngle(degreesToTargetY, 42, 28.5, 77));
       SmartDashboard.putNumber("Camera Distance", vision.getDistance(160, Math.toRadians(31.81), vision.getWidth()));
-      // SmartDashboard.putNumber("Camera Distance", vision.getDistance(a1, a2, h1,
-      // h2));
+      // SmartDashboard.putNumber("Camera Distance", vision.getDistance(a1, a2, h1, h2));
 
       if (Robot.m_oi.getDriveLeftBumper()) { // tracking
         driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
@@ -74,7 +79,7 @@ public class TankDrive extends Command {
         driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.5);
         driveLoop.setTolerancePID(1);
 
-      } else if (Robot.m_oi.getDriveRightBumper()) { // half speed
+      } else if (Robot.m_oi.getDriveRightTrigger()) { // half speed
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
         driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
@@ -89,8 +94,18 @@ public class TankDrive extends Command {
         driveLoop.setRightDrive(0);
         driveLoop.setLeftDrive(0);
       }
-      driveLoop.selectGear(!  Robot.m_oi.getDriveRightTrigger());
+      driveLoop.selectGear(!Robot.m_oi.getDriveRightBumper());
 
+      //hatch intake sequence
+      if (Robot.m_oi.getDriveLeftTrigger()) { //if A button
+        if(!hatchPickup.isRunning() && !pickingUp) { //if command not running
+          hatchPickup.start(); //start command
+          pickingUp = true;
+        } 
+      } else { //cancel hatch pickup
+        hatchPickup.cancel();
+        pickingUp = false;
+      }
     }
 
     // shift gears

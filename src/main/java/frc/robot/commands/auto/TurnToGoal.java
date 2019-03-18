@@ -75,6 +75,7 @@ public class TurnToGoal extends Command {
         goalAngle = Robot.drive.getAngle() + Math.min(goalYaw - Robot.drive.getYaw(), goalYaw + Robot.drive.getYaw());
 		
 		driveLoop.setAnglePID(goalAngle);
+		driveLoop.setRelativePID(true);
 		driveLoop.setTolerancePID(epsilon);
 		driveLoop.setTopSpeed(topSpeed);
 		driveLoop.setPIDType(false);
@@ -101,7 +102,7 @@ public class TurnToGoal extends Command {
     //end condition for command
     protected boolean isFinished() {
     	if((Robot.drive.getAngle() >= (goalAngle - epsilon) && Robot.drive.getAngle() <= (goalAngle + epsilon)) && //if heading is in range
-    			(Math.abs(drive.getRightOutput()) <= 0.1241)) { //and low oscillation on PID; getting side vel bc average vel when turning is 0 
+    			(Math.abs(drive.getRightOutput()) <= 0.25)) { //and low oscillation on PID; getting side vel bc average vel when turning is 0 
     		return true;    		
     	} else {
     		return false;

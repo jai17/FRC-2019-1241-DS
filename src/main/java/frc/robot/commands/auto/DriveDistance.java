@@ -31,6 +31,8 @@ public class DriveDistance extends Command {
   double xVal;
   double degreesToTarget;
   double initDistance = 0;
+  boolean relative; 
+  boolean highPID; 
 
   Timer timer;
   boolean started = true;
@@ -42,6 +44,8 @@ public class DriveDistance extends Command {
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = false;
+    this.relative = true;
+    this.highPID = false;  
     requires(drive);
   }
 
@@ -53,16 +57,20 @@ public class DriveDistance extends Command {
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = false;
+    this.relative = true; 
+    this.highPID = false;  
 
     requires(drive);
   }
 
-  public DriveDistance(double distance, double angle, double speed, double tolerance, boolean track) {
+  public DriveDistance(double distance, double angle, double speed, double tolerance, boolean track, boolean relative) {
     this.distance = distance;
     this.angle = angle;
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = track;
+    this.relative = relative; 
+    this.highPID = false;  
     requires(drive);
   }
 
@@ -77,9 +85,12 @@ public class DriveDistance extends Command {
     degreesToTarget = vision.pixelToDegree(xVal);
 
     driveLoop.setPIDType(true);
+    driveLoop.setRelativePID(this.relative);
+    driveLoop.setHighPID(highPID);
     driveLoop.setDistancePID(distance + drive.getAveragePos());
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
+      setTimeout(3);
     } else {
       driveLoop.setAnglePID(angle);
     }
@@ -132,7 +143,7 @@ public class DriveDistance extends Command {
   protected boolean isFinished() {
 
     if (track) {
-      if ((carriage.getUltrasonicLeft() + carriage.getUltrasonicRight()) / 2 < tolerance) {
+      if (carriage.getUltrasonicLeft() < tolerance || isTimedOut()) {
         return true;
       } else {
         return false;

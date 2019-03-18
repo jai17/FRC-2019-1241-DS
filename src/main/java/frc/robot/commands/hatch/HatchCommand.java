@@ -36,8 +36,9 @@ public class HatchCommand extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    // pivot hatch open loop
-    if (Robot.m_oi.getToolLeftTrigger()) { // have to hold left trigger for hatch
+    // have to hold left trigger for hatch
+    // a button on drive for feeding sequence
+    if (Robot.m_oi.getToolLeftTrigger() && !Robot.m_oi.getDriveAButton()) { 
 
       if (Robot.m_oi.getToolLeftBumper()) { // outtake
         hatchLoop.setIsIntaking(false);
@@ -80,10 +81,10 @@ public class HatchCommand extends Command {
 
       if (openLoop) {
         if (Robot.m_oi.getToolLeftY() > 0.5) { // move down
-          hatchLoop.setPivotSpeed(1);
+          hatchLoop.setPivotSpeed(-1);
           hatchLoop.setHatchState(HatchControlState.OPEN_LOOP);
         } else if (Robot.m_oi.getToolLeftY() < -0.5) { // move up
-          hatchLoop.setPivotSpeed(-1);
+          hatchLoop.setPivotSpeed(1);
           hatchLoop.setHatchState(HatchControlState.OPEN_LOOP);
         } else { // don't move
           hatchLoop.setPivotSpeed(0);

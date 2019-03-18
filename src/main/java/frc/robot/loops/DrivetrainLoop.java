@@ -32,6 +32,8 @@ public class DrivetrainLoop implements Loop {
 	private double angle;
 	private double stick;
 	double maxOutput = 0; 
+	boolean relative = true; 
+	boolean highPID = false; 
 
 	//Point Following
 	private double[] xy;
@@ -77,15 +79,18 @@ public class DrivetrainLoop implements Loop {
 				}
 				drive.runLeftDrive(openLoopLeft);
 				drive.runRightDrive(openLoopRight);
+			} else {
+				drive.runLeftDrive(0);
+				drive.runRightDrive(0);	
 			}
 			return;
 		case POINT_FOLLOWING:
 			updateXY();
 			
 			if (drivePID){
-				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed);
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, relative, highPID);
 			} else {
-				drive.regulatedTurnPID(angle, tolerance, topSpeed, false);
+				drive.regulatedTurnPID(angle, tolerance, topSpeed, relative);
 			}
 
 			// add point following code here
@@ -103,9 +108,9 @@ public class DrivetrainLoop implements Loop {
 			updateXY();
 
 			if (drivePID){
-				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed);
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, relative, highPID);
 			} else {
-				drive.turnPID(angle, speed, tolerance);
+				drive.regulatedTurnPID(angle, speed, tolerance, relative);
 			}
 			return;
 		}
@@ -190,6 +195,14 @@ public class DrivetrainLoop implements Loop {
 	}
 	public boolean getGear(){
 		return wantLow; 
+	}
+
+	public void setRelativePID(boolean relative){
+		this.relative = relative; 
+	}
+
+	public void setHighPID(boolean highPID){
+		this.highPID = highPID; 
 	}
 
 
