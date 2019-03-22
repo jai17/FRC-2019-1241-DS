@@ -90,7 +90,7 @@ public class DriveDistance extends Command {
     driveLoop.setDistancePID(distance + drive.getAveragePos());
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      setTimeout(3);
+      setTimeout(4);
     } else {
       driveLoop.setAnglePID(angle);
     }

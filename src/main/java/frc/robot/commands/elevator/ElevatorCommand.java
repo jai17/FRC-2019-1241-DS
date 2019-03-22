@@ -13,7 +13,6 @@ import frc.robot.Robot;
 import frc.robot.loops.ElevatorLoop;
 import frc.robot.loops.ElevatorLoop.ElevatorControlState;
 import frc.robot.subsystems.Elevator;
-import frc.robot.util.ToggleBoolean;
 
 public class ElevatorCommand extends Command {
   Elevator elevator; 
@@ -40,27 +39,27 @@ public class ElevatorCommand extends Command {
   protected void execute() {
 
       //motion magic controls
-      if (Robot.m_oi.getToolAButton()){ //bottom
+      if (Robot.m_oi.getToolAButton()) { //bottom
         elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_REST_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
         openLoop = false; 
-      }
-      else if (Robot.m_oi.getToolRightY() > 0.5){ //low rocket & feeder
+
+      } else if (Robot.m_oi.getToolRightY() > 0.5) { //low rocket & feeder
         elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
         openLoop = false; 
-      }
-      else if (Robot.m_oi.getToolRightX( )> 0.5){ //mid rocket
+
+      } else if (Robot.m_oi.getToolRightX( )> 0.5) { //mid rocket
         elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
         openLoop = false; 
-      } 
-      else if (Robot.m_oi.getToolRightY() < -0.5) { //high rocket
+
+      } else if (Robot.m_oi.getToolRightY() < -0.5) { //high rocket
         elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_HIGH_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.4);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
         openLoop = false; 
-      } 
-      else if (Robot.m_oi.getToolYButton()) { //cargo ship
+
+      } else if (Robot.m_oi.getToolYButton()) { //cargo ship
         elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_CARGOSHIP_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
       } //end motion magic
@@ -70,44 +69,32 @@ public class ElevatorCommand extends Command {
         openLoop = true; 
       }
 
+      /**
+       * if (Robot.m_oi.getToolLeftTrigger() && !openLoop) {
+       *  openLoop = true;
+       * }
+       * 
+       * if (openLoop) {
+       *  use joystick for manual up/down, default to 10%
+       * }
+       */
+
       //open loop controls
-      if (openLoop){
+      if (openLoop) {
         if (Robot.m_oi.getToolStartButton()){ //up
           elevatorLoop.setOpenLoopSpeed(0.75);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
-        } 
-        else if (Robot.m_oi.getToolBackButton()){ //down
+
+        } else if (Robot.m_oi.getToolBackButton()){ //down
           elevatorLoop.setOpenLoopSpeed(-0.6);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
+
         } else {
           elevatorLoop.setOpenLoopSpeed(0.1); //hold position
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
         }
       } //end open loop
-      
     }
-/*
-    if (elevator.getAtBottom()){
-      elevator.resetEncoders();
-    }*/
-
-    // if (Robot.m_oi.getToolStartButton()){
-    //   elevatorLoop.setOpenLoopSpeed(1);
-    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
-    //   System.out.println("START START START");
-    // } else if (Robot.m_oi.getToolBackButton()){
-    //   elevatorLoop.setOpenLoopSpeed(-1);
-    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
-    //   System.out.println("BACK BACK BACK");
-    // } else {
-    //   elevatorLoop.setOpenLoopSpeed(0);
-    //   elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
-    //   System.out.println("NOTHING NOTHING NOTHING");
-    // }
-
-
-
-  //}
 
   // Make this return true when this Command no longer needs to run execute()
   @Override

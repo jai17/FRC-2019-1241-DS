@@ -86,6 +86,9 @@ public class Drivetrain extends Subsystem {
   private DoubleSolenoid shifterSolenoid;
   private boolean isLow = false;
 
+  /* Lifter Cylinder */
+  private Solenoid lifterSolenoid;
+
   // Create a single instance of the drivetrain
   public static Drivetrain getInstance() {
     if (mInstance == null) {
@@ -186,6 +189,7 @@ public class Drivetrain extends Subsystem {
     // Initialize shifter solenoid
     shifterSolenoid = new DoubleSolenoid(ElectricalConstants.SHIFTER_SOLENOID_HIGH,
         ElectricalConstants.SHIFTER_SOLENOID_LOW);
+    lifterSolenoid = new Solenoid(ElectricalConstants.LIFTER_SOLENOID);
 
     // Initialize navX gyro
     try {
@@ -395,6 +399,16 @@ public class Drivetrain extends Subsystem {
     return isLow;
   }
 
+  // extend lifter
+  public void extendLifter() {
+    lifterSolenoid.set(true);
+  }
+
+  //retract lifter
+  public void retractLifter() {
+    lifterSolenoid.set(false);
+  }
+
   // PID methods
   // drive PID
   public void drivePID(double distSetpoint, double angleSetpoint, double speed, double epsilon) {
@@ -421,7 +435,9 @@ public class Drivetrain extends Subsystem {
 
   // drive PID constrained to top speed
   public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double topSpeed,
-      boolean relative, boolean high) {
+    boolean relative, boolean high) {
+    
+    //shift gears, change constants
     if (high) {
       this.shiftHigh();
       drivePID.changePIDGains(Robot.kP_DRIVE * 0.1, Robot.kI_DRIVE, Robot.kD_DRIVE * 5);
@@ -429,11 +445,15 @@ public class Drivetrain extends Subsystem {
       this.shiftLow();
       drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
     }
+
+    //change to use angles
     if (relative) {
       turnPID.changePIDGains(Robot.kP_DRIVETURN, Robot.kI_DRIVETURN, Robot.kD_DRIVETURN);
     } else {
       turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
     }
+
+    //^ CHANGE TO DRIVE TURN, ADD VISION BOOLEAN
 
     double currentVal;
 
@@ -450,7 +470,7 @@ public class Drivetrain extends Subsystem {
     else if (driveOut < 0) // driving backward
       driveOut = Math.max(driveOut, -topSpeed);
 
-    double angleOut = turnPID.calcPIDDrive(angleSetpoint, currentVal, 1);
+    double angleOut = turnPID.calcPIDDrive(angleSetpoint, currentVal, epsilon);
 
     if (relative) {
       if ((angleSetpoint < -90 || angleSetpoint > 90) && currentVal < 0) {

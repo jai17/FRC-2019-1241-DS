@@ -14,6 +14,7 @@ public class DrivetrainLoop implements Loop {
 	private double openLoopLeft = 0;
 	private double openLoopRight = 0;
 	private boolean wantLow = false;
+	private boolean liftEngaged = false;
 
 	// Point following constants
 	private Point goal = new Point();
@@ -77,6 +78,13 @@ public class DrivetrainLoop implements Loop {
 				} else {
 					drive.shiftHigh();
 				}
+
+				if (liftEngaged) {
+					drive.extendLifter();
+				} else {
+					drive.retractLifter();
+				}
+
 				drive.runLeftDrive(openLoopLeft);
 				drive.runRightDrive(openLoopRight);
 			} else {
@@ -176,6 +184,14 @@ public class DrivetrainLoop implements Loop {
 			wantLow = false;
 		else
 			wantLow = true;
+	}
+
+	//set the lifter position
+	public void engageLifter(boolean lift) {
+		if (lift)
+			liftEngaged = true;
+		else
+			liftEngaged = false;
 	}
 
 	// POINT FOLLOWING

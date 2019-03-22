@@ -44,7 +44,6 @@ public class FieldPositioning {
 				}
 			} else { //anywhere else
 				goalYaw = Math.toDegrees(Math.atan(dx/dy));
-				SmartDashboard.putString("Afro Angle", "Afro Angle" + goalYaw); 
 			}
 		}
 		return goalYaw;

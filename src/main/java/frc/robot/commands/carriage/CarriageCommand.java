@@ -103,10 +103,12 @@ public class CarriageCommand extends Command {
       carriageLoop.setIsShooting(true);
       carriageLoop.setIsFeeding(true);
       carriageLoop.setFeederSpeed(1);
-    } else { //no  shot
-      shooterSpeed = 0;
-      carriageLoop.setIsShooting(false);
     }
+    // } else { //no  shot
+    //   shooterSpeed = 0;
+    //   //carriageLoop.setIsShooting(false);
+    //  // carriageLoop.setFeederSpeed(0);
+    // }
 
     //set pneumatics
     carriageLoop.setClawPos(!clawToggle.get());

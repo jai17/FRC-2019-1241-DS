@@ -9,6 +9,8 @@ package frc.robot;
 
 import java.util.Map;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
@@ -25,7 +27,7 @@ import frc.robot.commands.auto.DriveTurn;
 import frc.robot.commands.auto.EjectHatchSequence;
 import frc.robot.commands.auto.TurnToGoal;
 import frc.robot.commands.auto.YeetOffSequence;
-import frc.robot.commands.auto.routines.FarRightShipHatch;
+import frc.robot.commands.auto.routines.LeftRocketCloseMid;
 import frc.robot.commands.auto.routines.RightRocketCloseLow;
 import frc.robot.commands.auto.routines.RightRocketCloseMid;
 import frc.robot.commands.auto.routines.RightShipCloseMid;
@@ -91,6 +93,9 @@ public class Robot extends TimedRobot {
   public static double[] hsvThresholdSat = new double[2];
   public static double[] hsvThresholdVal = new double[2];
 
+  DigitalOutput pin4; 
+  DigitalOutput pin5; 
+
   // Thread visionThread;
 
   // Logger
@@ -133,6 +138,9 @@ public class Robot extends TimedRobot {
     // Preferences instance
     prefs = Preferences.getInstance();
 
+    pin4 = new DigitalOutput(4); 
+    pin5 = new DigitalOutput(5); 
+
     // Open Logger File
    // logger.openFile("Robot Init");
     looper = new Looper();
@@ -141,12 +149,13 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("Drive Test", new DriveDistance(80, 0, 2, 0.85, 1));
     m_chooser.addObject("EjectHatchSequence", new EjectHatchSequence());
     m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1));
-    m_chooser.addObject("FarRightShipHatch", new FarRightShipHatch());
     m_chooser.addObject("Yeet Off Sequence", new YeetOffSequence());
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
-    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(30, 100), 5, 0.8, false));
+    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(-30, 100), 5, 0.8, false));
     // m_chooser.addObject("Drive Track Test", new DriveDistance(60, 0, 0.25, 10, true));
     m_chooser.addObject("RightShipCloseMid", new RightShipCloseMid());
+    SmartDashboard.putData("Auto modes", m_chooser);
+    m_chooser.addObject("LeftRocketCloseMid", new LeftRocketCloseMid());
     SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
@@ -200,6 +209,8 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {
     Scheduler.getInstance().run();
     updateSmartDashboard();
+    pin4.set(false);
+    pin5.set(false);
   }
 
   /**
@@ -233,13 +244,6 @@ public class Robot extends TimedRobot {
     drive.setRightrampRate(0);
     drive.shiftLow();
 
-    /*
-     * String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
-     * switch(autoSelected) { case "My Auto": autonomousCommand = new
-     * MyAutoCommand(); break; case "Default Auto": default: autonomousCommand = new
-     * ExampleCommand(); break; }
-     */
-
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.start();
@@ -251,6 +255,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    if (m_oi.getDriveStartButton()) {
+      m_autonomousCommand.cancel();
+    }
+
     Scheduler.getInstance().run();
     updateSmartDashboard();
   }
@@ -348,11 +356,11 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Cargo Present Intake", cargo.getOptic());
 
     // Carriage
-    SmartDashboard.putBoolean("Cargo Present Carriage", !carriage.getOptic());
+    SmartDashboard.putBoolean("Cargo Present Carriage", carriage.getOptic());
     SmartDashboard.putBoolean("Tray Position", carriageLoop.getSliderPos());
     SmartDashboard.putBoolean("Ejector Position", carriageLoop.getEjectorPos());
     SmartDashboard.putBoolean("Claw Position", carriageLoop.getClawPos());
-    SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight());
+    //SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight());
     SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft());
     shooterSpeed = prefs.getDouble("shooterSpeed", 1);
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);

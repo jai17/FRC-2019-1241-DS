@@ -4,6 +4,7 @@ import javax.lang.model.util.ElementScanner6;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Scheduler;
+import frc.robot.Robot;
 import frc.robot.commands.hatch.HatchFeedSequence;
 import frc.robot.subsystems.Cargo;
 import frc.robot.subsystems.Carriage;
@@ -54,7 +55,8 @@ public class CarriageLoop implements Loop{
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 			case OPEN_LOOP:
-			if (!DriverStation.getInstance().isAutonomous() && !HatchFeedSequence.getInstance().isRunning()){
+			if (!DriverStation.getInstance().isAutonomous()){
+				if (!Robot.m_oi.getDriveLeftTrigger()){
 				if (isRetracted) { //slider
 					carriage.extendCarriage();
 					// System.out.println("EXTEND CARRIAGE");
@@ -76,18 +78,22 @@ public class CarriageLoop implements Loop{
 					carriage.prisonBreak();
 				}
 			}
+			}
 
-			if (!carriage.getOptic() && isShooting) { //if ball in and is shooting
-				carriage.feederIn(1);
-			} 
+			// if (carriage.getOptic() && isShooting) { //if no ball and is shooting
+			// 	carriage.feederIn(feederSpeed);
+			// 	System.out.println("Is Running Feeder"); 
+			// } 
 			
-			else if (!carriage.getOptic()) { //if ball in
-				this.setFeederSpeed(0);
-				carriage.feederOut(0);
-			}
-			else {
-				carriage.feederIn(feederSpeed);
-			}
+			// else if (!carriage.getOptic()) { //if ball in
+			// 	//this.setFeederSpeed(0);
+			// 	carriage.feederOut(feederSpeed);
+			// }
+			// else {
+			// 	System.out.println("Running Feeder Open Loop"); 
+			// 	carriage.feederIn(feederSpeed);
+			// }
+			carriage.feederIn(feederSpeed);
 
 			if (isShooting) { //shooter
 				carriage.shootBackwards(shooterSpeed);

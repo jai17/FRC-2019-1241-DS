@@ -31,7 +31,8 @@ public class SetHatchPivotCommand extends Command {
 	// Called just before this Command runs the first time
 	protected void initialize() {
 		hatchLoop = HatchLoop.getInstance(); 
-    hatchLoop.setHatchState(HatchControlState.MOTION_MAGIC);
+	hatchLoop.setHatchState(HatchControlState.MOTION_MAGIC);
+	setTimeout(timeOut);
 	}
 
 	// Called repeatedly when this Command is scheduled to run
@@ -41,7 +42,7 @@ public class SetHatchPivotCommand extends Command {
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-		return isTimedOut() || (Math.abs(Robot.hatch.getMotionMagicError()) < 100);
+		return isTimedOut() || (Math.abs(Robot.hatch.getMotionMagicError()) < 50);
 	}
 
   // Called once after isFinished returns true

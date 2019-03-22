@@ -33,44 +33,35 @@ public class DriveToGoal extends Command {
 	private double goalYaw; //goal angle to maintain; updated based on robot field position
 	private double epsilon; //tolerance; radius of circle about goal point which you can exist in
 	private double topSpeed; //top speed limit for PID
-	private int printCounter; //counter to save memory
 	private Point robotPoint; //point for robot position
 	private double currentSetpoint; //current distance you are tracking right now
 	private boolean reverse; //whether the robot is driving in reverse or not
-	boolean highPID; 
+	private boolean highPID; //whether robot drives in high gear or not
 
 	DrivetrainLoop driveLoop;
 	Drivetrain drive;
 
 	Logger logger = Logger.getInstance(); 
 	
-	/* COMMAND
-	 * goal - point to drive to
-	 * epsilon - radius of circle around point which point can lie in for command to finish
-	 * topSpeed - top speed for PID value to pseudo-circumvent the inherent assumption of instantaneous acceleration
-	 *		- may be changed to an acceleration profile at beginning (end behavious of PID adheres to robot constraints closely enough)
-	 */
-    public  DriveToGoal(Point goal, double epsilon, double topSpeed, boolean reverse) {
+    public DriveToGoal(Point goal, double epsilon, double topSpeed, boolean reverse) {
         requires(Robot.drive);
         this.goalPoint = goal;
         this.epsilon = epsilon;
 		this.topSpeed = topSpeed;
 		this.reverse = reverse;
 		this.highPID = false; 
-		printCounter = 0;
 		
 		driveLoop = DrivetrainLoop.getInstance();
 		drive = Drivetrain.getInstance();
 	}
 
-	public  DriveToGoal(Point goal, double epsilon, double topSpeed, boolean reverse, boolean highPID) {
+	public DriveToGoal(Point goal, double epsilon, double topSpeed, boolean reverse, boolean highPID) {
         requires(Robot.drive);
         this.goalPoint = goal;
         this.epsilon = epsilon;
 		this.topSpeed = topSpeed;
 		this.reverse = reverse;
 		this.highPID = highPID; 
-		printCounter = 0;
 		
 		driveLoop = DrivetrainLoop.getInstance();
 		drive = Drivetrain.getInstance();
@@ -84,99 +75,107 @@ public class DriveToGoal extends Command {
      * 4) store initial distance value for PID (based on encoders, driving and turning from previous increases encoder values)
      */
     protected void initialize() {
+		//calculate distances from the goal point
         totalDist = Point.calcDistance(drive.getXYPoint(), goalPoint);
         initTotalDist = totalDist;
-		
-        // //debug
-        // try {
-		// 	pw = new PrintWriter(new File("/home/lvuser/tests/driveToGoal.csv"));
-	    //     pw.println("time,x,y,avgVel,goalAngle,totalDist");
-		// } catch (FileNotFoundException e) {
-		// 	System.out.println(this.toString() +": ERROR: could not create file!");
-		// }
         
-		goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		double goalYawTemp = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		
+		//if driving in reverse
+		if (reverse) {
+			//change setpoint to reverse
+			if (Math.signum(goalYawTemp) == 1){
+				goalYawTemp -= 180; 
+			} else {
+				goalYawTemp += 180;
+			}
+
+			//make distance setpoints negative
+			totalDist = -totalDist;
+			initTotalDist = -initTotalDist;
+		}
+		
+		goalYaw = Robot.drive.getAngle() + Math.min(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+
 		//cartesian left is 0, yaw left is 90
 		
-		if (reverse) {
-			if (Math.signum(goalYaw) == 1){
-				goalYaw -= 180; 
-			} else {
-				goalYaw += 180;
-			}
-			totalDist = -totalDist;
-		}
+		
 
-		//loops
-		driveLoop.setDistancePID(totalDist);
-		driveLoop.setRelativePID(true);
-		driveLoop.setHighPID(highPID);
-		driveLoop.setAnglePID(goalYaw);
-		driveLoop.setTolerancePID(epsilon);
-		driveLoop.setTopSpeed(topSpeed);
+		//calculate drive setpoint
+		currentSetpoint = drive.getAveragePos() + totalDist;
+
+		//update state machine
+		driveLoop.setDistancePID(currentSetpoint); //set distance setpoint
+		driveLoop.setRelativePID(false); //set to use yaw
+		driveLoop.setHighPID(highPID); //set to gear
+		driveLoop.setAnglePID(goalYaw); //set angle septoint
+		driveLoop.setTolerancePID(epsilon); //set tolerance for point radius
+		driveLoop.setTopSpeed(topSpeed); //set top speed to regulate to
 		driveLoop.setPIDType(true); //true for drive
-		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING);
+		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING); //set the proper state
 
+		//cancel ramp rate
 		drive.setLeftrampRate(0);
 		drive.setRightrampRate(0);
+
+		logger.logd("DriveToGoal_init(): ", "Distance = " + Double.toString(currentSetpoint)
+					+" Yaw = " + Double.toString(goalYaw));
     }
 
     /*EXECUTE
      * 1) live update distance (up to a point)
      * 2) live update angle (up to a point further from start)
      * 3) PID for distance and angle
-     * dbg - print data to file
      */
     protected void execute() {
+		double goalYawTemp = 0;
+		//update robot position
     	robotPoint = drive.getXYPoint();
     	
     	//(1) live update distance
     	totalDist = Point.calcDistance(robotPoint, goalPoint); //live update distance when far from point
-		if (reverse){
+		if (reverse) {
 			totalDist = -totalDist; 
 		}
 
-    	//(2) when close to point, maintain current heading
+    	//(2) when close to point, maintain current heading, update point
     	if(totalDist >= (initTotalDist*0.1)) { //if point distance is greater than 15% of total distance (not too close to point)
-    		goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update goal angle when far from point
-			// if ((goalPoint.getxPos() - robotPoint.getxPos()) != 0) {
-			// 	goalYaw = Math.atan((goalPoint.getyPos() - robotPoint.getyPos()) / 
-			// 	(goalPoint.getxPos() - robotPoint.getxPos()));
-			// } else {
-			// 	goalYaw = 0;
-			// }
+    		//goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update goal angle when far from point
+			
+			goalYawTemp = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		   
+			if (reverse) {
+				if (Math.signum(goalYawTemp) == 1){
+					goalYawTemp -= 180; 
+				} else {
+					goalYawTemp += 180;
+				}
+			} 
+			
+			goalYaw = Robot.drive.getAngle() + Math.min(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+
 			currentSetpoint = drive.getAveragePos() + totalDist;
 		}
 		
-		if (reverse){
-			if (Math.signum(goalYaw) == 1){
-				goalYaw -= 180; 
-			} else {
-				goalYaw += 180;
-			}
-		} else {
+		//flip yaw setpoints if driving in reverse
+		
+		//dbg
+		logger.logd("DriveToGoal_execute(): ", 
+					"Distance = " + Double.toString(currentSetpoint) 
+					+", Yaw = "+ Double.toString(goalYaw)
+					+", GoalYawTemp"+ Double.toString(goalYawTemp));
 
-			driveLoop.setAnglePID(goalYaw);
-		}
-		logger.logd("Setpoint", Double.toString(currentSetpoint));
+		//update distance and yaw setpoints
 		driveLoop.setDistancePID(currentSetpoint);
-		//drive setpoint is *ahead* of where you are
-    		
-    	// //print to .csv file
-    	// pw.println((System.currentTimeMillis() - initTime) +","+ robotPoint.getxPos() +","+ robotPoint.getyPos() +","+
-    	// 	Robot.drive.getAverageVelInchesPerSec() +","+ goalYaw +","+ totalDist);
-    	
-    	//print to console
+		driveLoop.setAnglePID(goalYaw);
     }
 
     /* FINISHED
      * drive until within circle around point
      */
-    protected boolean isFinished() {
-     logger.logd("DriveToGoal:isFinished(): ", "Current X Y: " + robotPoint.toString() + " Goal X Y: " + goalPoint.toString());
-	 logger.logd("Drive Encoder", Double.toString(drive.getAveragePos())); 
-	 if (Point.isWithinBounds(goalPoint, drive.getXYPoint(), epsilon)) { //within radius of circle
-			logger.logd("Is finished Check", "Checking");
+    protected boolean isFinished() {		
+	 	if (Point.isWithinBounds(goalPoint, drive.getXYPoint(), epsilon)) { //within radius of circle
+			
         	return true;
         } else {
         	return false;
@@ -185,18 +184,17 @@ public class DriveToGoal extends Command {
 
     //run when finished
     protected void end() {
-    	// pw.close();
-    	Point endPoint = drive.getXYPoint();
-    	
+		logger.logd("DriveToGoal_end(): ", "Current (X,Y) = " + robotPoint.toString() + 
+					 " Goal (X,Y) = " + goalPoint.toString() + 
+					 " Drive Encoder = " + Double.toString(drive.getAveragePos()));
+
 		drive.runRightDrive(0);
 		drive.runLeftDrive(0);
 		driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-		
     }
 
     //don't interrupt me 
     protected void interrupted() {
-    	// pw.close();
-    	System.out.println(this.toString() +": interrupted");
+		logger.logd("DriveToGoal_interrupted(): ", "Interrupted");
     }
 }

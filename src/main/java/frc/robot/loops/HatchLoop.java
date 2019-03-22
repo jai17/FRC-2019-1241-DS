@@ -1,5 +1,6 @@
 package frc.robot.loops;
 
+import frc.robot.commands.hatch.HatchFeedSequence;
 import frc.robot.subsystems.Hatch;
 
 public class HatchLoop implements Loop {
@@ -51,6 +52,10 @@ public class HatchLoop implements Loop {
 			hatch.intake(rollerSpeed);
 			return;
 		case MOTION_MAGIC:
+		if (HatchFeedSequence.getInstance().isRunning()){
+			hatch.magicMotionSetpoint(magicSetpoint, cruiseVelocity, secsToMaxSpeed);
+			hatch.intake(1);
+		}
 			hatch.magicMotionSetpoint(magicSetpoint, cruiseVelocity, secsToMaxSpeed);
 			hatch.intake(rollerSpeed);
 			return;

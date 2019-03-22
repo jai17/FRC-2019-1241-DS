@@ -79,32 +79,38 @@ public class TankDrive extends Command {
         driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.5);
         driveLoop.setTolerancePID(1);
 
-      } else if (Robot.m_oi.getDriveRightTrigger()) { // half speed
+      // half speed
+      } else if (Robot.m_oi.getDriveRightTrigger()) { 
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
         driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
 
-      } else if ((Math.abs(Robot.m_oi.getDriveRightY()) > 0.05) || (Math.abs(Robot.m_oi.getDriveLeftY()) > 0.05)) { // regular
+      // regular
+      } else if ((Math.abs(Robot.m_oi.getDriveRightY()) > 0.05) || (Math.abs(Robot.m_oi.getDriveLeftY()) > 0.05)) { 
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
         driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
 
-      } else { // no drive
+      // no drive
+      } else { 
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         driveLoop.setRightDrive(0);
         driveLoop.setLeftDrive(0);
       }
       driveLoop.selectGear(!Robot.m_oi.getDriveRightBumper());
+      driveLoop.engageLifter(Robot.m_oi.getDriveLeftTrigger());
 
       //hatch intake sequence
       if (Robot.m_oi.getDriveLeftTrigger()) { //if A button
-        if(!hatchPickup.isRunning() && !pickingUp) { //if command not running
-          hatchPickup.start(); //start command
-          pickingUp = true;
-        } 
+        // if(!hatchPickup.isRunning() && !pickingUp) { //if command not running
+        //   hatchPickup.start(); //start command
+        //   pickingUp = true;
+        // } 
       } else { //cancel hatch pickup
-        hatchPickup.cancel();
-        pickingUp = false;
+        if (pickingUp) {
+          hatchPickup.cancel();
+          pickingUp = false;
+        }
       }
     }
 

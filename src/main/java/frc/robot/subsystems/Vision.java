@@ -303,7 +303,7 @@ public class Vision extends Subsystem {
 
     public double pixelToDegree(double pixel) {
         // return 0.0870234789*pixel-28.5146932592;
-        return -Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(30.5))) / 80));// 31.81
+        return (-Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(30.5))) / 80))) ;// 31.81
     }
 
     public double pixelToDegreeY(double pixel) {

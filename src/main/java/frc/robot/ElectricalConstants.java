@@ -14,9 +14,10 @@ public class ElectricalConstants {
     public static final int RIGHT_DRIVE_MIDDLE = 14;
     // public static final int RIGHT_DRIVE_BACK = 15;
 
-    // solenoid
+    // solenoids
     public static final int SHIFTER_SOLENOID_HIGH = 6;
     public static final int SHIFTER_SOLENOID_LOW = 7;
+    public static final int LIFTER_SOLENOID = 0;
 
     // encoder constants
     public static final int RIGHT_ENCODER_A = 4;
@@ -32,7 +33,7 @@ public class ElectricalConstants {
     public static final double WHEEL_RADIUS = 2.0; 
     public static final double ROTATIONS_TO_INCHES = 2 * Math.PI * WHEEL_RADIUS * ENCODER_GEAR_RATIO;
     // public static final double TICKS_PER_INCH =  4096/ROTATIONS_TO_INCHES;//308
-    public static final double TICKS_PER_INCH =  332.02;//308
+    public static final double TICKS_PER_INCH =  301.165;//332.02
 
  
 
@@ -59,7 +60,7 @@ public class ElectricalConstants {
     // solenoids
     public static final int CLAW_SOLENOID_A = 4;
     public static final int CLAW_SOLENOID_B = 5;
-    public static final int EJECTOR_SOLENOID_A = 0;
+    //public static final int EJECTOR_SOLENOID_A = 0;
     public static final int EJECTOR_SOLENOID_B = 1;
     public static final int SLIDER_SOLENOID_A = 2;
     public static final int SLIDER_SOLENOID_B = 3;

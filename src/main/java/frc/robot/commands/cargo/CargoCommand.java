@@ -57,7 +57,7 @@ public class CargoCommand extends Command {
         timer.start();
         started = true;
       }
-      if (!cargo.getOptic() && timer.get() > 0.25) {
+      if (!cargo.getOptic() && timer.get() > 0.15) {
         timer.reset();
         timer.stop();
         cargo.setContains(true);
@@ -83,43 +83,55 @@ public class CargoCommand extends Command {
 
       } else if (Robot.m_oi.getToolRightBumper()) { //intaking
 
-        if (Math.abs(cargo.getCargoAngle()) <= 700 && !cargo.isCargoPresent()) { //pivot up, has ball
+        if (Math.abs(cargo.getCargoAngle()) <= 600 && !cargo.isCargoPresent()) { //pivot up, has ball
           cargoLoop.setIsIntaking(true); //intaking
           cargoLoop.setRollerSpeed(1);
-          carriageLoop.setIsFeeding(true); //feeding
-          carriageLoop.setFeederSpeed(1);
+          // carriageLoop.setIsFeeding(true); //feeding
+          // carriageLoop.setFeederSpeed(1);
 
-          carriageLoop.setIsShooting(true); //need isShooting, not shooting
+          //carriageLoop.setIsShooting(true); //need isShooting, not shooting
           carriageLoop.setShooterSpeed(0);
           carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
+          System.out.println("Pivot Up and Has Ball"); 
 
         }  else if (Math.abs(cargo.getCargoAngle()) <= 1500 && !cargo.isCargoPresent()) { //pivot down, has ball
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-          carriageLoop.setIsFeeding(true); //feeding
-          carriageLoop.setFeederSpeed(1);
-          carriageLoop.setIsShooting(true); //need isShooting, not shooting
+          // carriageLoop.setIsFeeding(true); //feeding
+          // carriageLoop.setFeederSpeed(1);
+          // carriageLoop.setIsShooting(true); //need isShooting, not shooting
           carriageLoop.setShooterSpeed(0);
           cargoLoop.setIsIntaking(false); //intaking
           cargoLoop.setRollerSpeed(0);
+          System.out.println("Pivot Down and Has Ball"); 
 
         } else if (cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) > 900) { //pivot down, no ball
           cargoLoop.setIsIntaking(true);
           cargoLoop.setRollerSpeed(1);
-          carriageLoop.setIsFeeding(false);
-          carriageLoop.setFeederSpeed(0);
+          // carriageLoop.setIsFeeding(false);
+          // carriageLoop.setFeederSpeed(0);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+          System.out.println("Pivot Down and No Ball"); 
 
         } else { //button pressed, no ball
           cargoLoop.setRollerSpeed(0);
-          carriageLoop.setIsFeeding(true);
-          carriageLoop.setFeederSpeed(0);
+          // carriageLoop.setIsFeeding(true);
+          // carriageLoop.setFeederSpeed(0);
+          System.out.println("No Ball"); 
         }
       } else { //no ball
         cargoLoop.setIsIntaking(true);
         cargoLoop.setRollerSpeed(0);
-        carriageLoop.setIsFeeding(false);
-        carriageLoop.setFeederSpeed(0);
+        // carriageLoop.setIsFeeding(false);
+        // carriageLoop.setFeederSpeed(0);
         cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+      }
+
+      if (!cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) <= 900 && carriage.getOptic()){
+          carriageLoop.setIsFeeding(true);
+          carriageLoop.setFeederSpeed(1);
+      } else if (!Robot.m_oi.getToolBButton() && !Robot.m_oi.getToolDPadDown() && !Robot.m_oi.getToolXButton()){
+        carriageLoop.setFeederSpeed(0);
+        carriageLoop.setIsShooting(false); 
       }
 
       //open loop      

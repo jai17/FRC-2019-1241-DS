@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Ultrasonic;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.ElectricalConstants;
 import frc.robot.commands.carriage.CarriageCommand;
@@ -71,9 +70,9 @@ public class Carriage extends Subsystem {
 
     cargoOptical = new DigitalInput(ElectricalConstants.CARGO_DETECTOR_CARRIAGE);
 
-    hatchDetectorRight = new Ultrasonic(ElectricalConstants.HATCH_PANEL_DETECTOR_TRIGGER_RIGHT, ElectricalConstants.HATCH_PANEL_DETECTOR_ECHO_RIGHT); 
+    //hatchDetectorRight = new Ultrasonic(ElectricalConstants.HATCH_PANEL_DETECTOR_TRIGGER_RIGHT, ElectricalConstants.HATCH_PANEL_DETECTOR_ECHO_RIGHT); 
     hatchDetectorLeft = new Ultrasonic(ElectricalConstants.HATCH_PANEL_DETECTOR_TRIGGER_LEFT, ElectricalConstants.HATCH_PANEL_DETECTOR_ECHO_LEFT);
-    hatchDetectorRight.setAutomaticMode(true);
+    //hatchDetectorRight.setAutomaticMode(true);
     hatchDetectorLeft.setAutomaticMode(true);
 
     // retractCarriage();
@@ -165,12 +164,13 @@ public class Carriage extends Subsystem {
 
   //Gets the state of the Cargo from the sensor 
   public boolean getOptic() { 
+    //no exclamation on practice
     return cargoOptical.get();
   }
 
-  public double getUltrasonicRight(){
-    return hatchDetectorRight.getRangeInches(); 
-  }
+  // public double getUltrasonicRight(){
+  //   return hatchDetectorRight.getRangeInches(); 
+  // }
   public double getUltrasonicLeft(){
     return hatchDetectorLeft.getRangeInches(); 
   }

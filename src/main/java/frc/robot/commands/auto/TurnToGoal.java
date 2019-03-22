@@ -7,17 +7,13 @@
 
 package frc.robot.commands.auto;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.FieldPositioning;
+import frc.robot.util.Logger;
 import frc.robot.util.Point;
 
 /**
@@ -28,12 +24,11 @@ import frc.robot.util.Point;
 public class TurnToGoal extends Command {
 	private Point goalPoint; //goal point to drive to
 	private double goalYaw; //goal angle to maintain; updated based on robot field position
-	private long initTime; //initial time
 	private double epsilon; //tolerance in degrees for final heading
 	private double topSpeed; //top speed limit for PID
-	private int printCounter; //counter for prints
-	// private PrintWriter pw; //print to .csv
-	private double goalAngle;
+	private double goalAngle; //goal angle for the robot to turn to
+
+	private Logger logger = Logger.getInstance(); //debugging
 
 	DrivetrainLoop driveLoop; 
 	Drivetrain drive; 
@@ -49,61 +44,39 @@ public class TurnToGoal extends Command {
         goalPoint = goal;
         this.epsilon = epsilon;
         this.topSpeed = topSpeed;
-		printCounter = 0;
 		
 		driveLoop = DrivetrainLoop.getInstance(); 
 		drive = Drivetrain.getInstance(); 
-    }
+	}
 
-   	//called in autonInit() ONCE
+   	//called when command starts ONCE
     protected void initialize() {
-    	Point robotPoint = Robot.drive.getXYPoint();
-        goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //setpoint
-        
-        //debug
-        // try {
-		// 	pw = new PrintWriter(new File("/home/lvuser/tests/turnToGoal.csv"));
-	    //     pw.println("time,goalAngle,currentAngle,sideVel,isAngle,isSpeed");
-		// } catch (FileNotFoundException e) {
-		// 	System.out.println(this.toString() + ": ERROR: could not create file!");
-		// }
-        
-        System.out.println(this.toString() +": INITIALIZING: "+ goalYaw +" "+ goalPoint.getxPos() +" "+ goalPoint.getyPos());
-        initTime = System.currentTimeMillis();
+    	Point robotPoint = Robot.drive.getXYPoint(); //update robot point 
+        goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //yaw value
         
         //get change in angle from yaw
         goalAngle = Robot.drive.getAngle() + Math.min(goalYaw - Robot.drive.getYaw(), goalYaw + Robot.drive.getYaw());
 		
-		driveLoop.setAnglePID(goalAngle);
-		driveLoop.setRelativePID(true);
-		driveLoop.setTolerancePID(epsilon);
-		driveLoop.setTopSpeed(topSpeed);
-		driveLoop.setPIDType(false);
-		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING);
+		driveLoop.setAnglePID(goalAngle); //delta angle is setpoint
+		driveLoop.setRelativePID(false); //set to use angle, not yaw
+		driveLoop.setTolerancePID(epsilon); //set tolerance for the turn in degrees
+		driveLoop.setTopSpeed(topSpeed); //set top speed to clamp turn to
+		driveLoop.setPIDType(false); // use turnPID
+		driveLoop.setDriveState(DriveControlState.POINT_FOLLOWING); //update state 
+
+		logger.logd("TurnToGoal_init(): ", "Goal Angle: " + Double.toString(goalAngle));
 	}
 
     //repeatedly called when required to execute
     protected void execute() {
 		
-    	SmartDashboard.putNumber("goalYaw", goalAngle);
-    	
-    	//print to file
-    	// pw.println((System.currentTimeMillis()-initTime) +","+ goalYaw +","+ Robot.drive.getYaw() +","+ Robot.drive.getLeftVelocityInchesPerSec()
-    	// 		+","+ ((Robot.drive.getYaw() >= (goalYaw - epsilon) && Robot.drive.getYaw() <= (goalYaw + epsilon)) 
-    	// 		+","+ (Math.abs(Robot.drive.getLeftVelocityInchesPerSec()) <= 20)));
-    	
-    	//print to console
-    	if(printCounter % 20 == 0) {
-    		System.out.println(this.toString() +": RUNNING: "+ goalYaw + " @ " + Robot.drive.getYaw());
-    	}
-    	printCounter++;
     }
 
     //end condition for command
     protected boolean isFinished() {
     	if((Robot.drive.getAngle() >= (goalAngle - epsilon) && Robot.drive.getAngle() <= (goalAngle + epsilon)) && //if heading is in range
     			(Math.abs(drive.getRightOutput()) <= 0.25)) { //and low oscillation on PID; getting side vel bc average vel when turning is 0 
-    		return true;    		
+			return true;    		
     	} else {
     		return false;
     	}
@@ -111,19 +84,21 @@ public class TurnToGoal extends Command {
 
     //called at the end
     protected void end() {
-    	// pw.close();
 		Point robotPoint = Robot.drive.getXYPoint();
+
+		//stop drive
 		drive.runLeftDrive(0);
 		drive.runRightDrive(0);
 		driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-    	System.out.println(this.toString() +": FINISHED: turned to "+ goalYaw +" @ "+ Robot.drive.getYaw());
-    	System.out.println(robotPoint.getxPos() +" "+ robotPoint.getyPos());
-    	System.out.println();
+
+		//debug
+    	logger.logd("TurnToGoal_end(): ", "Current (X,Y) = " + robotPoint.toString() + 
+					 " Goal (X,Y) = " + goalPoint.toString() + 
+					 " Drive Yaw = " + Double.toString(drive.getYaw()));
     }
 
     //called when interrupted
     protected void interrupted() {
-    	// pw.close();
-    	System.out.println(this.toString() +": interrupted");
+		logger.logd("TurnToGoal_interrupted(): ", "Interrupted");
     }
 }

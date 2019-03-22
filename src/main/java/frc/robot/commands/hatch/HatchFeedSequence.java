@@ -29,25 +29,25 @@ public class HatchFeedSequence extends CommandGroup {
 
   public HatchFeedSequence() {
     // // bring elevator to height, point fingers
-    // addParallel(new ElevatorSetpoint(NumberConstants.HINTAKE_FEEDING_HEIGHT, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
+    addSequential(new ElevatorSetpoint(NumberConstants.HINTAKE_FEEDING_HEIGHT, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
     // System.out.println("Elevator to hintake height");
-    // addSequential(new SetClawCommand(false));
+    addSequential(new SetClawCommand(true));
     // System.out.println("claw pointed");
 
     // //bring hatch pivot to feeding height, open fingers
-    // addSequential(new SetHatchPivotCommand(NumberConstants.HATCH_FEEDING_ANGLE, NumberConstants.HATCH_MAX_SPEED, 0.2, 0.5));
+    addSequential(new SetHatchPivotCommand(NumberConstants.HATCH_FEEDING_ANGLE, NumberConstants.HATCH_MAX_SPEED - 400, 1, 3));
     // System.out.println("hatch up");
-    // addSequential(new SetClawCommand(true));
+    addSequential(new SetClawCommand(false));
     // System.out.println("claw opened");
 
     // //bring elevator up for hintake to clear
-    // addSequential(new ElevatorSetpoint(NumberConstants.HINTAKE_FEEDING_HEIGHT + 8, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
+    addSequential(new ElevatorSetpoint(NumberConstants.HINTAKE_FEEDING_HEIGHT + 6, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
     // System.out.println("elevator clearing");
 
     // //bring to rest angle, bring elevator back down
-    // addSequential(new SetHatchPivotCommand(NumberConstants.HATCH_REST_ANGLE, NumberConstants.HATCH_MAX_SPEED, 0.1, 0.5));
+    addSequential(new SetHatchPivotCommand(NumberConstants.HATCH_REST_ANGLE, NumberConstants.HATCH_MAX_SPEED, 0.2, 0.5));
     // System.out.println("hatch pivot back in");
-    // addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
+    addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
     // System.out.println("elevator low hatch");
   }
 }
