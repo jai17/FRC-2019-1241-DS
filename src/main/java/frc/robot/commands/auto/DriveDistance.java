@@ -31,10 +31,12 @@ public class DriveDistance extends Command {
   double xVal;
   double degreesToTarget;
   double initDistance = 0;
-  boolean relative; 
-  boolean highPID; 
+  boolean relative;
+  boolean highPID;
 
   Timer timer;
+  Timer rangeTimer;
+  boolean rangeTimerStarted = false;
   boolean started = true;
 
   public DriveDistance(double distance, double angle, double timeOut, double speed, double tolerance) {
@@ -45,7 +47,7 @@ public class DriveDistance extends Command {
     this.tolerance = tolerance;
     this.track = false;
     this.relative = true;
-    this.highPID = false;  
+    this.highPID = false;
     requires(drive);
   }
 
@@ -57,8 +59,8 @@ public class DriveDistance extends Command {
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = false;
-    this.relative = true; 
-    this.highPID = false;  
+    this.relative = true;
+    this.highPID = false;
 
     requires(drive);
   }
@@ -69,8 +71,8 @@ public class DriveDistance extends Command {
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = track;
-    this.relative = relative; 
-    this.highPID = false;  
+    this.relative = relative;
+    this.highPID = false;
     requires(drive);
   }
 
@@ -78,6 +80,7 @@ public class DriveDistance extends Command {
   @Override
   protected void initialize() {
     timer = new Timer();
+    rangeTimer = new Timer();
 
     // drive.reset();
 
@@ -114,7 +117,8 @@ public class DriveDistance extends Command {
 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      System.out.println("Distance: " + (drive.getAveragePos() - distance) +" Angle: "+ (drive.getAngle() - degreesToTarget));
+      System.out.println(
+          "Distance: " + (drive.getAveragePos() - distance) + " Angle: " + (drive.getAngle() - degreesToTarget));
     }
 
     // driveLoop.selectGear(false);
@@ -141,13 +145,19 @@ public class DriveDistance extends Command {
   // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
+    boolean isFinished = false;
 
     if (track) {
-      if (carriage.getUltrasonicLeft() < tolerance || isTimedOut()) {
-        return true;
-      } else {
-        return false;
+      if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
+        rangeTimer.start();
+        rangeTimerStarted = true;
       }
+      if (rangeTimerStarted) {
+        if (rangeTimer.get() > 1) {
+          isFinished = true;
+        }
+      }
+      return isFinished;
     } else {
       if (Math.abs(drive.getAveragePos()) > Math.abs((initDistance) + Math.abs(distance) - tolerance)) {
         System.out.println("Reached Distance");

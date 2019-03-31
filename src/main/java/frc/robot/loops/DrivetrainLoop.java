@@ -106,7 +106,7 @@ public class DrivetrainLoop implements Loop {
 		case VISION_TRACKING:
 			updateXY();
 
-			drive.shiftLow();
+			drive.shiftHigh();
 			drive.trackTurnPID(angle, speed, tolerance, stick, maxOutput);
 			return;
 		case LOCK:

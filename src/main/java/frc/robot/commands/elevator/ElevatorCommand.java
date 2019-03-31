@@ -82,11 +82,11 @@ public class ElevatorCommand extends Command {
       //open loop controls
       if (openLoop) {
         if (Robot.m_oi.getToolStartButton()){ //up
-          elevatorLoop.setOpenLoopSpeed(0.75);
+          elevatorLoop.setOpenLoopSpeed(1);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
 
         } else if (Robot.m_oi.getToolBackButton()){ //down
-          elevatorLoop.setOpenLoopSpeed(-0.6);
+          elevatorLoop.setOpenLoopSpeed(-1);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
 
         } else {

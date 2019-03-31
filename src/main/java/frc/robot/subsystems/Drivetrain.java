@@ -48,7 +48,7 @@ public class Drivetrain extends Subsystem {
   private double xPos, yPos;
 
   // current limits
-  private int smartCurrentLimit = 55;
+  private int smartCurrentLimit = 60;
 
   /* Drive speed controlers */
   // public TalonSRX leftMaster;
