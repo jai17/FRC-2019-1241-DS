@@ -31,13 +31,15 @@ public class DriveToGoal extends Command {
 	private Point goalPoint; // goal point to drive to
 	private double totalDist; // total distance for PID to drive
 	private double initTotalDist; // initial total distance (1st hypotenuse of first current point - now)
-	private double goalYaw; // goal angle to maintain; updated based on robot field position
+	private double goalAngle; // goal angle to maintain; updated based on robot field position
 	private double epsilon; // tolerance; radius of circle about goal point which you can exist in
 	private double topSpeed; // top speed limit for PID
 	private Point robotPoint; // point for robot position
 	private double currentSetpoint; // current distance you are tracking right now
 	private boolean reverse; // whether the robot is driving in reverse or not
 	private boolean highPID; // whether robot drives in high gear or not
+
+	private double tolerance; //tolerance to modify setpoints
 
 	DrivetrainLoop driveLoop;
 	Drivetrain drive;
@@ -79,40 +81,41 @@ public class DriveToGoal extends Command {
 		// calculate distances from the goal point
 		totalDist = Point.calcDistance(drive.getXYPoint(), goalPoint);
 		initTotalDist = totalDist;
+		tolerance = epsilon;
 
-		double goalYawTemp = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		double goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
 
 		// if driving in reverse
 		if (reverse) {
 			// change setpoint to reverse
-			if (Math.signum(goalYawTemp) == 1) {
-				goalYawTemp -= 180;
+			if (Math.signum(goalYaw) == 1) {
+				goalYaw -= 180;
 			} else {
-				goalYawTemp += 180;
+				goalYaw += 180;
 			}
 
-			// make distance setpoints negative
+			// make distance values negative
 			totalDist = -totalDist;
 			initTotalDist = -initTotalDist;
-		}
+			tolerance = -epsilon;
+		} 
 
-		if (goalYawTemp >= 0) {
-			goalYaw = Robot.drive.getAngle()
-					+ Math.min(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+		double deltaAngle = goalYaw - drive.getYaw();
+		if (Math.abs(deltaAngle) < (360 - Math.abs(deltaAngle))) {
+			goalAngle = deltaAngle;
 		} else {
-			goalYaw = Robot.drive.getAngle()
-					+ Math.max(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+			goalAngle = (Math.signum(drive.getYaw())*180 - drive.getYaw()) 
+							- (Math.signum(goalYaw)*180 - goalYaw);
 		}
-		// cartesian left is 0, yaw left is 90
+		goalAngle = goalAngle + drive.getAngle();
 
 		// calculate drive setpoint
-		currentSetpoint = drive.getAveragePos() + totalDist;
+		currentSetpoint = drive.getAveragePos() + totalDist + tolerance;
 
 		// update state machine
 		driveLoop.setDistancePID(currentSetpoint); // set distance setpoint
-		driveLoop.setRelativePID(false); // set to use yaw
 		driveLoop.setHighPID(highPID); // set to gear
-		driveLoop.setAnglePID(goalYaw); // set angle septoint
+		driveLoop.setAnglePID(goalAngle); // set angle septoint
 		driveLoop.setTolerancePID(epsilon); // set tolerance for point radius
 		driveLoop.setTopSpeed(topSpeed); // set top speed to regulate to
 		driveLoop.setPIDType(true); // true for drive
@@ -131,7 +134,7 @@ public class DriveToGoal extends Command {
 	 * point further from start) 3) PID for distance and angle
 	 */
 	protected void execute() {
-		double goalYawTemp = 0;
+		double goalYaw = 0;
 		// update robot position
 		robotPoint = drive.getXYPoint();
 
@@ -142,49 +145,40 @@ public class DriveToGoal extends Command {
 		}
 
 		// (2) when close to point, maintain current heading, update point
-		if (totalDist >= (initTotalDist * 0.1)) { // if point distance is greater than 15% of total distance (not too
-													// close to point)
-			// goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //live update
-			// goal angle when far from point
-
-			goalYawTemp = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		if (Math.abs(totalDist) >= 6) { //if point distance is less than half a foot
+			goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
 
 			if (reverse) {
-				if (Math.signum(goalYawTemp) == 1) {
-					goalYawTemp -= 180;
-				} else {
-					goalYawTemp += 180;
-				}
+				goalYaw = -Math.signum(goalYaw) * 180 + goalYaw;
 			}
 
-			if (goalYawTemp >= 0) {
-				goalYaw = Robot.drive.getAngle()
-						+ Math.min(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+			double deltaAngle = goalYaw - drive.getYaw();
+			if (Math.abs(deltaAngle) < (360 - Math.abs(deltaAngle))) {
+				goalAngle = deltaAngle;
 			} else {
-				goalYaw = Robot.drive.getAngle()
-						+ Math.max(goalYawTemp - Robot.drive.getYaw(), goalYawTemp + Robot.drive.getYaw());
+				goalAngle = (Math.signum(drive.getYaw() * 180) - drive.getYaw())
+							- (Math.signum(goalYaw) * 180 - goalYaw);
 			}
+			goalAngle += drive.getAngle();
 			
-			currentSetpoint = drive.getAveragePos() + totalDist;
+			currentSetpoint = drive.getAveragePos() + totalDist + tolerance;
 		}
-
-		// flip yaw setpoints if driving in reverse
 
 		// dbg
 		logger.logd("DriveToGoal_execute(): ", "Distance = " + Double.toString(currentSetpoint) + ", Yaw = "
-				+ Double.toString(goalYaw) + ", GoalYawTemp" + Double.toString(goalYawTemp));
+				+ Double.toString(goalAngle) + ", GoalYawTemp" + Double.toString(goalYaw));
 
 		// update distance and yaw setpoints
 		driveLoop.setDistancePID(currentSetpoint);
-		driveLoop.setAnglePID(goalYaw);
+		driveLoop.setAnglePID(goalAngle);
 	}
 
 	/*
 	 * FINISHED drive until within circle around point
 	 */
 	protected boolean isFinished() {
-		if (Point.isWithinBounds(goalPoint, drive.getXYPoint(), epsilon)) { // within radius of circle
-
+		//if within radius of epsilon circle
+		if (Point.isWithinBounds(goalPoint, drive.getXYPoint(), epsilon)) { 
 			return true;
 		} else {
 			return false;

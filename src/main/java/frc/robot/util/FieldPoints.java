@@ -18,6 +18,8 @@ public class FieldPoints {
     public static final Point CLOSE_RIGHT_ROCKET_SCORE = new Point(299, 195);
 
     public static final Point LEFT_CLOSE_ROCKET = new Point(41,165);
+    public static final Point LEFT_FAR_ROCKET = new Point(60,285);
+
     public static final Point LEFT_ROCKET = new Point(12,230);
     public static final Point CLOSE_LEFT_ROCKET_SCORE = new Point(25, 195);
 

@@ -41,13 +41,13 @@ public class RightShipCloseMid extends CommandGroup {
     addSequential(new DriveTurn(1, 4, true, false));
 
     addSequential(new SetTrayCommand(false)); 
-    addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true, false)); 
+    addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
     addSequential(new EjectHatchSequence());
   
     addSequential(new SetXY(FieldPoints.CLOSE_RIGHT_CARGO));
     addSequential(new DriveToGoal(FieldPoints.PRE_FEEDER_RIGHT, 5, 1, false));
     addSequential(new SetClawCommand(true));
-    addParallel(new DriveDistance(80, 0, 0.5, 6, true, false));
+    addParallel(new DriveDistance(80, 0, 0.5, 6, true));
     addSequential(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1)); 
     addSequential(new SetClawCommand(false));
     addSequential(new SetXY(FieldPoints.RIGHT_FEEDER));
@@ -57,7 +57,7 @@ public class RightShipCloseMid extends CommandGroup {
     addSequential(new DriveTurn(1, 4, true, false));
 
     addSequential(new SetTrayCommand(false)); 
-    addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true, false)); 
+    addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
     addSequential(new EjectHatchSequence());
     
     // addParallel(new SetXY(FieldPoints.LEFT_LEVEL_2));

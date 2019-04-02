@@ -26,6 +26,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSink;
 import edu.wpi.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.util.VisionPipeline;
@@ -90,7 +91,7 @@ public class Vision extends Subsystem {
             // }
 
             /** Set the resolution */
-            camera.setResolution(160, 120);
+            camera.setResolution(320, 240);
             // camera.setExposureAuto()
             // camera.setWhiteBalanceAuto();
             camera.setExposureManual(-10);
@@ -117,7 +118,7 @@ public class Vision extends Subsystem {
              * Setup a CvSource. This will send images back to the Dashboard NOTE: Called
              * "Rectangle" on Dashboard
              */
-            CvSource outputStream = CameraServer.getInstance().putVideo("Rectangle", 160, 120);
+            CvSource outputStream = CameraServer.getInstance().putVideo("Rectangle", 320, 240);
 
             /** Mats are very memory expensive. Lets reuse this Mat. */
             Mat mat = new Mat();
@@ -146,6 +147,7 @@ public class Vision extends Subsystem {
                  * mat as well as the hsvThresholds we provide from the Robot Class Array
                  * Preferences
                  */
+                if (Robot.m_oi.getDriveLeftBumper() || DriverStation.getInstance().isAutonomous()){
                 VisionPipeline.process(mat, Robot.hsvThresholdHue, Robot.hsvThresholdSat, Robot.hsvThresholdVal);
                 /**
                  * Below is the Method(s) used to draw a rectangle around found contours For
@@ -282,7 +284,9 @@ public class Vision extends Subsystem {
                     outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                 }
             }
-        });
+        }
+    });
+        
         visionThread.setDaemon(true);
         visionThread.start();
 
@@ -303,12 +307,12 @@ public class Vision extends Subsystem {
 
     public double pixelToDegree(double pixel) {
         // return 0.0870234789*pixel-28.5146932592;
-        return (-Math.toDegrees(Math.atan(((pixel - 80) * Math.tan(Math.toRadians(30.5))) / 80))) ;// 31.81
+        return (-Math.toDegrees(Math.atan(((pixel - 160) * Math.tan(Math.toRadians(30.5))) / 160))) ;// 31.81
     }
 
     public double pixelToDegreeY(double pixel) {
         // return 0.0870234789*pixel-28.5146932592;
-        return Math.toDegrees(Math.atan(((pixel - 60) * Math.tan(Math.toRadians(31.81))) / 60));// 31.81
+        return Math.toDegrees(Math.atan(((pixel - 120) * Math.tan(Math.toRadians(31.81))) / 120));// 31.81
     }
 
     public double getCameraAngle(double angleToTargetY, double heightCamera, double heightTarget, double distance) {

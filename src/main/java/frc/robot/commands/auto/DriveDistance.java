@@ -59,19 +59,18 @@ public class DriveDistance extends Command {
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = false;
-    this.relative = true;
+    this.relative = false;
     this.highPID = false;
 
     requires(drive);
   }
 
-  public DriveDistance(double distance, double angle, double speed, double tolerance, boolean track, boolean relative) {
+  public DriveDistance(double distance, double angle, double speed, double tolerance, boolean track) {
     this.distance = distance;
     this.angle = angle;
     this.speed = speed;
     this.tolerance = tolerance;
     this.track = track;
-    this.relative = relative;
     this.highPID = false;
     requires(drive);
   }
@@ -88,12 +87,12 @@ public class DriveDistance extends Command {
     degreesToTarget = vision.pixelToDegree(xVal);
 
     driveLoop.setPIDType(true);
-    driveLoop.setRelativePID(this.relative);
+    driveLoop.setTrackPID(track);
     driveLoop.setHighPID(highPID);
     driveLoop.setDistancePID(distance + drive.getAveragePos());
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      setTimeout(4);
+      setTimeout(3);
     } else {
       driveLoop.setAnglePID(angle);
     }
@@ -151,6 +150,7 @@ public class DriveDistance extends Command {
       if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
         rangeTimer.start();
         rangeTimerStarted = true;
+        System.out.println("DRIVEDISTANCE_RANGEFINDER: STARTED");
       }
       if (rangeTimerStarted) {
         if (rangeTimer.get() > 1) {
@@ -167,7 +167,6 @@ public class DriveDistance extends Command {
         return false;
       }
     }
-
   }
 
   // Called once after isFinished returns true

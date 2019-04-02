@@ -2,6 +2,7 @@ package frc.robot.loops;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Robot;
+import frc.robot.commands.auto.routines.LevelTwoSequence;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Point;
 
@@ -33,7 +34,7 @@ public class DrivetrainLoop implements Loop {
 	private double angle;
 	private double stick;
 	double maxOutput = 0; 
-	boolean relative = true; 
+	boolean track = false; 
 	boolean highPID = false; 
 
 	//Point Following
@@ -70,7 +71,8 @@ public class DrivetrainLoop implements Loop {
 	public void onLoop(double time_stamp) {
 		switch (mControlState) {
 		case OPEN_LOOP:
-			if (!DriverStation.getInstance().isAutonomous()){
+			if (!DriverStation.getInstance().isAutonomous() && 
+					!LevelTwoSequence.getInstance().isRunning()) {
 				updateXY();
 
 				if (!wantLow) {
@@ -88,17 +90,18 @@ public class DrivetrainLoop implements Loop {
 				drive.runLeftDrive(openLoopLeft);
 				drive.runRightDrive(openLoopRight);
 			} else {
-				drive.runLeftDrive(0);
-				drive.runRightDrive(0);	
+				// drive.runLeftDrive(0);
+				// drive.runRightDrive(0);	
 			}
+			
 			return;
 		case POINT_FOLLOWING:
 			updateXY();
 			
 			if (drivePID){
-				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, relative, highPID);
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, false, highPID);
 			} else {
-				drive.regulatedTurnPID(angle, tolerance, topSpeed, relative);
+				drive.regulatedTurnPID(angle, tolerance, topSpeed, false);
 			}
 
 			// add point following code here
@@ -106,7 +109,7 @@ public class DrivetrainLoop implements Loop {
 		case VISION_TRACKING:
 			updateXY();
 
-			drive.shiftHigh();
+			drive.shiftLow();
 			drive.trackTurnPID(angle, speed, tolerance, stick, maxOutput);
 			return;
 		case LOCK:
@@ -116,9 +119,9 @@ public class DrivetrainLoop implements Loop {
 			updateXY();
 
 			if (drivePID){
-				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, relative, highPID);
+				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, track, highPID);
 			} else {
-				drive.regulatedTurnPID(angle, speed, tolerance, relative);
+				drive.regulatedTurnPID(angle, speed, tolerance, track);
 			}
 			return;
 		}
@@ -167,6 +170,10 @@ public class DrivetrainLoop implements Loop {
 		this.tolerance = tolerance;
 	}
 
+	public void setTrackPID(boolean track) {
+		this.track = track;
+	}
+
 	public void setAnglePID(double angle){
 		this.angle = angle; 
 	}
@@ -211,10 +218,6 @@ public class DrivetrainLoop implements Loop {
 	}
 	public boolean getGear(){
 		return wantLow; 
-	}
-
-	public void setRelativePID(boolean relative){
-		this.relative = relative; 
 	}
 
 	public void setHighPID(boolean highPID){

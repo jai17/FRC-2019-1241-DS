@@ -27,8 +27,7 @@ import frc.robot.commands.auto.DriveTurn;
 import frc.robot.commands.auto.EjectHatchSequence;
 import frc.robot.commands.auto.TurnToGoal;
 import frc.robot.commands.auto.YeetOffSequence;
-import frc.robot.commands.auto.routines.LeftRocketCloseMid;
-import frc.robot.commands.auto.routines.RightRocketCloseLow;
+import frc.robot.commands.auto.routines.LeftRocketCloseLow;
 import frc.robot.commands.auto.routines.RightRocketCloseMid;
 import frc.robot.commands.auto.routines.RightShipCloseMid;
 import frc.robot.commands.hatch.HatchFeedSequence;
@@ -138,8 +137,6 @@ public class Robot extends TimedRobot {
     // Preferences instance
     prefs = Preferences.getInstance();
 
-    pin4 = new DigitalOutput(4); 
-    pin5 = new DigitalOutput(5); 
 
     // Open Logger File
    // logger.openFile("Robot Init");
@@ -151,11 +148,14 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1));
     m_chooser.addObject("Yeet Off Sequence", new YeetOffSequence());
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
-    m_chooser.addObject("DriveToGoal Test", new DriveToGoal(new Point(-30, 100), 5, 0.8, false));
+    m_chooser.addObject("DriveToGoalLeft Test", new DriveToGoal(new Point(-30, 100), 5, 0.8, false));
+    m_chooser.addObject("DriveToGoalRight Test", new DriveToGoal(new Point(30, 100), 5, 0.8, false));
+    m_chooser.addObject("DriveToGoalBackLeft Test", new DriveToGoal(new Point(-30, -100), 5, 0.8, true));
+    m_chooser.addObject("DriveToGoalBackRight Test", new DriveToGoal(new Point(30, -100), 5, 0.8, true));
     // m_chooser.addObject("Drive Track Test", new DriveDistance(60, 0, 0.25, 10, true));
     m_chooser.addObject("RightShipCloseMid", new RightShipCloseMid());
     SmartDashboard.putData("Auto modes", m_chooser);
-    m_chooser.addObject("LeftRocketCloseMid", new LeftRocketCloseMid());
+    m_chooser.addObject("LeftRocketCloseLow", new LeftRocketCloseLow());
     SmartDashboard.putData("Auto modes", m_chooser);
 
     // Register all loops
@@ -209,8 +209,6 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {
     Scheduler.getInstance().run();
     updateSmartDashboard();
-    pin4.set(false);
-    pin5.set(false);
   }
 
   /**
@@ -233,9 +231,6 @@ public class Robot extends TimedRobot {
 
     // carriageLoop.setClawPos(true);
     drive.reset();
-    drive.resetXY();
-    drive.resetXY();
-    drive.resetXY();
     drive.resetXY();
     carriage.extendCarriage();
     carriage.prisonBreak();
@@ -343,16 +338,12 @@ public class Robot extends TimedRobot {
     kD_VISION = prefs.getDouble("kD_VISION", 0);
 
     SmartDashboard.putString("Elevator State", elevatorLoop.getControlState().toString());
-    SmartDashboard.putNumber("Elevator Max Speed", maxElevatorSpeed);
-    SmartDashboard.putNumber("Elevator Raw Units", elevator.getElevatorRotations());
     SmartDashboard.putNumber("Elevator Inches", elevator.getElevatorEncoder());
 
     // Cargo
     SmartDashboard.putNumber("Cargo Pivot Raw", Math.abs(cargo.getRawCargoPivot()));
-    SmartDashboard.putNumber("Cargo Pivot Speed", cargo.getRawPivotSpeed());
     SmartDashboard.putString("Cargo State", cargoLoop.getControlState().toString());
 
-    SmartDashboard.putNumber("Max Pivot Speed", maxPivotSpeed);
     SmartDashboard.putBoolean("Cargo Present Intake", cargo.getOptic());
 
     // Carriage
@@ -365,7 +356,6 @@ public class Robot extends TimedRobot {
     shooterSpeed = prefs.getDouble("shooterSpeed", 1);
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
     feedDist = prefs.getDouble("feedDist", 7);
-    SmartDashboard.putBoolean("Good to Feed", carriage.getUltrasonicLeft() < feedDist);
 
     // Field Relative Positioning
     SmartDashboard.putString("Position", state.getFieldToRobot().toString());
@@ -387,9 +377,6 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());
 
-    //Hatch 
-    SmartDashboard.putNumber("Hatch Angle", hatch.getAngle()); 
-    SmartDashboard.putNumber("Hatch Speed", hatch.getHatchPivotSpeed()); 
     // SmartDashboard.putData("Hatch Command Sequence", new HatchFeedSequence());
 
     // Shuffleboard.getTab("Vision").add("H",

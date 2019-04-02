@@ -9,11 +9,14 @@ package frc.robot.commands.cargo;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import frc.robot.commands.auto.routines.LevelTwoSequence;
 import frc.robot.loops.CargoLoop;
 import frc.robot.loops.CargoLoop.CargoControlState;
+import frc.robot.subsystems.Cargo;
 
 public class SetIntakePivotCommand extends Command {
-  	CargoLoop cargoLoop; 
+	//   CargoLoop cargoLoop;
+	  Cargo cargo;
 
 	private double setpoint;
 	private int cruiseVelocity;
@@ -25,19 +28,20 @@ public class SetIntakePivotCommand extends Command {
 		this.cruiseVelocity = cruiseVelocity;
 		this.timeToMax = timeToMax;
 		this.timeOut = timeOut;
-
+		cargo = Cargo.getInstance();
 	}
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
 		setTimeout(timeOut);
-		cargoLoop = CargoLoop.getInstance(); 
-    cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
+		// cargoLoop = CargoLoop.getInstance(); 
+    	// cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		cargoLoop.setMotionMagic(setpoint, cruiseVelocity, timeToMax);
+		cargo.magicMotionSetpoint(setpoint, cruiseVelocity, timeToMax);
+		System.out.println(this.toString() + " is being naughty");
 	}
 
 	// Make this return true when this Command no longer needs to run execute()

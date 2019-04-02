@@ -50,15 +50,6 @@ public class Drivetrain extends Subsystem {
   // current limits
   private int smartCurrentLimit = 60;
 
-  /* Drive speed controlers */
-  // public TalonSRX leftMaster;
-  // private VictorSPX leftSlave1;
-  // private VictorSPX leftSlave2;
-
-  // private TalonSRX rightMaster;
-  // private VictorSPX rightSlave1;
-  // private VictorSPX rightSlave2;
-
   /* Spark Drive Speed Controllers */
   public CANSparkMax leftMaster;
   private CANSparkMax leftSlave1;
@@ -127,59 +118,6 @@ public class Drivetrain extends Subsystem {
     rightSlave1.follow(rightMaster);
     // rightSlave2.follow(rightMaster);
 
-    /*
-     * //Initialize Talons //left master leftMaster = new
-     * TalonSRX(ElectricalConstants.LEFT_DRIVE_FRONT);
-     * leftMaster.configSelectedFeedbackSensor(FeedbackDevice.
-     * CTRE_MagEncoder_Relative, 0, 0); leftMaster.setInverted(true);
-     * leftMaster.setSensorPhase(true);
-     * leftMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * 
-     * //left slaves leftSlave1 = new
-     * VictorSPX(ElectricalConstants.LEFT_DRIVE_BACK);
-     * leftSlave1.set(ControlMode.Follower, ElectricalConstants.LEFT_DRIVE_FRONT);
-     * leftSlave1.follow(leftMaster); leftSlave2 = new
-     * VictorSPX(ElectricalConstants.LEFT_DRIVE_MIDDLE);
-     * leftSlave2.set(ControlMode.Follower, ElectricalConstants.LEFT_DRIVE_FRONT);
-     * leftSlave2.follow(leftMaster);
-     * leftSlave2.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * leftSlave1.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * 
-     * 
-     * //right masters rightMaster = new
-     * TalonSRX(ElectricalConstants.RIGHT_DRIVE_FRONT);
-     * rightMaster.configSelectedFeedbackSensor(FeedbackDevice.
-     * CTRE_MagEncoder_Relative, 0, 0); rightMaster.setInverted(false);
-     * rightMaster.setSensorPhase(false);
-     * rightMaster.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * 
-     * //right slaves rightSlave2 = new
-     * VictorSPX(ElectricalConstants.RIGHT_DRIVE_MIDDLE);
-     * rightSlave2.set(ControlMode.Follower, ElectricalConstants.RIGHT_DRIVE_FRONT);
-     * rightSlave2.follow(rightMaster); rightSlave1 = new
-     * VictorSPX(ElectricalConstants.RIGHT_DRIVE_BACK);
-     * rightSlave1.set(ControlMode.Follower, ElectricalConstants.RIGHT_DRIVE_FRONT);
-     * rightSlave1.follow(rightMaster);
-     * rightSlave1.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * rightSlave2.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
-     * 
-     * //For Motion Magic set up rightMaster.selectProfileSlot(0, 0);
-     * rightMaster.configMotionAcceleration(2500, 0);
-     * rightMaster.configMotionCruiseVelocity(2500, 0); rightMaster.config_kF(0,
-     * NumberConstants.fTalonDrive, 10); rightMaster.config_kP(0,
-     * NumberConstants.pTalonDrive, 0); rightMaster.config_kI(0,
-     * NumberConstants.iTalonDrive, 0); rightMaster.config_kD(0,
-     * NumberConstants.dTalonDrive, 0);
-     * 
-     * //For Motion Magic set up leftMaster.selectProfileSlot(0, 0);
-     * leftMaster.configMotionAcceleration(2500, 0);
-     * leftMaster.configMotionCruiseVelocity(2500, 0); leftMaster.config_kF(0,
-     * NumberConstants.fTalonDrive, 10); leftMaster.config_kP(0,
-     * NumberConstants.pTalonDrive, 0); leftMaster.config_kI(0,
-     * NumberConstants.iTalonDrive, 0); leftMaster.config_kD(0,
-     * NumberConstants.dTalonDrive, 0); leftMaster.setInverted(false);\
-     */
-
     // Initialize PID controllers
     drivePID = new PIDController(NumberConstants.pDrive, NumberConstants.iDrive, NumberConstants.dDrive);
     turnPID = new PIDController(NumberConstants.pTurn, NumberConstants.iTurn, NumberConstants.dTurn);
@@ -215,46 +153,6 @@ public class Drivetrain extends Subsystem {
   public void initDefaultCommand() {
     setDefaultCommand(new TankDrive());
   }
-  /*
-   * TalonSRX Methods public void runLeftDrive(double input) {
-   * leftMaster.set(ControlMode.PercentOutput, input); }
-   * 
-   * public void runRightDrive(double input) {
-   * rightMaster.set(ControlMode.PercentOutput, input); }
-   * 
-   * //encoder methods //get left encoder public double getLeftPos() { return
-   * leftMaster.getSelectedSensorPosition(0) / ElectricalConstants.TICKS_PER_INCH;
-   * }
-   * 
-   * //get right encoder public double getRightPos() { return
-   * rightMaster.getSelectedSensorPosition(0) /
-   * ElectricalConstants.TICKS_PER_INCH; }
-   * 
-   * // average encoder value public double getAveragePos() { return (getLeftPos()
-   * + getRightPos()) / 2; }
-   * 
-   * //average raw encoder ticks public double getAverageRaw() { return
-   * ((leftMaster.getSelectedSensorPosition(0) +
-   * rightMaster.getSelectedSensorPosition(0)) / 2); }
-   * 
-   * public double getLeftSpeed() { return
-   * leftMaster.getSelectedSensorVelocity(0); }
-   * 
-   * public double getRightSpeed() { return
-   * rightMaster.getSelectedSensorVelocity(0); }
-   * 
-   * public double getLeftVelocityInchesPerSec() { return ((getLeftSpeed() /
-   * ElectricalConstants.DRIVE_TO_INCHES) * 10); }
-   * 
-   * public double getRightVelocityInchesPerSec() { return ((getRightSpeed() /
-   * ElectricalConstants.DRIVE_TO_INCHES) * 10); }
-   * 
-   * public double getAverageVelInchesPerSec() { return
-   * (getLeftVelocityInchesPerSec() + getRightVelocityInchesPerSec()) / 2; }
-   * 
-   * public void resetEncoders() { leftMaster.setSelectedSensorPosition(0, 0, 0);
-   * rightMaster.setSelectedSensorPosition(0, 0, 0); }
-   */
 
   public void reset() {
     resetDriveEncoders();
@@ -384,13 +282,13 @@ public class Drivetrain extends Subsystem {
 
   // shift to low gear
   public void shiftLow() {
-    shifterSolenoid.set(DoubleSolenoid.Value.kForward);
+    shifterSolenoid.set(DoubleSolenoid.Value.kReverse);
     isLow = true;
   }
 
   // shift to high gear
   public void shiftHigh() {
-    shifterSolenoid.set(DoubleSolenoid.Value.kReverse);
+    shifterSolenoid.set(DoubleSolenoid.Value.kForward);
     isLow = false;
   }
 
@@ -435,7 +333,7 @@ public class Drivetrain extends Subsystem {
 
   // drive PID constrained to top speed
   public void regulatedDrivePID(double distSetpoint, double angleSetpoint, double epsilon, double topSpeed,
-    boolean relative, boolean high) {
+    boolean track, boolean high) {
     
     //shift gears, change constants
     if (high) {
@@ -447,21 +345,13 @@ public class Drivetrain extends Subsystem {
     }
 
     //change to use angles
-    if (relative) {
+    if (!track) {
       turnPID.changePIDGains(Robot.kP_DRIVETURN, Robot.kI_DRIVETURN, Robot.kD_DRIVETURN);
     } else {
       turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
     }
 
-    //^ CHANGE TO DRIVE TURN, ADD VISION BOOLEAN
-
-    double currentVal;
-
-    if (relative) {
-      currentVal = getYaw();
-    } else {
-      currentVal = getAngle();
-    }
+    double currentVal = getAngle();
 
     double driveOut = drivePID.calcPIDDrive(distSetpoint, getAveragePos(), epsilon);
     // limit driving PID output to top speed
@@ -472,11 +362,11 @@ public class Drivetrain extends Subsystem {
 
     double angleOut = turnPID.calcPIDDrive(angleSetpoint, currentVal, epsilon);
 
-    if (relative) {
-      if ((angleSetpoint < -90 || angleSetpoint > 90) && currentVal < 0) {
-        angleOut = -angleOut;
-      }
-    }
+    // if (relative) {
+    //   if ((angleSetpoint < -90 || angleSetpoint > 90) && currentVal < 0) {
+    //     angleOut = -angleOut;
+    //   }
+    // }
 
     double leftOut = driveOut + angleOut;
     double rightOut = -driveOut + angleOut;
@@ -512,27 +402,18 @@ public class Drivetrain extends Subsystem {
   }
 
   // turn PID constrained to top speed for P2P
-  public void regulatedTurnPID(double angleSetpoint, double epsilon, double topSpeed, boolean relative) {
-    if (relative) {
+  public void regulatedTurnPID(double angleSetpoint, double epsilon, double topSpeed, boolean track) {
+    if (!track) {
       turnPID.changePIDGains(Robot.kP_TURN, Robot.kI_TURN, Robot.kD_TURN);
     } else {
       turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
     }
     this.shiftLow(); 
 
-    double currentVal;
-    if (relative) {
-      currentVal = getYaw();
-    } else {
-      currentVal = getAngle();
-    }
+    double currentVal = getAngle();
 
     double angleOut = turnPID.calcPIDDrive(angleSetpoint, currentVal, epsilon);
-    if (relative) {
-      if ((angleSetpoint < -90 || angleSetpoint > 90) && currentVal < 0) {
-        angleOut = -angleOut;
-      }
-    }
+    
     // limit turning PID output to top speed
     if (angleOut > 0) // driving forward
       angleOut = Math.min(angleOut, topSpeed);

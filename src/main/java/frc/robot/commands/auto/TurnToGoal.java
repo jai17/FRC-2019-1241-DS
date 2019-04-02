@@ -28,6 +28,8 @@ public class TurnToGoal extends Command {
 	private double topSpeed; //top speed limit for PID
 	private double goalAngle; //goal angle for the robot to turn to
 
+	private double tolerance;
+
 	private Logger logger = Logger.getInstance(); //debugging
 
 	DrivetrainLoop driveLoop; 
@@ -55,10 +57,16 @@ public class TurnToGoal extends Command {
         goalYaw = FieldPositioning.calcGoalYaw(robotPoint, goalPoint); //yaw value
         
         //get change in angle from yaw
-        goalAngle = Robot.drive.getAngle() + Math.min(goalYaw - Robot.drive.getYaw(), goalYaw + Robot.drive.getYaw());
+		double deltaAngle = goalYaw - drive.getYaw();
+		if (Math.abs(deltaAngle) < (360 - Math.abs(deltaAngle))) {
+			goalAngle = deltaAngle;
+		} else {
+			goalAngle = (Math.signum(drive.getYaw()) * 180 - drive.getYaw())
+						- (Math.signum(goalYaw) * 180 - goalYaw);
+		}
+		goalAngle += drive.getAngle();
 		
 		driveLoop.setAnglePID(goalAngle); //delta angle is setpoint
-		driveLoop.setRelativePID(false); //set to use angle, not yaw
 		driveLoop.setTolerancePID(epsilon); //set tolerance for the turn in degrees
 		driveLoop.setTopSpeed(topSpeed); //set top speed to clamp turn to
 		driveLoop.setPIDType(false); // use turnPID
@@ -86,7 +94,7 @@ public class TurnToGoal extends Command {
     protected void end() {
 		Point robotPoint = Robot.drive.getXYPoint();
 
-		//stop drive
+		//stop drive (temporarily)
 		drive.runLeftDrive(0);
 		drive.runRightDrive(0);
 		driveLoop.setDriveState(DriveControlState.OPEN_LOOP);

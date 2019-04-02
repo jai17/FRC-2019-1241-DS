@@ -54,7 +54,7 @@ public class DriveTurn extends Command {
     this.speed = speed; 
     this.tolerance = tolerance; 
     this.track = track; 
-    this.relative = relative; 
+    this.relative = !relative; 
   }
 
   // Called just before this Command runs the first time
@@ -66,7 +66,6 @@ public class DriveTurn extends Command {
 
 
     driveLoop.setPIDType(false);
-    driveLoop.setRelativePID(relative);
     if (track){
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     } else {

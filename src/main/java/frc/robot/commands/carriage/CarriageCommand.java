@@ -97,7 +97,7 @@ public class CarriageCommand extends Command {
       carriageLoop.setIsShooting(true);
     } else if (Robot.m_oi.getToolXButton()) { //cargo shot
       shooterSpeed = 0.3560; //jash
-      carriageLoop.setFeederSpeed(0.5);
+      carriageLoop.setFeederSpeed(1);
       carriageLoop.setIsShooting(true);
     } else if (Robot.m_oi.getToolDPadDown()) { //run feeder
       carriageLoop.setIsShooting(true);

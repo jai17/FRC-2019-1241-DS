@@ -1,5 +1,6 @@
 package frc.robot.loops;
 
+import frc.robot.commands.auto.routines.LevelTwoSequence;
 import frc.robot.subsystems.Cargo;
 
 public class CargoLoop implements Loop {
@@ -47,23 +48,26 @@ public class CargoLoop implements Loop {
 
 	@Override
 	public void onLoop(double time_stamp) {
-		switch (mControlState) {
-		case OPEN_LOOP:
-			if (pivotSpeed > 0) {
-				cargo.runUp(Math.abs(pivotSpeed));
-			} else {
-				cargo.runDown(Math.abs(pivotSpeed));
+		if (!LevelTwoSequence.getInstance().isRunning()) {
+			switch (mControlState) {
+			case OPEN_LOOP:
+				if (pivotSpeed > 0) {
+					cargo.runUp(Math.abs(pivotSpeed));
+				} else {
+					cargo.runDown(Math.abs(pivotSpeed));
+				}
+				cargo.intake(rollerSpeed);
+				return;
+			case MOTION_MAGIC:
+				cargo.magicMotionSetpoint(magicSetpoint, cruiseVelocity, secsToMaxSpeed);
+				cargo.intake(rollerSpeed);
+				return;
+			case PID_SETPOINT:
+				cargo.intake(rollerSpeed);
+				return;
 			}
-			cargo.intake(rollerSpeed);
-			return;
-		case MOTION_MAGIC:
-			cargo.magicMotionSetpoint(magicSetpoint, cruiseVelocity, secsToMaxSpeed);
-			cargo.intake(rollerSpeed);
-			return;
-		case PID_SETPOINT:
-			cargo.intake(rollerSpeed);
-			return;
 		}
+		// System.out.println(this.toString() + " NOT IN LOOP");
 	}
 
 	@Override

@@ -83,7 +83,7 @@ public class CargoCommand extends Command {
 
       } else if (Robot.m_oi.getToolRightBumper()) { //intaking
 
-        if (Math.abs(cargo.getCargoAngle()) <= 400 && !cargo.isCargoPresent()) { //pivot up, has ball
+        if (Math.abs(cargo.getCargoAngle()) <= 250 && !cargo.isCargoPresent()) { //pivot up, has ball
           cargoLoop.setIsIntaking(true); //intaking
           cargoLoop.setRollerSpeed(1);
           // carriageLoop.setIsFeeding(true); //feeding
@@ -106,7 +106,7 @@ public class CargoCommand extends Command {
 
         } else if (cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) > 900) { //pivot down, no ball
           cargoLoop.setIsIntaking(true);
-          cargoLoop.setRollerSpeed(0.78);
+          cargoLoop.setRollerSpeed(1);
           // carriageLoop.setIsFeeding(false);
           // carriageLoop.setFeederSpeed(0);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
