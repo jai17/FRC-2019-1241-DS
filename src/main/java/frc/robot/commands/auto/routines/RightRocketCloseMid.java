@@ -38,23 +38,30 @@ public class RightRocketCloseMid extends CommandGroup {
     addParallel(new SetTrayCommand(false));
     addSequential(new DriveTurn(0.6, 5, true));
 
-    addParallel(new DriveDistance(40, 0, 0.4, FieldPoints.ROCKET_EJECT_DIST, true)); 
-    addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
+    addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
+    addSequential(new DriveDistance(50, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true)); 
     
     addSequential(new EjectHatchSequence());
     addSequential(new SetXY(FieldPoints.CLOSE_RIGHT_ROCKET_SCORE));
 
-    addParallel(new DriveToGoal(FieldPoints.PRE_FEEDER_RIGHT, 4, 1, true));
-    addSequential(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1));
+    addParallel(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1));
+    addSequential(new DriveToGoal(FieldPoints.PRE_FEEDER_RIGHT, 4, 1, true));
 
     addSequential(new TurnToGoal(FieldPoints.RIGHT_FEEDER, 4, 0.9));
     addSequential(new SetClawCommand(true));
-    addSequential(new DriveDistance(80, 0, 0.25, 8, true)); 
+    addSequential(new DriveDistance(80, 0, 0.25, FieldPoints.FEEDER_EJECT_DIST, true)); 
     addSequential(new SetClawCommand(false));
+    addSequential(new SetXY(FieldPoints.RIGHT_FEEDER_ROBOT));
 
-    addParallel(new DriveToGoal(FieldPoints.RIGHT_FAR_ROCKET, 4, 1, true));
-    addSequential(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1));
+    addParallel(new ElevatorSetpointWait(0.5, NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.35, 1));
+    addSequential(new DriveToGoal(FieldPoints.RIGHT_FAR_ROCKET, 4, 1, true));
 
+    addSequential(new TurnToGoal(FieldPoints.RIGHT_ROCKET, 4, 0.9));
 
+    addSequential(new DriveTurn(0.6, 4, true));
+    addSequential(new SetTrayCommand(false));
+    addSequential(new DriveDistance(80, 0, 0.15, FieldPoints.ROCKET_EJECT_DIST, true));
+    addSequential(new EjectHatchSequence());
+    addSequential(new SetXY(FieldPoints.RIGHT_FAR_ROCKET_SCORE));
   }
 }

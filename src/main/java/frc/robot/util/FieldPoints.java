@@ -13,9 +13,9 @@ public class FieldPoints {
     //rocket
     public static final Point RIGHT_CLOSE_ROCKET = new Point(283,165);
     public static final Point RIGHT_FAR_ROCKET = new Point(264,285);
-
     public static final Point RIGHT_ROCKET = new Point(312,230);
     public static final Point CLOSE_RIGHT_ROCKET_SCORE = new Point(299, 195);
+    public static final Point RIGHT_FAR_ROCKET_SCORE = new Point(286,265); //57, 315
 
     public static final Point LEFT_CLOSE_ROCKET = new Point(45,150);
     public static final Point LEFT_FAR_ROCKET = new Point(50,285); //57, 315
@@ -30,6 +30,7 @@ public class FieldPoints {
     //feeder
     public static final Point PRE_FEEDER_RIGHT = new Point(300, 60);
     public static final Point RIGHT_FEEDER = new Point(300, 0);
+    public static final Point RIGHT_FEEDER_ROBOT = new Point(300, 18);
 
     public static final Point PRE_FEEDER_LEFT = new Point(40, 60);
     public static final Point LEFT_FEEDER = new Point(40, 0); 
