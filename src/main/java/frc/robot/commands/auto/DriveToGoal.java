@@ -39,6 +39,9 @@ public class DriveToGoal extends Command {
 	private boolean reverse; // whether the robot is driving in reverse or not
 	private boolean highPID; // whether robot drives in high gear or not
 
+	private double deltaAngle;
+	private double goalYaw;
+
 	private double tolerance; //tolerance to modify setpoints
 
 	DrivetrainLoop driveLoop;
@@ -83,7 +86,7 @@ public class DriveToGoal extends Command {
 		initTotalDist = totalDist;
 		tolerance = epsilon;
 
-		double goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
+		goalYaw = FieldPositioning.calcGoalYaw(Robot.drive.getXYPoint(), goalPoint);
 
 		// if driving in reverse
 		if (reverse) {
@@ -134,7 +137,6 @@ public class DriveToGoal extends Command {
 	 * point further from start) 3) PID for distance and angle
 	 */
 	protected void execute() {
-		double goalYaw = 0;
 		// update robot position
 		robotPoint = drive.getXYPoint();
 
@@ -152,7 +154,7 @@ public class DriveToGoal extends Command {
 				goalYaw = -Math.signum(goalYaw) * 180 + goalYaw;
 			}
 
-			double deltaAngle = goalYaw - drive.getYaw();
+			deltaAngle = goalYaw - drive.getYaw();
 			if (Math.abs(deltaAngle) < (360 - Math.abs(deltaAngle))) {
 				goalAngle = deltaAngle;
 			} else {
@@ -166,7 +168,8 @@ public class DriveToGoal extends Command {
 
 		// dbg
 		logger.logd("DriveToGoal_execute(): ", "Distance = " + Double.toString(currentSetpoint) + ", Yaw = "
-				+ Double.toString(goalAngle) + ", GoalYawTemp" + Double.toString(goalYaw));
+				+ Double.toString(drive.getYaw()) + ", GoalYawTemp" + Double.toString(goalYaw)
+				+ " deltaAngle: " + deltaAngle + " ");
 
 		// update distance and yaw setpoints
 		driveLoop.setDistancePID(currentSetpoint);
@@ -188,7 +191,7 @@ public class DriveToGoal extends Command {
 	// run when finished
 	protected void end() {
 		logger.logd("DriveToGoal_end(): ", "Current (X,Y) = " + robotPoint.toString() + " Goal (X,Y) = "
-				+ goalPoint.toString() + " Drive Encoder = " + Double.toString(drive.getAveragePos()));
+				+ goalPoint.toString() + " Drive Encoder = " + Double.toString(drive.getAveragePos()) + "\n");
 
 		drive.runRightDrive(0);
 		drive.runLeftDrive(0);

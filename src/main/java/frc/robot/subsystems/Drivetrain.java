@@ -282,13 +282,13 @@ public class Drivetrain extends Subsystem {
 
   // shift to low gear
   public void shiftLow() {
-    shifterSolenoid.set(DoubleSolenoid.Value.kReverse);
+    shifterSolenoid.set(DoubleSolenoid.Value.kForward);
     isLow = true;
   }
 
   // shift to high gear
   public void shiftHigh() {
-    shifterSolenoid.set(DoubleSolenoid.Value.kForward);
+    shifterSolenoid.set(DoubleSolenoid.Value.kReverse);
     isLow = false;
   }
 
@@ -341,14 +341,20 @@ public class Drivetrain extends Subsystem {
       drivePID.changePIDGains(Robot.kP_DRIVE * 0.1, Robot.kI_DRIVE, Robot.kD_DRIVE * 5);
     } else {
       this.shiftLow();
+      if (!track){
       drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
+      } else {
+        drivePID.changePIDGains(Robot.kP_DRIVE * 0.7, Robot.kI_DRIVE, Robot.kD_DRIVE * 1);
+      }
     }
 
     //change to use angles
     if (!track) {
       turnPID.changePIDGains(Robot.kP_DRIVETURN, Robot.kI_DRIVETURN, Robot.kD_DRIVETURN);
     } else {
-      turnPID.changePIDGains(Robot.kP_VISION, Robot.kI_VISION, Robot.kD_VISION);
+      //turnPID.changePIDGains(Robot.kP_DRIVETURN * 0.75, Robot.kI_DRIVETURN, Robot.kD_DRIVETURN * 1);
+
+      turnPID.changePIDGains(Robot.kP_VISION * 0.85, Robot.kI_VISION, Robot.kD_VISION * 1);
     }
 
     double currentVal = getAngle();

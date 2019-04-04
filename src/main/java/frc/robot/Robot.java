@@ -44,6 +44,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Hatch;
 import frc.robot.subsystems.Vision;
+import frc.robot.util.FieldPoints;
 import frc.robot.util.Logger;
 import frc.robot.util.Point;
 
@@ -152,7 +153,8 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("DriveToGoalRight Test", new DriveToGoal(new Point(30, 100), 5, 0.8, false));
     m_chooser.addObject("DriveToGoalBackLeft Test", new DriveToGoal(new Point(-30, -100), 5, 0.8, true));
     m_chooser.addObject("DriveToGoalBackRight Test", new DriveToGoal(new Point(30, -100), 5, 0.8, true));
-    // m_chooser.addObject("Drive Track Test", new DriveDistance(60, 0, 0.25, 10, true));
+    m_chooser.addObject("Rangefinder Test", new DriveDistance(100, 0, 0.4, FieldPoints.ROCKET_EJECT_DIST, true));
+    m_chooser.addObject("Drive Track Test", new DriveDistance(50, 0, 0.2, FieldPoints.ROCKET_EJECT_DIST, true));
     m_chooser.addObject("RightShipCloseMid", new RightShipCloseMid());
     SmartDashboard.putData("Auto modes", m_chooser);
     m_chooser.addObject("LeftRocketCloseLow", new LeftRocketCloseLow());
@@ -237,7 +239,7 @@ public class Robot extends TimedRobot {
 
     drive.setLeftrampRate(0);
     drive.setRightrampRate(0);
-    drive.shiftLow();
+    //drive.shiftLow();`
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {

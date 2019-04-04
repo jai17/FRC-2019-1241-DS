@@ -48,7 +48,7 @@ public class Elevator extends Subsystem {
     magEncoderTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     magEncoderTalon.setInverted(false);
     //sensor phase false in on real robot
-    magEncoderTalon.setSensorPhase(false);
+    magEncoderTalon.setSensorPhase(true);
     magEncoderTalon.setNeutralMode(NeutralMode.Brake);
   
     // Method in order to set a default Motion Magic Velocity and Acceleration 

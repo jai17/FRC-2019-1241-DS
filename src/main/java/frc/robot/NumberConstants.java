@@ -37,9 +37,9 @@ public class NumberConstants {
 
     /*********************** ELEVATOR ************************************/
     // PID constants
-    public static final double pTalonElevator = 0.4; //0.4
+    public static final double pTalonElevator = 0.36; //0.4
     public static final double iTalonElevator = 0.0;
-    public static final double dTalonElevator = 0.004; //0.004
+    public static final double dTalonElevator = 0.007; //0.004
     public static final double fTalonElevator = 0.2;
 
     public static final double pElevator = 0.0;
@@ -59,7 +59,7 @@ public class NumberConstants {
     public static final double ELEVATOR_HATCH_FEEDER = 15; 
     public static final double HINTAKE_FEEDING_HEIGHT = 11;
     public static final double ELEVATOR_MID_HATCH_POSITION = 44; //46
-    public static final double ELEVATOR_HIGH_HATCH_POSITION = 74.5;
+    public static final double ELEVATOR_HIGH_HATCH_POSITION = 72;
     public static final double ELEVATOR_CARGOSHIP_POSITION = 28.5; // jim zondag 
 
     /*********************** CARGO ************************************/

@@ -130,7 +130,7 @@ public class TankDrive extends Command {
         driveLoop.setLeftDrive(0);
       }
 
-      driveLoop.selectGear(!Robot.m_oi.getDriveRightBumper());
+      driveLoop.selectGear(Robot.m_oi.getDriveRightBumper());
 
       if (Robot.m_oi.getDriveLeftTrigger()){
         if (!LevelTwoSequence.getInstance().isRunning() && !lifting) {

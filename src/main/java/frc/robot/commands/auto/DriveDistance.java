@@ -12,6 +12,7 @@ import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Carriage;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
+import frc.robot.util.Logger;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -21,6 +22,7 @@ public class DriveDistance extends Command {
   DrivetrainLoop driveLoop = DrivetrainLoop.getInstance();
   Vision vision = Vision.getInstance();
   Carriage carriage = Carriage.getInstance();
+  Logger logger = Logger.getInstance(); 
 
   double distance;
   double angle;
@@ -38,6 +40,7 @@ public class DriveDistance extends Command {
   Timer rangeTimer;
   boolean rangeTimerStarted = false;
   boolean started = true;
+  boolean isFinished = false;
 
   public DriveDistance(double distance, double angle, double timeOut, double speed, double tolerance) {
     this.distance = distance;
@@ -81,6 +84,9 @@ public class DriveDistance extends Command {
     timer = new Timer();
     rangeTimer = new Timer();
 
+    rangeTimerStarted = false;
+    isFinished = false;
+
     // drive.reset();
 
     xVal = vision.avg();
@@ -95,6 +101,7 @@ public class DriveDistance extends Command {
       setTimeout(3);
     } else {
       driveLoop.setAnglePID(angle);
+      setTimeout(1);
     }
     driveLoop.setTolerancePID(tolerance);
     // driveLoop.setSpeedPID(speed);
@@ -105,6 +112,8 @@ public class DriveDistance extends Command {
     drive.setLeftrampRate(0);
 
     initDistance = drive.getAveragePos();
+    isFinished = false;
+    rangeTimerStarted = false;
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -116,8 +125,9 @@ public class DriveDistance extends Command {
 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-      System.out.println(
-          "Distance: " + (drive.getAveragePos() - distance) + " Angle: " + (drive.getAngle() - degreesToTarget));
+      // System.out.println(
+      // "Distance: " + (drive.getAveragePos() - distance) + " Angle: " +
+      // (drive.getAngle() - degreesToTarget));
     }
 
     // driveLoop.selectGear(false);
@@ -144,28 +154,48 @@ public class DriveDistance extends Command {
   // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
-    boolean isFinished = false;
 
     if (track) {
       if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
         rangeTimer.start();
         rangeTimerStarted = true;
-        System.out.println("DRIVEDISTANCE_RANGEFINDER: STARTED");
+        System.out.println("DRIVEDISTANCE_RANGEFINDER: STARTED AT: " + carriage.getUltrasonicLeft());
       }
       if (rangeTimerStarted) {
+        System.out.println("DriveDistance: Checking Ramge Finder Time AT " + carriage.getUltrasonicLeft());
+        logger.logd("DriveDistanceTrack", "Checking Range Finder At " + carriage.getUltrasonicLeft() + " , " + rangeTimer.get());
+        if (carriage.getUltrasonicLeft() < tolerance){
         if (rangeTimer.get() > 1) {
           isFinished = true;
+          System.out.println(
+              "DriveDistance: Range Finder Timed Out AT" + carriage.getUltrasonicLeft() + " " + rangeTimer.get());
+          logger.logd("DriveDistanceTrack", "Checking Range Finder Timed Out At " + carriage.getUltrasonicLeft() + " , " + rangeTimer.get());
         }
+      } else {
+        rangeTimerStarted = false; 
+        rangeTimer.reset();
+      }
       }
       return isFinished;
     } else {
-      if (Math.abs(drive.getAveragePos()) > Math.abs((initDistance) + Math.abs(distance) - tolerance)) {
-        System.out.println("Reached Distance");
-        return true;
+      System.out.println("DriveDistance Angle" + drive.getAngle() + " , " + angle);
+
+      if (Math.signum(distance) == 1){
+        if (drive.getAveragePos() > (initDistance + distance - tolerance)){
+          System.out.println("Checking Drive Distance Positive AT current: " + drive.getAveragePos() + " , " + distance);
+          return true; 
+        } else {
+          return false; 
+        }
       } else {
-        // started = false;
-        return false;
+        System.out.println("Checking Drive Distance AT current: " + drive.getAveragePos() + " , " + distance);
+        if (drive.getAveragePos() < (initDistance + distance + tolerance)){
+          return true; 
+        } else {
+          return false;
+        }
       }
+
     }
   }
 
@@ -182,5 +212,6 @@ public class DriveDistance extends Command {
   // subsystems is scheduled to run
   @Override
   protected void interrupted() {
+    System.out.println(this.toString() + " WAS INTERRUPTED");
   }
 }
