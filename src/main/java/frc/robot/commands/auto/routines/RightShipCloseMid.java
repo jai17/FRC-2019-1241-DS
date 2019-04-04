@@ -38,7 +38,7 @@ public class RightShipCloseMid extends CommandGroup {
     addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION + 4, NumberConstants.ELEVATOR_MAX_SPEED, 0.3, 1));
 
     addSequential(new DriveTurn(-90, 1, 5));
-    addSequential(new DriveTurn(1, 4, true, false));
+    addSequential(new DriveTurn(1, 4, true));
 
     addSequential(new SetTrayCommand(false)); 
     addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
@@ -54,7 +54,7 @@ public class RightShipCloseMid extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.MID_RIGHT_CARGO_PRE_SCORE, 9, 0.6, true, true));
 
     addSequential(new DriveTurn(90, 1, 5));
-    addSequential(new DriveTurn(1, 4, true, false));
+    addSequential(new DriveTurn(1, 4, true));
 
     addSequential(new SetTrayCommand(false)); 
     addSequential(new DriveDistance(38, 0, 0.35, 10 + FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 

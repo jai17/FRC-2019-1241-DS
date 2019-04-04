@@ -36,7 +36,7 @@ public class RightRocketCloseMid extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.RIGHT_CLOSE_ROCKET, 6, 1, false));
     
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(0.6, 5, true, false));
+    addSequential(new DriveTurn(0.6, 5, true));
 
     addParallel(new DriveDistance(40, 0, 0.4, FieldPoints.ROCKET_EJECT_DIST, true)); 
     addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));

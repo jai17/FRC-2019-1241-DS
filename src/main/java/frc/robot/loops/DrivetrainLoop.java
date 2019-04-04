@@ -121,7 +121,7 @@ public class DrivetrainLoop implements Loop {
 			if (drivePID){
 				drive.regulatedDrivePID(distance, angle, tolerance, topSpeed, track, highPID);
 			} else {
-				drive.regulatedTurnPID(angle, speed, tolerance, track);
+				drive.regulatedTurnPID(angle, tolerance, speed, track);
 			}
 			return;
 		}

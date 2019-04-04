@@ -39,7 +39,7 @@ public class LeftRocketCloseLow extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.LEFT_CLOSE_ROCKET, 7.5, 0.9, false));
     
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(0.6, 5, true, false));
+    addSequential(new DriveTurn(0.6, 5, true));
 
     addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
     addSequential(new DriveDistance(50, 0, 0.2, FieldPoints.ROCKET_EJECT_DIST, true));
@@ -61,7 +61,7 @@ public class LeftRocketCloseLow extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.LEFT_FAR_ROCKET, 4, 1, true));
     addSequential(new TurnToGoal(FieldPoints.LEFT_ROCKET, 4, 0.9));
 
-    addSequential(new DriveTurn(0.6, 4, true, false));
+    addSequential(new DriveTurn(0.6, 4, true));
     addSequential(new SetTrayCommand(false));
     addSequential(new DriveDistance(80, 0, 0.15, FieldPoints.ROCKET_EJECT_DIST, true));
     addSequential(new SetXY(FieldPoints.LEFT_FAR_ROCKET_SCORE));

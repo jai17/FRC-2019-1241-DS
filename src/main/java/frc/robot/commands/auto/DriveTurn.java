@@ -13,63 +13,58 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj.command.Command;
 
-
 public class DriveTurn extends Command {
 
-  Drivetrain drive = Drivetrain.getInstance(); 
-  DrivetrainLoop driveLoop = DrivetrainLoop.getInstance(); 
-  Vision vision = Vision.getInstance(); 
+  Drivetrain drive = Drivetrain.getInstance();
+  DrivetrainLoop driveLoop = DrivetrainLoop.getInstance();
+  Vision vision = Vision.getInstance();
 
-  double angle; 
+  double angle;
   double speed;
-  double timeOut; 
-  double tolerance; 
-  boolean track = false; 
-  boolean relative; 
+  double timeOut;
+  double tolerance;
+  boolean track = false;
 
-  double xVal; 
-  double degreesToTarget; 
+  double xVal;
+  double degreesToTarget;
 
-  public DriveTurn( double angle,double speed,double timeOut,double tolerance) {
-    this.angle = angle; 
-    this.timeOut = timeOut; 
-    this.speed = speed; 
-    this.tolerance = tolerance; 
-    this.track = false; 
-    this.relative = true; 
+  public DriveTurn(double angle, double speed, double timeOut, double tolerance) {
+    this.angle = angle;
+    this.timeOut = timeOut;
+    this.speed = speed;
+    this.tolerance = tolerance;
+    this.track = false;
     requires(drive);
   }
 
-  public DriveTurn( double angle,double speed,double tolerance) {
-    this.angle = angle; 
-    this.timeOut = 0; 
-    this.speed = speed; 
-    this.tolerance = tolerance; 
-    this.track = false; 
-    this.relative = true; 
+  public DriveTurn(double angle, double speed, double tolerance) {
+    this.angle = angle;
+    this.timeOut = 0;
+    this.speed = speed;
+    this.tolerance = tolerance;
+    this.track = false;
     requires(drive);
   }
 
-  public DriveTurn(double speed, double tolerance, boolean track, boolean relative){
-    this.speed = speed; 
-    this.tolerance = tolerance; 
-    this.track = track; 
-    this.relative = !relative; 
+  public DriveTurn(double speed, double tolerance, boolean track) {
+    this.speed = speed;
+    this.tolerance = tolerance;
+    this.track = track;
   }
 
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    //drive.reset();
+    // drive.reset();
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal);
 
-
     driveLoop.setPIDType(false);
-    if (track){
+    driveLoop.setTrackPID(track);
+    if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     } else {
-    driveLoop.setAnglePID(angle);
+      driveLoop.setAnglePID(angle);
     }
     driveLoop.setTolerancePID(tolerance);
     driveLoop.setSpeedPID(speed);
@@ -81,29 +76,36 @@ public class DriveTurn extends Command {
   protected void execute() {
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal);
-    if (track){
+    if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-    } 
+    }
   }
 
   // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
 
-    if (track){
-      if(Math.abs(degreesToTarget) < tolerance){
+    if (track) {
+      if (Math.abs(degreesToTarget) < tolerance) {
         return true;
       } else {
-        return false; 
+        return false;
       }
     } else {
-
-    if (Math.abs(angle) - (Math.abs(drive.getYaw())) < tolerance) {
-      return true;
-    } else {
-      return false;
+      if (Math.signum(angle) == 1) {
+        if ((angle - drive.getAngle()) < (tolerance)) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        if ((angle - drive.getAngle()) > (-tolerance)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
     }
-  }
   }
 
   // Called once after isFinished returns true
