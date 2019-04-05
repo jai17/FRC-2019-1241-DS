@@ -49,9 +49,9 @@ public class FieldPoints {
     public static final Point CLOSE_RIGHT_CARGO = new Point(204, 235);
     public static final Point MID_RIGHT_CARGO = new Point(210, 260);
 
-    public static final Point CLOSE_LEFT_CARGO_PRE_SCORE = new Point(240, 250);
-    public static final Point MID_LEFT_CARGO_PRE_SCORE = new Point(240, 260);
-    public static final Point PRE_CLOSE_LEFT_CARGO = new Point(120, 180);
-    public static final Point CLOSE_LEFT_CARGO = new Point(204, 235);
-    public static final Point MID_LEFT_CARGO = new Point(210, 260);
+    public static final Point CLOSE_LEFT_CARGO_PRE_SCORE = new Point(84, 250);
+    public static final Point MID_LEFT_CARGO_PRE_SCORE = new Point(84, 260);
+    public static final Point PRE_CLOSE_LEFT_CARGO = new Point(134, 235);
+    public static final Point CLOSE_LEFT_CARGO = new Point(120, 235);
+    public static final Point MID_LEFT_CARGO = new Point(114, 260);
 }
