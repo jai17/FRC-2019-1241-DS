@@ -51,7 +51,7 @@ public class CargoCommand extends Command {
   @Override
   protected void execute() {
 
-    if (!Robot.m_oi.getToolLeftTrigger()) { // As long as Left Trigger is not held
+    //if (!Robot.m_oi.getToolLeftTrigger()) { // As long as Left Trigger is not held
 
       if (!cargo.getOptic() && started == false) {
         timer.start();
@@ -129,7 +129,7 @@ public class CargoCommand extends Command {
       if (!cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) <= 900 && carriage.getOptic()){
           carriageLoop.setIsFeeding(true);
           carriageLoop.setFeederSpeed(1);
-      } else if (!Robot.m_oi.getToolBButton() && !Robot.m_oi.getToolDPadDown() && !Robot.m_oi.getToolXButton()){
+      } else if (!Robot.m_oi.getToolBButton() && !Robot.m_oi.getToolDPadDown() && !Robot.m_oi.getToolXButton() && !Robot.m_oi.getToolLeftTrigger()){
         carriageLoop.setFeederSpeed(0);
         carriageLoop.setIsShooting(false); 
       }
@@ -194,7 +194,8 @@ public class CargoCommand extends Command {
       // } else {
       //   carriageLoop.setFeederSpeed(0);
       // }
-    }
+      //For Sequence
+    //}
 
 
 

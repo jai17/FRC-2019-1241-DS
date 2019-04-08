@@ -57,10 +57,11 @@ public class DriveTurn extends Command {
   protected void initialize() {
     // drive.reset();
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal);
+    degreesToTarget = vision.pixelToDegree(xVal) - 2;
 
     driveLoop.setPIDType(false);
     driveLoop.setTrackPID(track);
+    driveLoop.setHighPID(false); 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     } else {
@@ -75,7 +76,7 @@ public class DriveTurn extends Command {
   @Override
   protected void execute() {
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal);
+    degreesToTarget = vision.pixelToDegree(xVal) - 2;
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     }
@@ -93,12 +94,14 @@ public class DriveTurn extends Command {
       }
     } else {
       if (Math.signum(angle) == 1) {
+        System.out.println((angle - drive.getAngle())); 
         if ((angle - drive.getAngle()) < (tolerance)) {
           return true;
         } else {
           return false;
         }
       } else {
+        System.out.println((angle - drive.getAngle())); 
         if ((angle - drive.getAngle()) > (-tolerance)) {
           return true;
         } else {

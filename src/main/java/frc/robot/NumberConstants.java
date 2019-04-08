@@ -53,13 +53,13 @@ public class NumberConstants {
     public static final int ELEVATOR_ACCELERATION = 0;
 
     // Position setpoints
-    public static final double ELEVATOR_REST_POSITION = 4; 
+    public static final double ELEVATOR_REST_POSITION = 2.5; 
     public static final double HATCH_FINESSE_POSITION = 7.5;
     public static final double ELEVATOR_LOW_HATCH_POSITION = 12.5;  //15.5
     public static final double ELEVATOR_HATCH_FEEDER = 15; 
-    public static final double HINTAKE_FEEDING_HEIGHT = 11;
+    public static final double HINTAKE_FEEDING_HEIGHT = 8;
     public static final double ELEVATOR_MID_HATCH_POSITION = 44; //46
-    public static final double ELEVATOR_HIGH_HATCH_POSITION = 72;
+    public static final double ELEVATOR_HIGH_HATCH_POSITION = 75;
     public static final double ELEVATOR_CARGOSHIP_POSITION = 28.5; // jim zondag 
 
     /*********************** CARGO ************************************/
@@ -80,10 +80,10 @@ public class NumberConstants {
     public static final int CARGO_ACCELERATION = 0;
 
     // Angle constants 
-    public static final double CARGO_FEEDING_ANGLE = 30; 
+    public static final double CARGO_FEEDING_ANGLE = 20; 
     public static final double CARGO_RESTING_ANGLE = 300; 
     public static final double CARGO_STATION_ANGLE = 900; 
-    public static final double CARGO_INTAKING_ANGLE = 1700; 
+    public static final double CARGO_INTAKING_ANGLE = 1500; //1700
     public static final double CARGO_LIFTING_ANGLE = 3161; 
 
     // Soft Limits

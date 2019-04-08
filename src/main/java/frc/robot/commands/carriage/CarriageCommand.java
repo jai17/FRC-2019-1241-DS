@@ -100,9 +100,13 @@ public class CarriageCommand extends Command {
       carriageLoop.setFeederSpeed(1);
       carriageLoop.setIsShooting(true);
     } else if (Robot.m_oi.getToolDPadDown()) { //run feeder
-      carriageLoop.setIsShooting(true);
+      carriageLoop.setIsShooting(false);
       carriageLoop.setIsFeeding(true);
       carriageLoop.setFeederSpeed(1);
+    } else if (Robot.m_oi.getToolLeftTrigger()){
+      shooterSpeed = -0.40;
+      carriageLoop.setFeederSpeed(0);
+      carriageLoop.setIsShooting(true);
     }
     // } else { //no  shot
     //   shooterSpeed = 0;

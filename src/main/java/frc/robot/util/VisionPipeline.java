@@ -56,12 +56,12 @@ public class VisionPipeline {
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
 
-		double filterContoursMinArea = 25.0; //15
+		double filterContoursMinArea = 15.0; //15
 		double filterContoursMinPerimeter = 0;
 		double filterContoursMinWidth = 0;
 		double filterContoursMaxWidth = 1000;
 		double filterContoursMinHeight = 0;
-		double filterContoursMaxHeight = 1000;
+		double filterContoursMaxHeight = 70;
 		double[] filterContoursSolidity = { 0, 100 };
 		double filterContoursMaxVertices = 1000000;
 		double filterContoursMinVertices = 0;
@@ -213,8 +213,8 @@ public class VisionPipeline {
 		r.points(points);
 
 		//calculate slope
-		double y2 = 120 - points[2].y;
-		double y1 = 120 - points[0].y;
+		double y2 = 240 - points[2].y;
+		double y1 = 240 - points[0].y;
 
 		double x2 = points[2].x;
 		double x1 = points[0].x;

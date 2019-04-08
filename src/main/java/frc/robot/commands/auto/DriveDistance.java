@@ -90,7 +90,7 @@ public class DriveDistance extends Command {
     // drive.reset();
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal);
+    degreesToTarget = vision.pixelToDegree(xVal) - 2;
 
     driveLoop.setPIDType(true);
     driveLoop.setTrackPID(track);
@@ -121,7 +121,7 @@ public class DriveDistance extends Command {
   protected void execute() {
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal);
+    degreesToTarget = vision.pixelToDegree(xVal) - 2;
 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
@@ -161,11 +161,11 @@ public class DriveDistance extends Command {
         rangeTimerStarted = true;
         System.out.println("DRIVEDISTANCE_RANGEFINDER: STARTED AT: " + carriage.getUltrasonicLeft());
       }
-      if (rangeTimerStarted) {
+      if (rangeTimerStarted) { 
         System.out.println("DriveDistance: Checking Ramge Finder Time AT " + carriage.getUltrasonicLeft());
         logger.logd("DriveDistanceTrack", "Checking Range Finder At " + carriage.getUltrasonicLeft() + " , " + rangeTimer.get());
         if (carriage.getUltrasonicLeft() < tolerance){
-        if (rangeTimer.get() > 1) {
+        if (rangeTimer.get() > 0.75) {
           isFinished = true;
           System.out.println(
               "DriveDistance: Range Finder Timed Out AT" + carriage.getUltrasonicLeft() + " " + rangeTimer.get());

@@ -37,6 +37,7 @@
     @Override
     protected void execute() {
       // have to hold left trigger for hatch
+      /*
       if (Robot.m_oi.getToolLeftTrigger()) { 
 
         if (Robot.m_oi.getToolLeftBumper()) { // outtake
@@ -92,9 +93,9 @@
             hatchLoop.setHatchState(HatchControlState.OPEN_LOOP);
           }
         }
-
+*/
       }
-    }
+    
 
     // Make this return true when this Command no longer needs to run execute()
     @Override

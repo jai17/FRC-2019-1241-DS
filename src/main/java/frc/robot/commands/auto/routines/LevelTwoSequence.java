@@ -28,11 +28,11 @@ public class LevelTwoSequence extends CommandGroup {
     //bintake down
     addSequential(new SetIntakePivotCommand(NumberConstants.CARGO_LIFTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.5, 3));
     // //drive at 40 percent
-    addSequential(new TimedDrive(1.5, 0.75));
+    addSequential(new TimedDrive(1, 0.75));
     addSequential(new SetDingusCommand(true));
     addSequential(new SetIntakePivotCommand(NumberConstants.CARGO_RESTING_ANGLE, NumberConstants.CARGO_MAX_SPEED, 0.5, 1));
 
-    addSequential(new TimedDrive(3, 0.65));
+    addSequential(new TimedDrive(1.25, 0.2));
      // //stop drive after time
     addSequential(new SetDingusCommand(false));
   }

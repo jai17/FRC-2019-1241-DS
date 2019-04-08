@@ -65,15 +65,15 @@ public class TankDrive extends Command {
       if (vision.getTrackingState() == VisionTrackingState.NO_TARGET) {
         degreesToTarget = 0;
       } else {
-        degreesToTarget = vision.pixelToDegree(xVal);
+        degreesToTarget = vision.pixelToDegree(xVal) -2 ;
       }
       // added offset to compensate for camera
 
       yVal = vision.avgY();
       degreesToTargetY = vision.pixelToDegreeY(yVal);
 
-      if (Robot.m_oi.getDriveLeftBumper()) { // tracking
-        if (vision.mTrackingState == VisionTrackingState.ROCKET) {
+      if (Robot.m_oi.getDriveLeftBumper()) {   // tracking
+        if (vision.mTrackingState == VisionTrackingState.ROCKET || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
           driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
@@ -83,18 +83,18 @@ public class TankDrive extends Command {
         if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
           driveLoop.setMaxOutput(0.4); // 0.6
         } else {
-          driveLoop.setMaxOutput(0.85); // 0.7
+          driveLoop.setMaxOutput(0.75); // 0.7
         }
         // driveLoop.selectGear(true);
-        if (vision.getTrackingState() == VisionTrackingState.ROCKET) {
+        if ((vision.getTrackingState() == VisionTrackingState.ROCKET) || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
           driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-          driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.75);
+          driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.50);
         } else {
           driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
           driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
         }
         // driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.75);
-        driveLoop.setTolerancePID(1.5);
+        driveLoop.setTolerancePID(1);
 
         // half speed
       } else if (Robot.m_oi.getDriveRightTrigger()) {
@@ -120,8 +120,8 @@ public class TankDrive extends Command {
         } else {
           drive.setLeftrampRate(0);
           drive.setRightrampRate(0);
-          driveLoop.setLeftDrive(-0.8 * Robot.m_oi.getDriveLeftY());
-          driveLoop.setRightDrive(0.8 * Robot.m_oi.getDriveRightY());
+          driveLoop.setLeftDrive(-0.85 * Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(0.85 * Robot.m_oi.getDriveRightY());
         }
         // no drive
       } else {
@@ -145,6 +145,11 @@ public class TankDrive extends Command {
           lifting = false;
         }
      }
+    // if (Robot.m_oi.getDriveLeftTrigger()){
+    //    driveLoop.engageLifter(true);
+    // } else {
+    //   driveLoop.engageLifter(false);
+    // }
     }
    }
 

@@ -26,8 +26,11 @@ import frc.robot.commands.auto.DriveToGoal;
 import frc.robot.commands.auto.DriveTurn;
 import frc.robot.commands.auto.EjectHatchSequence;
 import frc.robot.commands.auto.TurnToGoal;
+import frc.robot.commands.auto.WaitCommand;
 import frc.robot.commands.auto.YeetOffSequence;
+import frc.robot.commands.auto.routines.DriveTrackTest;
 import frc.robot.commands.auto.routines.LeftRocketCloseLow;
+import frc.robot.commands.auto.routines.LeftShipCloseMid;
 import frc.robot.commands.auto.routines.RightRocketCloseMid;
 import frc.robot.commands.auto.routines.RightShipCloseMid;
 import frc.robot.commands.hatch.HatchFeedSequence;
@@ -154,8 +157,11 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("DriveToGoalBackLeft Test", new DriveToGoal(new Point(-30, -100), 5, 0.8, true));
     m_chooser.addObject("DriveToGoalBackRight Test", new DriveToGoal(new Point(30, -100), 5, 0.8, true));
     m_chooser.addObject("Rangefinder Test", new DriveDistance(100, 0, 0.4, FieldPoints.ROCKET_EJECT_DIST, true));
-    m_chooser.addObject("Drive Track Test", new DriveDistance(50, 0, 0.2, FieldPoints.ROCKET_EJECT_DIST, true));
+    m_chooser.addObject("Drive Track Test", new DriveTrackTest());
     m_chooser.addObject("RightShipCloseMid", new RightShipCloseMid());
+    m_chooser.addObject("LeftShipCloseMid", new LeftShipCloseMid());
+    m_chooser.addObject("NO AUTO", new WaitCommand(0.5));
+
     SmartDashboard.putData("Auto modes", m_chooser);
     m_chooser.addObject("LeftRocketCloseLow", new LeftRocketCloseLow());
     SmartDashboard.putData("Auto modes", m_chooser);
@@ -239,7 +245,7 @@ public class Robot extends TimedRobot {
 
     drive.setLeftrampRate(0);
     drive.setRightrampRate(0);
-    //drive.shiftLow();`
+    drive.shiftLow();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -322,22 +328,22 @@ public class Robot extends TimedRobot {
     SmartDashboard.putString("Drivetrain State", driveLoop.getControlState().toString());
     SmartDashboard.putBoolean("Drive Gear", driveLoop.getGear());
 
-    kP_DRIVE = prefs.getDouble("kP_DRIVE", 0);
+    kP_DRIVE = prefs.getDouble("kP_DRIVE", 0.015);
     kI_DRIVE = prefs.getDouble("kI_DRIVE", 0);
-    kD_DRIVE = prefs.getDouble("kD_DRIVE", 0);
+    kD_DRIVE = prefs.getDouble("kD_DRIVE", 0.019);
     kF_DRIVE = prefs.getDouble("kF_DRIVE", 0.12);
 
-    kP_DRIVETURN = prefs.getDouble("kP_DRIVETURN", 0);
+    kP_DRIVETURN = prefs.getDouble("kP_DRIVETURN", 0.02);
     kI_DRIVETURN = prefs.getDouble("kI_DRIVETURN", 0);
-    kD_DRIVETURN = prefs.getDouble("kD_DRIVETURN", 0);
+    kD_DRIVETURN = prefs.getDouble("kD_DRIVETURN", 0.01);
 
-    kP_TURN = prefs.getDouble("kP_TURN", 0);
+    kP_TURN = prefs.getDouble("kP_TURN", 0.02);
     kI_TURN = prefs.getDouble("kI_TURN", 0);
-    kD_TURN = prefs.getDouble("kD_TURN", 0);
+    kD_TURN = prefs.getDouble("kD_TURN", 0.04);
 
-    kP_VISION = prefs.getDouble("kP_VISION", 0);
+    kP_VISION = prefs.getDouble("kP_VISION", 0.0117);
     kI_VISION = prefs.getDouble("kI_VISION", 0);
-    kD_VISION = prefs.getDouble("kD_VISION", 0);
+    kD_VISION = prefs.getDouble("kD_VISION", 0.039);
 
     SmartDashboard.putString("Elevator State", elevatorLoop.getControlState().toString());
     SmartDashboard.putNumber("Elevator Inches", elevator.getElevatorEncoder());
@@ -366,15 +372,15 @@ public class Robot extends TimedRobot {
 
     // VISION
     SmartDashboard.putNumber("X", vision.avg());
-    SmartDashboard.putNumber("Degrees To Target", vision.pixelToDegree(vision.avg()));
+    SmartDashboard.putNumber("Degrees To Target", (vision.pixelToDegree(vision.avg()) - 2.5));
 
-    hsvThresholdHue[0] = prefs.getDouble("HueMin", 30);
+    hsvThresholdHue[0] = prefs.getDouble("HueMin", 65);
     hsvThresholdHue[1] = prefs.getDouble("HueMax", 180);
 
-    hsvThresholdSat[0] = prefs.getDouble("SatMin", 0);
+    hsvThresholdSat[0] = prefs.getDouble("SatMin", 170);
     hsvThresholdSat[1] = prefs.getDouble("SatMax", 255);
 
-    hsvThresholdVal[0] = prefs.getDouble("ValMin", 0);
+    hsvThresholdVal[0] = prefs.getDouble("ValMin", 95);
     hsvThresholdVal[1] = prefs.getDouble("ValMax", 255);
 
     SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());

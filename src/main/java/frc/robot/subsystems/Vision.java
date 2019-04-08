@@ -28,6 +28,7 @@ import edu.wpi.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.util.VisionPipeline;
 import frc.robot.util.RotanglePair;
@@ -94,10 +95,10 @@ public class Vision extends Subsystem {
             camera.setResolution(320, 240);
             // camera.setExposureAuto()
             // camera.setWhiteBalanceAuto();
-            camera.setExposureManual(-10);
+            camera.setExposureManual(-15);
             camera.setExposureHoldCurrent();
             camera.setWhiteBalanceAuto();
-            camera.setBrightness(-10);
+            camera.setBrightness(-15);
 
             // carriage camera settings
             carriageCamera.setResolution(160, 120);
@@ -147,7 +148,7 @@ public class Vision extends Subsystem {
                  * mat as well as the hsvThresholds we provide from the Robot Class Array
                  * Preferences
                  */
-                if (Robot.m_oi.getDriveLeftBumper() || DriverStation.getInstance().isAutonomous()){
+                //if (Robot.m_oi.getDriveLeftBumper() || DriverStation.getInstance().isAutonomous()){
                 VisionPipeline.process(mat, Robot.hsvThresholdHue, Robot.hsvThresholdSat, Robot.hsvThresholdVal);
                 /**
                  * Below is the Method(s) used to draw a rectangle around found contours For
@@ -178,12 +179,12 @@ public class Vision extends Subsystem {
                     Collections.sort(rotangles);
 
                     //For Judges: Draw numbers associated to rotangles 
-                    /*
-                    int loop = 0;
-                    for (Rotangle rot : rotangles) {
-                        Imgproc.putText(frame, Integer.toString(loop), rot.getRect().center, 1, 2.0, new Scalar(0,0,255));
-                        loop++;
-                    }*/
+                    
+                    // int loop = 0;
+                    // for (Rotangle rot : rotangles) {
+                    //     Imgproc.putText(frame, Integer.toString(loop), rot.getRect().center, 1, 2.0, new Scalar(0,0,255));
+                    //     loop++;
+                    // }
 
                     //find all pairs
                     RotanglePair[] pairs = new RotanglePair[numContours-1];
@@ -191,14 +192,15 @@ public class Vision extends Subsystem {
                     for(int n = 0; n < (numContours-1); n++) {
                         pairs[n] = new RotanglePair(rotangles.get(n).getRect(), rotangles.get(n+1).getRect());
                         //For Judges: Draw numbers of paired rotangles
-                        // Imgproc.putText(frame, Integer.toString(n), pairs[n].getCenterPoint(), 1, 1.0, new Scalar(0,255,0));
+                        //Imgproc.putText(frame, Integer.toString(n), pairs[n].getCenterPoint(), 1, 1.0, new Scalar(0,255,0));
                     }
 
                     //find all targets
                     ArrayList<RotanglePair> targets = new ArrayList<RotanglePair>();
 
                     for (int t = 0; t < (numContours - 1); t++) {
-                        if(VisionPipeline.calcSlope(pairs[t].getLeftRotangle()) == -1) { //if left is left sloped and right is right sloped
+                        if((VisionPipeline.calcSlope(pairs[t].getLeftRotangle()) == -1)) { //if left is left sloped and right is right sloped
+                            SmartDashboard.putNumber("Center Y", pairs[t].getCenterY()); 
                             targets.add(pairs[t]);
                         } else {
                         }
@@ -216,6 +218,7 @@ public class Vision extends Subsystem {
                             wanted = i;
                         }
                     } //found pairs
+                    //SmartDashboard.putNumber("Center Y", targets.get(wanted).getCenterY());
 
                     //set average x and y
                     if (targets.size() != 0) {
@@ -235,7 +238,7 @@ public class Vision extends Subsystem {
                         } //drew lines
                     }
 
-                    outputStream.putFrame(frame);
+                    outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                 /** Less than 3 but greater than 0: Rocket Ship */
                 } else if (numContours == 2) {
                     mTrackingState = VisionTrackingState.ROCKET;
@@ -262,6 +265,9 @@ public class Vision extends Subsystem {
                     avgX = target.getCenterX();
                     avgY = target.getCenterY();
 
+                    SmartDashboard.putNumber("Center Y", avgY);
+
+
                     //fill rotangle points into arrays for drawing
                     Point[] leftVertices = new Point[4];
                     target.getLeftRotangle().points(leftVertices);
@@ -276,14 +282,14 @@ public class Vision extends Subsystem {
                     }
 
                     //put the frame to the screen
-                    outputStream.putFrame(frame);
+                    outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                     
                     /** ELSE: No Targets */
                 } else {
                     mTrackingState = VisionTrackingState.NO_TARGET;
                     outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                 }
-            }
+           // }
         }
     });
         

@@ -48,7 +48,7 @@ public class Elevator extends Subsystem {
     magEncoderTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     magEncoderTalon.setInverted(false);
     //sensor phase false in on real robot
-    magEncoderTalon.setSensorPhase(true);
+    magEncoderTalon.setSensorPhase(false);
     magEncoderTalon.setNeutralMode(NeutralMode.Brake);
   
     // Method in order to set a default Motion Magic Velocity and Acceleration 
@@ -106,13 +106,19 @@ public class Elevator extends Subsystem {
       
       magEncoderTalon.configMotionCruiseVelocity(cruiseVelocity, 0);
 
+      if (setpoint > 70){
+        secsToMaxSpeed = 0.6; 
+      }
+
       if ((this.getElevatorEncoder() > 50) && setpoint > this.getElevatorEncoder()){
         //3 second acceleration at top
-        magEncoderTalon.configMotionAcceleration((int) ((NumberConstants.ELEVATOR_MAX_SPEED / 5)/secsToMaxSpeed), 0); 
+        magEncoderTalon.configMotionAcceleration((int) ((NumberConstants.ELEVATOR_MAX_SPEED)/secsToMaxSpeed), 0); 
       } else {
         //regular acceleration
         magEncoderTalon.configMotionAcceleration((int) (NumberConstants.ELEVATOR_MAX_SPEED / secsToMaxSpeed), 0);
       }
+
+    
 
       runElevatorMotionMagic(setpoint * ElectricalConstants.ELEVATOR_TO_INCHES);
   }

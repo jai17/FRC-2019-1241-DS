@@ -29,11 +29,11 @@ public class LeftRocketCloseLow extends CommandGroup {
   //Elevator (parallel) and drive nested (sequential)
   
   public LeftRocketCloseLow() {
-    // addParallel(new SetXY(FieldPoints.LEFT_LEVEL_2));
-    // addSequential(new YeetOffSequence());
+    addParallel(new SetXY(FieldPoints.LEFT_LEVEL_2));
+    addSequential(new YeetOffSequence());
 
     // For without Yeet
-    addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
+    //addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
     
     addSequential(new SetXY(FieldPoints.LEFT_OFF_PLATFORM));
     addSequential(new DriveToGoal(FieldPoints.LEFT_CLOSE_ROCKET, 7.5, 0.9, false));
@@ -42,7 +42,7 @@ public class LeftRocketCloseLow extends CommandGroup {
     addSequential(new DriveTurn(0.6, 5, true));
 
     addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
-    addSequential(new DriveDistance(50, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true));
+    addSequential(new DriveDistance(100, 0, 0.35, FieldPoints.ROCKET_EJECT_DIST, true));
     
     addSequential(new EjectHatchSequence());
     addSequential(new SetXY(FieldPoints.CLOSE_LEFT_ROCKET_SCORE));
@@ -53,7 +53,7 @@ public class LeftRocketCloseLow extends CommandGroup {
     addSequential(new DriveToGoal(FieldPoints.PRE_FEEDER_LEFT, 4, 1, true));
     
     addSequential(new TurnToGoal(FieldPoints.LEFT_FEEDER, 3, 0.8));
-    addSequential(new DriveDistance(100, 0, 0.25, FieldPoints.FEEDER_EJECT_DIST, true)); 
+    addSequential(new DriveDistance(100, 0, 0.35, FieldPoints.FEEDER_EJECT_DIST, true)); 
     addSequential(new SetClawCommand(false));
     addSequential(new SetXY(FieldPoints.LEFT_FEEDER_ROBOT));
 
@@ -63,7 +63,7 @@ public class LeftRocketCloseLow extends CommandGroup {
 
     addSequential(new DriveTurn(0.6, 4, true));
     addSequential(new SetTrayCommand(false));
-    addSequential(new DriveDistance(80, 0, 0.15, FieldPoints.ROCKET_EJECT_DIST, true));
+    addSequential(new DriveDistance(80, 0, 0.35, FieldPoints.ROCKET_EJECT_DIST, true));
     addSequential(new SetXY(FieldPoints.LEFT_FAR_ROCKET_SCORE));
     addSequential(new EjectHatchSequence());
     addSequential(new DriveToGoal(FieldPoints.POST_LEFT_FAR_ROCKET, 4, 1, true));
