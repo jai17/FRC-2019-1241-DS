@@ -82,7 +82,7 @@ public class Vision extends Subsystem {
 
             /** Get the UsbCamera from CameraServer */
             UsbCamera camera = CameraServer.getInstance().startAutomaticCapture(0);
-            UsbCamera carriageCamera = CameraServer.getInstance().startAutomaticCapture(1);
+            //UsbCamera carriageCamera = CameraServer.getInstance().startAutomaticCapture(1);
             // server = CameraServer.getInstance().getServer();
 
             // if (Robot.m_oi.getDriveRightTrigger()){
@@ -101,10 +101,10 @@ public class Vision extends Subsystem {
             camera.setBrightness(-15);
 
             // carriage camera settings
-            carriageCamera.setResolution(160, 120);
-            carriageCamera.setExposureAuto();
-            carriageCamera.setFPS(15);
-            carriageCamera.setBrightness(60);
+            // carriageCamera.setResolution(160, 120);
+            // carriageCamera.setExposureAuto();
+            // carriageCamera.setFPS(15);
+            // carriageCamera.setBrightness(60);
 
             /**
              * Set the FPS NOTE: Param Set will not necessarily be what is displayed
@@ -148,7 +148,7 @@ public class Vision extends Subsystem {
                  * mat as well as the hsvThresholds we provide from the Robot Class Array
                  * Preferences
                  */
-                //if (Robot.m_oi.getDriveLeftBumper() || DriverStation.getInstance().isAutonomous()){
+                if (Robot.m_oi.getDriveLeftBumper() || DriverStation.getInstance().isAutonomous() || Robot.m_oi.getDriveRightTrigger() || Robot.m_oi.getDriveLeftTrigger()){
                 VisionPipeline.process(mat, Robot.hsvThresholdHue, Robot.hsvThresholdSat, Robot.hsvThresholdVal);
                 /**
                  * Below is the Method(s) used to draw a rectangle around found contours For
@@ -199,7 +199,7 @@ public class Vision extends Subsystem {
                     ArrayList<RotanglePair> targets = new ArrayList<RotanglePair>();
 
                     for (int t = 0; t < (numContours - 1); t++) {
-                        if((VisionPipeline.calcSlope(pairs[t].getLeftRotangle()) == -1)) { //if left is left sloped and right is right sloped
+                        if((VisionPipeline.calcSlope(pairs[t].getLeftRotangle()) == -1) && (pairs[t].getCenterX() > 100) && (pairs[t].getCenterX() < 220)) { //if left is left sloped and right is right sloped
                             SmartDashboard.putNumber("Center Y", pairs[t].getCenterY()); 
                             targets.add(pairs[t]);
                         } else {
@@ -213,8 +213,8 @@ public class Vision extends Subsystem {
                     //find target
                     for (int i = 0; i < targets.size(); i++) {
                         if (i == 0) { // assign closest center first run
-                            closestCenter = Math.abs(targets.get(i).getCenterX() - 80);
-                        } else if ((targets.get(i).getCenterX() - 80) < closestCenter) { // if closer to center
+                            closestCenter = Math.abs(targets.get(i).getCenterX() - 160);
+                        } else if ((targets.get(i).getCenterX() - 160) < closestCenter) { // if closer to center
                             wanted = i;
                         }
                     } //found pairs
@@ -238,7 +238,7 @@ public class Vision extends Subsystem {
                         } //drew lines
                     }
 
-                    outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
+                    outputStream.putFrame(frame);
                 /** Less than 3 but greater than 0: Rocket Ship */
                 } else if (numContours == 2) {
                     mTrackingState = VisionTrackingState.ROCKET;
@@ -282,14 +282,14 @@ public class Vision extends Subsystem {
                     }
 
                     //put the frame to the screen
-                    outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
+                    outputStream.putFrame(frame);
                     
                     /** ELSE: No Targets */
                 } else {
                     mTrackingState = VisionTrackingState.NO_TARGET;
                     outputStream.putFrame(VisionPipeline.hsvThresholdOutput());
                 }
-           // }
+           }
         }
     });
         

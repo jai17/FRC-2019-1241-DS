@@ -338,14 +338,14 @@ public class Drivetrain extends Subsystem {
     //shift gears, change constants
     if (high) {
       this.shiftHigh();
-      drivePID.changePIDGains(Robot.kP_DRIVE * 0.1, Robot.kI_DRIVE, Robot.kD_DRIVE * 0.25);
+      drivePID.changePIDGains(Robot.kP_DRIVEHIGH, Robot.kI_DRIVEHIGH, Robot.kD_DRIVEHIGH);
     } else {
       drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
       this.shiftLow();
       if (!track){
       drivePID.changePIDGains(Robot.kP_DRIVE, Robot.kI_DRIVE, Robot.kD_DRIVE);
       } else {
-        drivePID.changePIDGains(Robot.kP_DRIVE * 0.7, Robot.kI_DRIVE, Robot.kD_DRIVE * 1);
+        drivePID.changePIDGains(Robot.kP_DRIVE * 0.7, Robot.kI_DRIVE, Robot.kD_DRIVE * 1.25);
       }
     }
 

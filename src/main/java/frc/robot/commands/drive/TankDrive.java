@@ -36,7 +36,7 @@ public class TankDrive extends Command {
   HatchFeedSequence hatchPickup = HatchFeedSequence.getInstance();
   boolean pickingUp = false;
 
-  //dingus
+  // dingus
   boolean lifting = false;
 
   LevelTwoSequence levelTwoSequence;
@@ -65,15 +65,84 @@ public class TankDrive extends Command {
       if (vision.getTrackingState() == VisionTrackingState.NO_TARGET) {
         degreesToTarget = 0;
       } else {
-        degreesToTarget = vision.pixelToDegree(xVal) -2 ;
+        degreesToTarget = vision.pixelToDegree(xVal) ;
       }
       // added offset to compensate for camera
 
       yVal = vision.avgY();
       degreesToTargetY = vision.pixelToDegreeY(yVal);
 
-      if (Robot.m_oi.getDriveLeftBumper()) {   // tracking
-        if (vision.mTrackingState == VisionTrackingState.ROCKET || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+      if (Robot.m_oi.getDriveRightTrigger()) {
+        if (vision.mTrackingState == VisionTrackingState.ROCKET
+            || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
+        } else {
+          driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        }
+        driveLoop.setPIDType(false);
+        driveLoop.setSpeedPID(1);
+
+        if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setMaxOutput(0.3); // 0.6
+        } else {
+          driveLoop.setMaxOutput(0.75); // 0.7
+        }
+
+        if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
+            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
+          driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
+
+          if (Robot.carriage.getUltrasonicLeft() < 10) {
+            driveLoop.setStick(0); // 0.6
+          } else if (Robot.carriage.getUltrasonicLeft() < 30){
+            driveLoop.setStick(-0.18); // 0.7
+          } else {
+            driveLoop.setStick(-0.55); // 0.7
+          }
+          driveLoop.setTolerancePID(1);
+
+        } else {
+          driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+        }
+
+      } else if (Robot.m_oi.getDriveLeftTrigger()) {
+        if (vision.mTrackingState == VisionTrackingState.ROCKET
+            || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
+        } else {
+          driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        }
+        driveLoop.setPIDType(false);
+        driveLoop.setSpeedPID(1);
+
+        if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setMaxOutput(0.3); // 0.6
+        } else {
+          driveLoop.setMaxOutput(0.75); // 0.7
+        }
+
+        if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
+            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
+          driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
+
+          if (Robot.carriage.getUltrasonicLeft() < 8) {
+            driveLoop.setStick(0); // 0.6
+          } else if (Robot.carriage.getUltrasonicLeft() < 25){
+            driveLoop.setStick(-0.18); // 0.7
+          } else {
+            driveLoop.setStick(-0.45); // 0.7
+          }
+          driveLoop.setTolerancePID(1);
+
+        } else {
+          driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+        }
+
+      } else if (Robot.m_oi.getDriveLeftBumper()) { // tracking
+        if (vision.mTrackingState == VisionTrackingState.ROCKET
+            || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
           driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
@@ -81,12 +150,13 @@ public class TankDrive extends Command {
         driveLoop.setPIDType(false);
         driveLoop.setSpeedPID(1);
         if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
-          driveLoop.setMaxOutput(0.4); // 0.6
+          driveLoop.setMaxOutput(0.3); // 0.6
         } else {
           driveLoop.setMaxOutput(0.75); // 0.7
         }
         // driveLoop.selectGear(true);
-        if ((vision.getTrackingState() == VisionTrackingState.ROCKET) || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
+        if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
+            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
           driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
           driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.50);
         } else {
@@ -96,13 +166,6 @@ public class TankDrive extends Command {
         // driveLoop.setStick(Robot.m_oi.getDriveRightY() * 0.75);
         driveLoop.setTolerancePID(1);
 
-        // half speed
-      } else if (Robot.m_oi.getDriveRightTrigger()) {
-        driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-        driveLoop.setLeftDrive(-0.5 * Robot.m_oi.getDriveLeftY());
-        driveLoop.setRightDrive(0.5 * Robot.m_oi.getDriveRightY());
-
-        // regular
       } else if ((Math.abs(Robot.m_oi.getDriveRightY()) > 0.05) || (Math.abs(Robot.m_oi.getDriveLeftY()) > 0.05)) {
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         // driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
@@ -120,8 +183,8 @@ public class TankDrive extends Command {
         } else {
           drive.setLeftrampRate(0);
           drive.setRightrampRate(0);
-          driveLoop.setLeftDrive(-0.85 * Robot.m_oi.getDriveLeftY());
-          driveLoop.setRightDrive(0.85 * Robot.m_oi.getDriveRightY());
+          driveLoop.setLeftDrive(-0.78 * Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(0.78 * Robot.m_oi.getDriveRightY());
         }
         // no drive
       } else {
@@ -132,26 +195,26 @@ public class TankDrive extends Command {
 
       driveLoop.selectGear(Robot.m_oi.getDriveRightBumper());
 
-      if (Robot.m_oi.getDriveLeftTrigger()){
+      if (Robot.m_oi.getDriveYButton()) {
         if (!LevelTwoSequence.getInstance().isRunning() && !lifting) {
           levelTwoSequence.start();
           System.out.println("LEVEL 2 SEQUENCE RUNNING");
           lifting = true;
-        } 
-     } else {
+        }
+      } else {
         if (lifting) {
           levelTwoSequence.cancel();
           System.out.println("LEVEL 2 SEQUENCE CANCELLING");
           lifting = false;
         }
-     }
-    // if (Robot.m_oi.getDriveLeftTrigger()){
-    //    driveLoop.engageLifter(true);
-    // } else {
-    //   driveLoop.engageLifter(false);
-    // }
+      }
+      // if (Robot.m_oi.getDriveLeftTrigger()){
+      // driveLoop.engageLifter(true);
+      // } else {
+      // driveLoop.engageLifter(false);
+      // }
     }
-   }
+  }
 
   // Make this return true when this Command no longer needs to run execute()
   @Override

@@ -113,7 +113,7 @@ public class DriveToGoal extends Command {
 		goalAngle = goalAngle + drive.getAngle();
 
 		// calculate drive setpoint
-		currentSetpoint = drive.getAveragePos() + totalDist + tolerance;
+		currentSetpoint = drive.getAveragePos() + totalDist + 2*tolerance;
 
 		// update state machine
 		driveLoop.setDistancePID(currentSetpoint); // set distance setpoint
@@ -158,12 +158,12 @@ public class DriveToGoal extends Command {
 			if (Math.abs(deltaAngle) < (360 - Math.abs(deltaAngle))) {
 				goalAngle = deltaAngle;
 			} else {
-				goalAngle = (Math.signum(drive.getYaw() * 180) - drive.getYaw())
+				goalAngle = (Math.signum(drive.getYaw()) * 180 - drive.getYaw())
 							- (Math.signum(goalYaw) * 180 - goalYaw);
 			}
 			goalAngle += drive.getAngle();
 			
-			currentSetpoint = drive.getAveragePos() + totalDist + tolerance;
+			currentSetpoint = drive.getAveragePos() + totalDist + 2*tolerance;
 		}
 
 		// dbg

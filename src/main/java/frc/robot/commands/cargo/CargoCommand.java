@@ -92,7 +92,6 @@ public class CargoCommand extends Command {
           //carriageLoop.setIsShooting(true); //need isShooting, not shooting
           carriageLoop.setShooterSpeed(0);
           carriageLoop.setCarriageState(CarriageControlState.OPEN_LOOP);
-          System.out.println("Pivot Up and Has Ball"); 
 
         }  else if (Math.abs(cargo.getCargoAngle()) <= 1500 && !cargo.isCargoPresent()) { //pivot down, has ball
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
@@ -102,7 +101,6 @@ public class CargoCommand extends Command {
           carriageLoop.setShooterSpeed(0);
           cargoLoop.setIsIntaking(false); //intaking
           cargoLoop.setRollerSpeed(0);
-          System.out.println("Pivot Down and Has Ball"); 
 
         } else if (cargo.isCargoPresent() && Math.abs(cargo.getCargoAngle()) > 900) { //pivot down, no ball
           cargoLoop.setIsIntaking(true);
@@ -110,13 +108,11 @@ public class CargoCommand extends Command {
           // carriageLoop.setIsFeeding(false);
           // carriageLoop.setFeederSpeed(0);
           cargoLoop.setCargoState(CargoControlState.MOTION_MAGIC);
-          System.out.println("Pivot Down and No Ball"); 
 
         } else { //button pressed, no ball
           cargoLoop.setRollerSpeed(0);
           // carriageLoop.setIsFeeding(true);
           // carriageLoop.setFeederSpeed(0);
-          System.out.println("No Ball"); 
         }
       } else { //no ball
         cargoLoop.setIsIntaking(true);

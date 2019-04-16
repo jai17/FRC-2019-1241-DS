@@ -27,6 +27,51 @@ public class RightShipCloseMid extends CommandGroup {
    * Add your docs here.
    */
   public RightShipCloseMid() {
+
+    // //Get off Level 2
+addSequential(new YeetOffSequence());
+//Drive to close cargo bay
+addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION+3, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
+addSequential(new DriveDistance (157, 5, 1, 15, 0, false));
+//Extend Tray while turning to close cargo bay
+addParallel(new SetTrayCommand(false));
+addSequential(new DriveTurn(-90, 0.75, 5));
+addSequential(new DriveTurn (0.5, 3.5, true));
+//Drive Track to cargo bay
+addSequential(new DriveDistance(60, 0, 0.25, FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
+//addSequential(new DriveDistance (46 , -90, 1, 4));
+//Eject Hatch
+addSequential(new EjectHatchSequence());
+
+//Drive Back 
+addSequential(new DriveDistance (-40 , -90, 1, 12, 0, false));
+//Turn to Feeder
+addSequential(new DriveTurn(-190, 1, 15));
+//Drive To Feeder
+addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
+addSequential(new DriveDistance (215, -190, 0.90, 20, 0, true));
+//Turn to Feeder
+addSequential(new DriveTurn(-180, 1, 8));
+//Drive Track To Feeder
+addSequential(new DriveDistance(150, 0, 0.6, FieldPoints.FEEDER_EJECT_DIST, true)); 
+//addSequential(new DriveDistance (42 , -180, 1, 4));
+//Close Fingers 
+addSequential(new SetClawCommand(false));
+
+//Drive Back to second cargo bay
+addSequential(new DriveDistance (-287, -195, 0.8, 10, 0, true));
+//Extend Tray while turning to close cargo bay
+addParallel(new SetTrayCommand(false));
+addSequential(new DriveTurn(-75, 0.3, 6));
+addSequential(new DriveTurn (0.3, 3, true));
+//Drive Track to cargo bay
+addSequential(new DriveDistance(60, 0, 0.3, FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
+//addSequential(new DriveDistance (46 , -90, 1, 4));
+//Eject Hatch
+addSequential(new EjectHatchSequence());
+
+
+/*Old
 //HIGH PID FALSE IN DRIVETURN
 //addParallel(new SetXY(FieldPoints.RIGHT_LEVEL_2));
 //Get off Level 2
@@ -60,6 +105,10 @@ addSequential(new DriveDistance (-280 , -192, 1, 6));
 //Extend Tray while turning to close cargo bay
 //addParallel(new SetTrayCommand(false));
 addSequential(new DriveTurn(-90, 1, 6));
+*/
+//OLD
+
+
 //Drive Track to cargo bay
 //addSequential(new DriveDistance(50, 0, 0.3, FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
 //addSequential(new DriveDistance (46 , -90, 1, 4));

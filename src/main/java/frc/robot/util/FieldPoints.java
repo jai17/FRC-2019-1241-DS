@@ -22,7 +22,7 @@ public class FieldPoints {
     public static final Point LEFT_FAR_ROCKET_SCORE = new Point(38,265); //57, 315
     public static final Point LEFT_MID_ROCKET = new Point(65,250);
     public static final Point POST_LEFT_CLOSE_ROCKET = new Point(43,157);
-    public static final Point POST_LEFT_FAR_ROCKET = new Point(65,275);
+    public static final Point POST_LEFT_FAR_ROCKET = new Point(65,280);
 
     public static final Point LEFT_ROCKET = new Point(12,240);
     public static final Point CLOSE_LEFT_ROCKET_SCORE = new Point(25, 195);
@@ -37,9 +37,9 @@ public class FieldPoints {
     public static final Point LEFT_FEEDER_ROBOT = new Point(24, 18);
 
     //ejection distances
-    public static final double CARGO_SHIP_EJECT_DIST = 14.5;
-    public static final double ROCKET_EJECT_DIST = 8;
-    public static final double FEEDER_EJECT_DIST = 6.5;
+    public static final double CARGO_SHIP_EJECT_DIST = 17;
+    public static final double ROCKET_EJECT_DIST = 13;
+    public static final double FEEDER_EJECT_DIST = 10;
 
 
     //cargo ship

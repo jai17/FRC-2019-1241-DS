@@ -82,6 +82,7 @@ public class Robot extends TimedRobot {
   Preferences prefs;
 
   public static double kP_DRIVE, kI_DRIVE, kD_DRIVE, kF_DRIVE;
+  public static double kP_DRIVEHIGH, kI_DRIVEHIGH, kD_DRIVEHIGH; 
   public static double kP_DRIVETURN, kI_DRIVETURN, kD_DRIVETURN;
   public static double kP_TURN, kI_TURN, kD_TURN;
   public static double kP_VISION, kI_VISION, kD_VISION;
@@ -148,8 +149,12 @@ public class Robot extends TimedRobot {
 
     m_chooser.addDefault("RightRocketCloseMid", new RightRocketCloseMid());
     m_chooser.addObject("Drive Test", new DriveDistance(80, 0, 2, 0.85, 1));
+    m_chooser.addObject("Drive Test HIGH", new DriveDistance(150, 0, 1, 10, 1, true));
     m_chooser.addObject("EjectHatchSequence", new EjectHatchSequence());
-    m_chooser.addObject("Drive Turn Test", new DriveTurn(90, 1, 2, 1));
+    m_chooser.addObject("Drive Turn 90 Test", new DriveTurn(90, 1, 2, 1));
+    m_chooser.addObject("Drive Turn -90 Test", new DriveTurn(-90, 1, 2, 1));
+    m_chooser.addObject("Drive Turn -180 Test", new DriveTurn(-180, 1, 2, 1));
+    m_chooser.addObject("Drive Turn 180 Test", new DriveTurn(180, 1, 2, 1));
     m_chooser.addObject("Yeet Off Sequence", new YeetOffSequence());
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
     m_chooser.addObject("DriveToGoalLeft Test", new DriveToGoal(new Point(-30, 100), 5, 0.8, false));
@@ -207,6 +212,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    drive.setLeftCoastMode();
+    drive.setRightCoastMode();
     logger.close();
     looper.stop();
     maxElevatorSpeed = 0;
@@ -215,6 +222,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+    drive.setLeftCoastMode();
+    drive.setRightCoastMode();
     Scheduler.getInstance().run();
     updateSmartDashboard();
   }
@@ -233,19 +242,21 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    drive.setLeftBrakeMode();
+    drive.setRightBrakeMode();
     m_autonomousCommand = m_chooser.getSelected();
     looper.start();
     logger.openFile("Auton Init");
 
     // carriageLoop.setClawPos(true);
-    drive.reset();
+    //drive.reset();
     drive.resetXY();
     carriage.extendCarriage();
     carriage.prisonBreak();
 
     drive.setLeftrampRate(0);
     drive.setRightrampRate(0);
-    drive.shiftLow();
+    //drive.shiftLow();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -258,6 +269,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    drive.setLeftBrakeMode();
+    drive.setRightBrakeMode();
     if (m_oi.getDriveStartButton()) {
       m_autonomousCommand.cancel();
     }
@@ -290,6 +303,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    drive.setLeftBrakeMode();
+    drive.setRightBrakeMode();
     Scheduler.getInstance().run();
     updateSmartDashboard();
 
@@ -332,6 +347,10 @@ public class Robot extends TimedRobot {
     kI_DRIVE = prefs.getDouble("kI_DRIVE", 0);
     kD_DRIVE = prefs.getDouble("kD_DRIVE", 0.019);
     kF_DRIVE = prefs.getDouble("kF_DRIVE", 0.12);
+    
+    kP_DRIVEHIGH = prefs.getDouble("kP_DRIVEHIGH", 0.015);
+    kI_DRIVEHIGH = prefs.getDouble("kI_DRIVEHIGH", 0);
+    kD_DRIVEHIGH = prefs.getDouble("kD_DRIVEHIGH", 0.019);
 
     kP_DRIVETURN = prefs.getDouble("kP_DRIVETURN", 0.02);
     kI_DRIVETURN = prefs.getDouble("kI_DRIVETURN", 0);
@@ -384,6 +403,7 @@ public class Robot extends TimedRobot {
     hsvThresholdVal[1] = prefs.getDouble("ValMax", 255);
 
     SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());
+    SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime()); 
 
     // SmartDashboard.putData("Hatch Command Sequence", new HatchFeedSequence());
 

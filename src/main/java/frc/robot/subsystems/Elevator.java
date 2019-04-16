@@ -47,7 +47,7 @@ public class Elevator extends Subsystem {
     //Set up Mag Encoders
     magEncoderTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     magEncoderTalon.setInverted(false);
-    //sensor phase false in on real robot
+    //sensor phase true in on real robot
     magEncoderTalon.setSensorPhase(false);
     magEncoderTalon.setNeutralMode(NeutralMode.Brake);
   

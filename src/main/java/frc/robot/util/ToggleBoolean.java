@@ -31,4 +31,8 @@ public class ToggleBoolean {
 	public boolean get(){
 		return toggle;
 	}
+
+	public void setTime(double waitTime){
+		this.waitTime = waitTime; 
+	}
 }

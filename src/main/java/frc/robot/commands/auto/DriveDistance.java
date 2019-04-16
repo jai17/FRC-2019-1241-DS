@@ -35,6 +35,7 @@ public class DriveDistance extends Command {
   double initDistance = 0;
   boolean relative;
   boolean highPID;
+  int stopDrive = 1; 
 
   Timer timer;
   Timer rangeTimer;
@@ -51,6 +52,7 @@ public class DriveDistance extends Command {
     this.track = false;
     this.relative = true;
     this.highPID = false;
+    this.stopDrive = 1; 
     requires(drive);
   }
 
@@ -64,6 +66,20 @@ public class DriveDistance extends Command {
     this.track = false;
     this.relative = false;
     this.highPID = false;
+    this.stopDrive = 1; 
+    requires(drive);
+  }
+
+  public DriveDistance(double distance, double angle, double speed, double tolerance, int stopDrive, boolean highPID) {
+    this.distance = distance;
+    this.angle = angle;
+    this.timeOut = 0;
+    this.speed = speed;
+    this.tolerance = tolerance;
+    this.stopDrive = stopDrive; 
+    this.track = false;
+    this.relative = false;
+    this.highPID = highPID;
 
     requires(drive);
   }
@@ -75,6 +91,7 @@ public class DriveDistance extends Command {
     this.tolerance = tolerance;
     this.track = track;
     this.highPID = false;
+    this.stopDrive = 1; 
     requires(drive);
   }
 
@@ -90,12 +107,12 @@ public class DriveDistance extends Command {
     // drive.reset();
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal) - 2;
+    degreesToTarget = vision.pixelToDegree(xVal) - 2.75;
 
     driveLoop.setPIDType(true);
     driveLoop.setTrackPID(track);
     driveLoop.setHighPID(highPID);
-    driveLoop.setDistancePID(distance + drive.getAveragePos());
+    driveLoop.setDistancePID(distance + drive.getAveragePos() + Math.signum(distance) * tolerance);
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
       setTimeout(3);
@@ -121,7 +138,7 @@ public class DriveDistance extends Command {
   protected void execute() {
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal) - 2;
+    degreesToTarget = vision.pixelToDegree(xVal)  - 2.75;
 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
@@ -159,18 +176,12 @@ public class DriveDistance extends Command {
       if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
         rangeTimer.start();
         rangeTimerStarted = true;
-        System.out.println("DRIVEDISTANCE_RANGEFINDER: STARTED AT: " + carriage.getUltrasonicLeft());
       }
       if (rangeTimerStarted) { 
-        System.out.println("DriveDistance: Checking Ramge Finder Time AT " + carriage.getUltrasonicLeft());
-        logger.logd("DriveDistanceTrack", "Checking Range Finder At " + carriage.getUltrasonicLeft() + " , " + rangeTimer.get());
         if (carriage.getUltrasonicLeft() < tolerance){
-        if (rangeTimer.get() > 0.75) {
+        if (rangeTimer.get() > 0.5) {
           isFinished = true;
-          System.out.println(
-              "DriveDistance: Range Finder Timed Out AT" + carriage.getUltrasonicLeft() + " " + rangeTimer.get());
-          logger.logd("DriveDistanceTrack", "Checking Range Finder Timed Out At " + carriage.getUltrasonicLeft() + " , " + rangeTimer.get());
-        }
+          }
       } else {
         rangeTimerStarted = false; 
         rangeTimer.reset();
@@ -178,17 +189,14 @@ public class DriveDistance extends Command {
       }
       return isFinished;
     } else {
-      System.out.println("DriveDistance Angle" + drive.getAngle() + " , " + angle);
 
       if (Math.signum(distance) == 1){
         if (drive.getAveragePos() > (initDistance + distance - tolerance)){
-          System.out.println("Checking Drive Distance Positive AT current: " + drive.getAveragePos() + " , " + distance);
           return true; 
         } else {
           return false; 
         }
       } else {
-        System.out.println("Checking Drive Distance AT current: " + drive.getAveragePos() + " , " + distance);
         if (drive.getAveragePos() < (initDistance + distance + tolerance)){
           return true; 
         } else {
@@ -202,16 +210,16 @@ public class DriveDistance extends Command {
   // Called once after isFinished returns true
   @Override
   protected void end() {
+    if (stopDrive == 1){
     drive.runLeftDrive(0);
     drive.runRightDrive(0);
+    }
     driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-    System.out.println(this.toString() + " HAS FINISHED");
   }
 
   // Called when another command which requires one or more of the same
   // subsystems is scheduled to run
   @Override
   protected void interrupted() {
-    System.out.println(this.toString() + " WAS INTERRUPTED");
   }
 }

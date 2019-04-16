@@ -19,9 +19,9 @@ public class EjectHatchSequence extends CommandGroup {
   public EjectHatchSequence() {
     addSequential(new SetClawCommand(true));
     addSequential(new SetEjectorCommand(false));
-    addSequential(new WaitCommand(0.1));
+    addSequential(new WaitCommand(0.07));
     addSequential(new SetTrayCommand(true));
-    addSequential(new WaitCommand(0.25));
+    // addSequential(new WaitCommand(0.25));
     addSequential(new SetEjectorCommand(true));
  
   }
