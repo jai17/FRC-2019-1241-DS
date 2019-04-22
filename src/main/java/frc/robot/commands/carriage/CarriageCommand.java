@@ -59,10 +59,15 @@ public class CarriageCommand extends Command {
     if (!DriverStation.getInstance().isAutonomous()) {
       // pneumatic toggles
       if(Robot.m_oi.getDriveLeftTrigger() && carriage.getUltrasonicLeft() < 8 && Robot.vision.pixelToDegree(Robot.vision.avg()) < 4){
-        clawToggle.setTime(0.5);
-        ejectToggle.setTime(0.5);
-        clawToggle.set(false);
-        ejectToggle.set(true);
+        clawToggle.setTime(2);
+        ejectToggle.setTime(2);
+        sliderToggle.setTime(2);
+        clawToggle.set(true);
+        ejectToggle.set(false);
+        if (!carriageLoop.getSliderPos()){
+        sliderToggle.set(true);
+        }
+        System.out.println("Ejecting");
       }
 
       if (Robot.m_oi.getDriveRightTrigger() && carriage.getUltrasonicLeft() < 10

@@ -56,7 +56,7 @@ public class CarriageLoop implements Loop{
 		switch (mControlState) {
 			case OPEN_LOOP:
 			if (!DriverStation.getInstance().isAutonomous()){
-				if (!Robot.m_oi.getDriveLeftTrigger()){
+				//if (!Robot.m_oi.getDriveLeftTrigger()){
 				if (isRetracted) { //slider
 					carriage.extendCarriage();
 					// System.out.println("EXTEND CARRIAGE");
@@ -77,7 +77,7 @@ public class CarriageLoop implements Loop{
 				} else {
 					carriage.prisonBreak();
 				}
-			}
+			
 			}
 
 			// if (carriage.getOptic() && isShooting) { //if no ball and is shooting

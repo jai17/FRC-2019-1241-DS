@@ -106,12 +106,14 @@ public class DrivetrainLoop implements Loop {
 
 			// add point following code here
 			return;
+
 		case VISION_TRACKING:
 			updateXY();
 
 			drive.shiftLow();
 			drive.trackTurnPID(angle, speed, tolerance, stick, maxOutput);
 			return;
+			
 		case LOCK:
 			//drive.drivePID(lockPos, lockAng, speed, 0);
 			return;

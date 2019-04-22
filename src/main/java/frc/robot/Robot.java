@@ -25,14 +25,17 @@ import frc.robot.commands.auto.DriveDistance;
 import frc.robot.commands.auto.DriveToGoal;
 import frc.robot.commands.auto.DriveTurn;
 import frc.robot.commands.auto.EjectHatchSequence;
+import frc.robot.commands.auto.TrackDrive;
 import frc.robot.commands.auto.TurnToGoal;
 import frc.robot.commands.auto.WaitCommand;
 import frc.robot.commands.auto.YeetOffSequence;
 import frc.robot.commands.auto.routines.DriveTrackTest;
 import frc.robot.commands.auto.routines.LeftRocketCloseLow;
 import frc.robot.commands.auto.routines.LeftShipCloseMid;
+import frc.robot.commands.auto.routines.LeftShipFrontClose;
 import frc.robot.commands.auto.routines.RightRocketCloseMid;
 import frc.robot.commands.auto.routines.RightShipCloseMid;
+import frc.robot.commands.auto.routines.RightShipFrontClose;
 import frc.robot.commands.hatch.HatchFeedSequence;
 import frc.robot.loops.CargoLoop;
 import frc.robot.loops.CarriageLoop;
@@ -166,6 +169,9 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("RightShipCloseMid", new RightShipCloseMid());
     m_chooser.addObject("LeftShipCloseMid", new LeftShipCloseMid());
     m_chooser.addObject("NO AUTO", new WaitCommand(0.5));
+    m_chooser.addObject("TrackDrive", new TrackDrive(false));
+    m_chooser.addObject("LeftShipFrontClose", new LeftShipFrontClose());
+    m_chooser.addObject("RightShipFrontClose", new RightShipFrontClose());
 
     SmartDashboard.putData("Auto modes", m_chooser);
     m_chooser.addObject("LeftRocketCloseLow", new LeftRocketCloseLow());
@@ -289,7 +295,6 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     updateSmartDashboard();
-    logger.openFile("Teleop init");
     looper.start();
 
     // carriageLoop.setClawPos(true);
@@ -303,6 +308,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    if (m_oi.getDriveStartButton() && m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
     drive.setLeftBrakeMode();
     drive.setRightBrakeMode();
     Scheduler.getInstance().run();
@@ -375,9 +383,9 @@ public class Robot extends TimedRobot {
 
     // Carriage
     SmartDashboard.putBoolean("Cargo Present Carriage", carriage.getOptic());
-    SmartDashboard.putBoolean("Tray Position", carriageLoop.getSliderPos());
+    SmartDashboard.putBoolean("Tray Position", !carriageLoop.getSliderPos());
     SmartDashboard.putBoolean("Ejector Position", carriageLoop.getEjectorPos());
-    SmartDashboard.putBoolean("Claw Position", carriageLoop.getClawPos());
+    SmartDashboard.putBoolean("Claw Position", !carriageLoop.getClawPos());
     //SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight());
     SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft());
     shooterSpeed = prefs.getDouble("shooterSpeed", 1);
@@ -391,7 +399,7 @@ public class Robot extends TimedRobot {
 
     // VISION
     SmartDashboard.putNumber("X", vision.avg());
-    SmartDashboard.putNumber("Degrees To Target", (vision.pixelToDegree(vision.avg()) - 2.5));
+    SmartDashboard.putNumber("Degrees To Target", (vision.pixelToDegree(vision.avg())));
 
     hsvThresholdHue[0] = prefs.getDouble("HueMin", 65);
     hsvThresholdHue[1] = prefs.getDouble("HueMax", 180);

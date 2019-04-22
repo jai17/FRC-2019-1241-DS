@@ -1,6 +1,7 @@
 package frc.robot.commands.auto;
 
 import edu.wpi.first.wpilibj.command.Command;
+import frc.robot.Robot;
 
 /**
  * @author RickHansen Robotics
@@ -26,6 +27,7 @@ public class WaitCommand extends Command {
     }
 
     protected void end() {
+        System.out.println("WC_END: " + Robot.drive.getAngle());
     }
 
     protected void interrupted() {

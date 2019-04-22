@@ -43,6 +43,8 @@ public class DriveDistance extends Command {
   boolean started = true;
   boolean isFinished = false;
 
+  private double offset = 1.5;
+
   public DriveDistance(double distance, double angle, double timeOut, double speed, double tolerance) {
     this.distance = distance;
     this.angle = angle;
@@ -101,13 +103,10 @@ public class DriveDistance extends Command {
     timer = new Timer();
     rangeTimer = new Timer();
 
-    rangeTimerStarted = false;
-    isFinished = false;
-
     // drive.reset();
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal) - 2.75;
+    degreesToTarget = vision.pixelToDegree(xVal) + offset;
 
     driveLoop.setPIDType(true);
     driveLoop.setTrackPID(track);
@@ -138,13 +137,14 @@ public class DriveDistance extends Command {
   protected void execute() {
 
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal)  - 2.75;
+    degreesToTarget = vision.pixelToDegree(xVal) + offset;
 
     if (track) {
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
       // System.out.println(
       // "Distance: " + (drive.getAveragePos() - distance) + " Angle: " +
       // (drive.getAngle() - degreesToTarget));
+      logger.logd("DriveDistance: ", "Vision Angle: " + (drive.getAngle() - degreesToTarget));
     }
 
     // driveLoop.selectGear(false);
@@ -173,31 +173,34 @@ public class DriveDistance extends Command {
   protected boolean isFinished() {
 
     if (track) {
+      logger.logd("DriveDistance_T: ", "isFinished: " + (carriage.getUltrasonicLeft() < tolerance));
       if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
         rangeTimer.start();
         rangeTimerStarted = true;
       }
       if (rangeTimerStarted) { 
         if (carriage.getUltrasonicLeft() < tolerance){
-        if (rangeTimer.get() > 0.5) {
-          isFinished = true;
-          }
-      } else {
-        rangeTimerStarted = false; 
-        rangeTimer.reset();
-      }
+          if (rangeTimer.get() > 0.05) {
+              isFinished = true;
+            }
+        } else {
+          rangeTimerStarted = false; 
+          rangeTimer.reset();
+        }
       }
       return isFinished;
     } else {
 
       if (Math.signum(distance) == 1){
         if (drive.getAveragePos() > (initDistance + distance - tolerance)){
+          logger.logd("DriveDistance_D: ", " finished");
           return true; 
         } else {
           return false; 
         }
       } else {
         if (drive.getAveragePos() < (initDistance + distance + tolerance)){
+          logger.logd("DriveDistance_D: ", " finished");
           return true; 
         } else {
           return false;
@@ -211,10 +214,11 @@ public class DriveDistance extends Command {
   @Override
   protected void end() {
     if (stopDrive == 1){
-    drive.runLeftDrive(0);
-    drive.runRightDrive(0);
+      drive.runLeftDrive(0);
+      drive.runRightDrive(0);
     }
     driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+    logger.logd("", "e\n");
   }
 
   // Called when another command which requires one or more of the same

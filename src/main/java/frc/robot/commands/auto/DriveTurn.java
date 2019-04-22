@@ -11,6 +11,7 @@ import frc.robot.loops.DrivetrainLoop;
 import frc.robot.loops.DrivetrainLoop.DriveControlState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Vision;
+import frc.robot.util.Logger;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class DriveTurn extends Command {
@@ -18,6 +19,7 @@ public class DriveTurn extends Command {
   Drivetrain drive = Drivetrain.getInstance();
   DrivetrainLoop driveLoop = DrivetrainLoop.getInstance();
   Vision vision = Vision.getInstance();
+  Logger logger = Logger.getInstance();
 
   double angle;
   double speed;
@@ -27,6 +29,7 @@ public class DriveTurn extends Command {
 
   double xVal;
   double degreesToTarget;
+  private double offset;
 
   public DriveTurn(double angle, double speed, double timeOut, double tolerance) {
     this.angle = angle;
@@ -57,7 +60,7 @@ public class DriveTurn extends Command {
   protected void initialize() {
     // drive.reset();
     xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal) - 2.75;
+    degreesToTarget = vision.pixelToDegree(xVal) + offset;
 
     driveLoop.setPIDType(false);
     driveLoop.setTrackPID(track);
@@ -70,14 +73,16 @@ public class DriveTurn extends Command {
     driveLoop.setTolerancePID(tolerance);
     driveLoop.setSpeedPID(speed);
     driveLoop.setDriveState(DriveControlState.PID);
+
+    offset = 2.5;
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    xVal = vision.avg();
-    degreesToTarget = vision.pixelToDegree(xVal) - 2.75;
     if (track) {
+      xVal = vision.avg();
+      degreesToTarget = vision.pixelToDegree(xVal) + offset;
       driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
     }
   }
@@ -88,6 +93,7 @@ public class DriveTurn extends Command {
 
     if (track) {
       if (Math.abs(degreesToTarget) < tolerance) {
+        logger.logd("DriveTurn: ", " vision angle within tolerance");
         return true;
       } else {
         return false;
@@ -95,12 +101,14 @@ public class DriveTurn extends Command {
     } else {
       if (Math.signum(angle) == 1) {
         if (Math.abs(angle - drive.getAngle()) < (tolerance)) {
+          logger.logd("DriveTurn: ", " + angle within tolerance");
           return true;
         } else {
           return false;
         }
       } else {
         if ((Math.abs((angle - drive.getAngle())) < (tolerance))) {
+          logger.logd("DriveTurn: ", " - angle within tolerance");
           return true;
         } else {
           return false;

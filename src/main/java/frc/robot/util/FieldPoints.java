@@ -37,10 +37,9 @@ public class FieldPoints {
     public static final Point LEFT_FEEDER_ROBOT = new Point(24, 18);
 
     //ejection distances
-    public static final double CARGO_SHIP_EJECT_DIST = 17;
-    public static final double ROCKET_EJECT_DIST = 13;
+    public static final double CARGO_SHIP_EJECT_DIST = 12;
+    public static final double ROCKET_EJECT_DIST = 12;
     public static final double FEEDER_EJECT_DIST = 10;
-
 
     //cargo ship
     public static final Point CLOSE_RIGHT_CARGO_PRE_SCORE = new Point(240, 250);

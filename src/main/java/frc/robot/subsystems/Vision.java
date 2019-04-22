@@ -265,8 +265,6 @@ public class Vision extends Subsystem {
                     avgX = target.getCenterX();
                     avgY = target.getCenterY();
 
-                    SmartDashboard.putNumber("Center Y", avgY);
-
 
                     //fill rotangle points into arrays for drawing
                     Point[] leftVertices = new Point[4];

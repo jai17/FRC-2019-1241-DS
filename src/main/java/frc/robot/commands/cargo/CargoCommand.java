@@ -57,7 +57,7 @@ public class CargoCommand extends Command {
         timer.start();
         started = true;
       }
-      if (!cargo.getOptic() && timer.get() > 0.005) {
+      if (!cargo.getOptic() && timer.get() > 0.000) { //0.005
         timer.reset();
         timer.stop();
         cargo.setContains(true);

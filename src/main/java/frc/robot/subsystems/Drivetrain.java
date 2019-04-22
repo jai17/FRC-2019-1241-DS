@@ -206,6 +206,11 @@ public class Drivetrain extends Subsystem {
     rightMaster.setOpenLoopRampRate(rate);
   }
 
+  public void setRampRate(double rate) {
+    leftMaster.setOpenLoopRampRate(rate);
+    rightMaster.setOpenLoopRampRate(rate);
+  }
+
   public void runLeftDrive(double speed) {
     leftMaster.set(speed);
   }

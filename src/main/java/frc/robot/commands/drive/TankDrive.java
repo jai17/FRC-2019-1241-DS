@@ -10,6 +10,7 @@ package frc.robot.commands.drive;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.NumberConstants;
 import frc.robot.Robot;
 import frc.robot.commands.auto.routines.LevelTwoSequence;
 import frc.robot.commands.hatch.HatchFeedSequence;
@@ -27,6 +28,7 @@ public class TankDrive extends Command {
   Drivetrain drive;
 
   ToggleBoolean toggle;
+  private double offset;
 
   // For Vision
   double xVal, degreesToTarget;
@@ -46,6 +48,8 @@ public class TankDrive extends Command {
     vision = Vision.getInstance();
     drive = Drivetrain.getInstance();
     requires(drive);
+
+    this.offset = 3;
   }
 
   // Called just before this Command runs the first time
@@ -65,16 +69,56 @@ public class TankDrive extends Command {
       if (vision.getTrackingState() == VisionTrackingState.NO_TARGET) {
         degreesToTarget = 0;
       } else {
-        degreesToTarget = vision.pixelToDegree(xVal) ;
+        degreesToTarget = vision.pixelToDegree(xVal) + offset;
       }
       // added offset to compensate for camera
 
       yVal = vision.avgY();
       degreesToTargetY = vision.pixelToDegreeY(yVal);
 
-      if (Robot.m_oi.getDriveRightTrigger()) {
+      if (Robot.m_oi.getDriveRightTrigger()) { //AUTO HATCH FEED
+        //change states
         if (vision.mTrackingState == VisionTrackingState.ROCKET
             || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
+        } else {
+          driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
+        }
+
+        driveLoop.setPIDType(false);
+        driveLoop.setSpeedPID(1);
+
+        //change speed based on # of targets
+        if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
+          driveLoop.setMaxOutput(0.3); // 0.6
+        } else {
+          driveLoop.setMaxOutput(0.75); // 0.7
+        }
+
+
+        if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
+            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
+          driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
+
+          if (Math.abs(degreesToTarget) > 20 && Robot.carriage.getUltrasonicLeft() > 25){
+            driveLoop.setStick(0);
+          } else {
+            double distance = Robot.carriage.getUltrasonicLeft();
+            //output is clamped between a top speed and a minimum speed
+            double output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(60, -2), 0.18), 0.85);
+            driveLoop.setStick(-output);
+          }
+
+          driveLoop.setTolerancePID(1);
+
+        } else {
+          driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+        }
+
+      } else if (Robot.m_oi.getDriveLeftTrigger()) { //AUTO HATCH PANEL SCORE
+        if (vision.mTrackingState == VisionTrackingState.ROCKET
+            || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) { //if targets are there
           driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
@@ -83,22 +127,54 @@ public class TankDrive extends Command {
         driveLoop.setSpeedPID(1);
 
         if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
-          driveLoop.setMaxOutput(0.3); // 0.6
+          driveLoop.setMaxOutput(0.3); // 0.6 real robot
         } else {
-          driveLoop.setMaxOutput(0.75); // 0.7
+          driveLoop.setMaxOutput(0.75); // 0.7 real robot
         }
 
+        //ramp down based on rangefinder angle
         if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
-            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
+            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) { //if targets available
           driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
 
-          if (Robot.carriage.getUltrasonicLeft() < 10) {
-            driveLoop.setStick(0); // 0.6
-          } else if (Robot.carriage.getUltrasonicLeft() < 30){
-            driveLoop.setStick(-0.18); // 0.7
+          if (Math.abs(degreesToTarget) > 15 && Robot.carriage.getUltrasonicLeft() < 25) { //too close, not aligned
+            driveLoop.setStick(0);
           } else {
-            driveLoop.setStick(-0.55); // 0.7
+            double distance = Robot.carriage.getUltrasonicLeft();
+            double rampDist = 36;
+            double rampDistHi = 40;
+            double output = 0;
+            //high scoring
+            if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_HIGH_HATCH_POSITION - 5) {
+              
+              if (distance > rampDistHi) { //ramp in 
+                output = 0.5;
+              } else { //ramp out
+                output = Math.min(Math.max(Math.pow(distance, 3) * Math.pow(rampDistHi, -3), 0.1), 0.5);
+              }
+
+            //mid scoring
+            } else if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_MID_HATCH_POSITION - 5) {
+              if (distance > rampDist) {
+                output = 0.5;
+              } else {
+                output = (0.5/rampDist)*distance;
+              }
+
+            //low scoring
+            // } else if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_LOW_HATCH_POSITION - 5) { //add back for real robot
+            } else {
+              if (distance > rampDist) {
+                output = 0.5;
+              } else {
+                output = (0.5/rampDist)*distance;
+              }
+              
+            }
+            //set the power to output
+            driveLoop.setStick(-output);
           }
+          
           driveLoop.setTolerancePID(1);
 
         } else {
@@ -106,41 +182,7 @@ public class TankDrive extends Command {
           driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
         }
 
-      } else if (Robot.m_oi.getDriveLeftTrigger()) {
-        if (vision.mTrackingState == VisionTrackingState.ROCKET
-            || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
-          driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
-        } else {
-          driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
-        }
-        driveLoop.setPIDType(false);
-        driveLoop.setSpeedPID(1);
-
-        if (vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
-          driveLoop.setMaxOutput(0.3); // 0.6
-        } else {
-          driveLoop.setMaxOutput(0.75); // 0.7
-        }
-
-        if ((vision.getTrackingState() == VisionTrackingState.ROCKET)
-            || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
-          driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
-
-          if (Robot.carriage.getUltrasonicLeft() < 8) {
-            driveLoop.setStick(0); // 0.6
-          } else if (Robot.carriage.getUltrasonicLeft() < 25){
-            driveLoop.setStick(-0.18); // 0.7
-          } else {
-            driveLoop.setStick(-0.45); // 0.7
-          }
-          driveLoop.setTolerancePID(1);
-
-        } else {
-          driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
-          driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
-        }
-
-      } else if (Robot.m_oi.getDriveLeftBumper()) { // tracking
+      } else if (Robot.m_oi.getDriveLeftBumper()) { //alignment tracking
         if (vision.mTrackingState == VisionTrackingState.ROCKET
             || vision.mTrackingState == VisionTrackingState.CARGO_SHIP) {
           driveLoop.setDriveState(DriveControlState.VISION_TRACKING);
@@ -170,21 +212,14 @@ public class TankDrive extends Command {
         driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         // driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
         // driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
-        if (driveLoop.getGear()) {
-          if (Math.abs(Robot.elevator.getElevatorEncoder()) > 60) {
-            drive.setLeftrampRate(0);
-            drive.setRightrampRate(0);
-          } else {
-            drive.setLeftrampRate(0);
-            drive.setRightrampRate(0);
-          }
+        if (driveLoop.getGear()) { //HIGH GEAR
+          driveLoop.setLeftDrive(-0.90 * Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(0.90 * Robot.m_oi.getDriveRightY());
+        } else {
+          drive.setLeftrampRate(0.05);
+          drive.setRightrampRate(0.05);
           driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
           driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
-        } else {
-          drive.setLeftrampRate(0);
-          drive.setRightrampRate(0);
-          driveLoop.setLeftDrive(-0.78 * Robot.m_oi.getDriveLeftY());
-          driveLoop.setRightDrive(0.78 * Robot.m_oi.getDriveRightY());
         }
         // no drive
       } else {
@@ -231,5 +266,17 @@ public class TankDrive extends Command {
   // subsystems is scheduled to run
   @Override
   protected void interrupted() {
+  }
+
+  private double squareMaintainSign(double input) {
+    return Math.signum(input) * Math.pow(input, 2);
+  }
+
+  private double capMaintainSign(double input, double cap) {
+    if (input > 0) { //above zero
+      return Math.min(input, Math.abs(cap));
+    } else { //below zero
+      return Math.max(input, Math.abs(cap));
+    }
   }
 }
