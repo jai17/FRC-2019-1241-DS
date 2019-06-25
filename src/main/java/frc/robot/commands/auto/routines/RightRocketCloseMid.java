@@ -36,23 +36,23 @@ public class RightRocketCloseMid extends CommandGroup {
 
     addSequential(new YeetOffSequence());
     // //Drive to close rocket 
-    addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION,
-                  NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
-    addSequential(new DriveDistance(130, 52, 0.9, 30, 0, false));
+    // addSequential(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION,
+    //               NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
+    addSequential(new DriveDistance(115, 57, 1, 10, 0, false));
     // //Turning to close rocket while extending tray
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(27, 0.75, 4));
+    addSequential(new DriveTurn(25, 1, 4));
     addSequential(new DriveTurn(0.7, 3.5, true));
 
     // //Drive Track to close rocket
     addSequential(new DriveDistance(80, 0, 0.35, FieldPoints.ROCKET_EJECT_DIST, true));
     // //Eject Hatch
     addSequential(new EjectHatchSequence());
-    addSequential(new WaitCommand(0.1));
+    //addSequential(new WaitCommand(0.1));
     // //Drive Back
-    addSequential(new DriveDistance(-40, 30, 1, 20, 0, false));
+    addSequential(new DriveDistance(-25, 33, 1, 20, 0, false));
     // //Turn to Feeder
-    addSequential(new DriveTurn(170, 1, 4));
+    addSequential(new DriveTurn(173, 1, 4));
     // //Drive To Feeder
     addSequential(new DriveDistance(140, 173, 1, 15, 0, false));
     // //Turn to Feeder
@@ -64,26 +64,29 @@ public class RightRocketCloseMid extends CommandGroup {
     // // Close Fingers
     // addSequential(new SetClawCommand(false));
 
-    addSequential(new DriveTurn(180, 0.9, 5));
+    addSequential(new DriveTurn(180, 1, 6));
+    addSequential(new DriveTurn(1, 3.5, true));
     // addSequential(new DriveTurn(0.5, 6, true));
     //Drive Track To Feeder
-    addSequential(new DriveDistance(150, 0, 0.5, FieldPoints.FEEDER_EJECT_DIST + 3, true)); 
-    //addSequential(new DriveDistance (42 , -180, 1, 4));
-    //Close Fingers 
+    addSequential(new DriveDistance(200, 0, 0.7, FieldPoints.FEEDER_EJECT_DIST + 3, true)); 
+    
     addSequential(new SetClawCommand(false));
-    addSequential(new WaitCommand(0.05));
-
+    addSequential(new WaitCommand(0.15));
     // Drive Back to far rocket
-    addSequential(new DriveDistance(-260, 170, 1, 40, 0, false));
-    addSequential(new DriveDistance(-100, 205, 1, 10, 0, false));
-    // Extend Tray while turning t$o close cargo bay
+    addSequential(new DriveDistance(-260, 167, 0.75, 25, 0, true));
+    addSequential(new DriveDistance(-90, 205, 1, 10, 0, false));
+    // Extend Tray while turning to close cargo bay
     addParallel(new SetTrayCommand(false));
     addSequential(new DriveTurn(148, 1, 6));
     addSequential(new DriveTurn(1, 3, true));
-    // Drive Track to rocket
-    addSequential(new DriveDistance(100, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true));
+    // Drive Track to cargo bay
+    addSequential(new DriveDistance(60, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true));
     // Eject Hatch
     addSequential(new EjectHatchSequence());
+    addSequential(new DriveDistance(-50, 160, 1, 30, 0, true));
+    addSequential(new DriveDistance(-60, 90, 1, 30, 0, true));
+    addSequential(new DriveDistance(-200, 0, 1, 20, 1, true));
+
     //addSequential(new DriveDistance(-40, Robot.drive.getAngle(), 1, 10, 1, false));
   }
 }

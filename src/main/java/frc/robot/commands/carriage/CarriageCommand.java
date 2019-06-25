@@ -74,6 +74,7 @@ public class CarriageCommand extends Command {
           && Robot.vision.pixelToDegree(Robot.vision.avg()) < 4) {
         clawToggle.setTime(2);
         clawToggle.set(false);
+        System.out.println("Feeding");
       } else if (Robot.m_oi.getToolDPadRight()) { // toggle claw
         clawToggle.setTime(0.5);
         clawToggle.set(Robot.m_oi.getToolDPadRight());
@@ -115,7 +116,7 @@ public class CarriageCommand extends Command {
         carriageLoop.setFeederSpeed(1);
         carriageLoop.setIsShooting(true);
       } else if (Robot.m_oi.getToolXButton()) { // cargo shot
-        shooterSpeed = 0.3560; // jash
+        shooterSpeed = 0.4560; // jash
         carriageLoop.setFeederSpeed(1);
         carriageLoop.setIsShooting(true);
       } else if (Robot.m_oi.getToolDPadDown()) { // run feeder

@@ -18,6 +18,7 @@ import frc.robot.commands.auto.EjectHatchSequence;
 import frc.robot.commands.auto.ElevatorSetpointWait;
 import frc.robot.commands.auto.SetXY;
 import frc.robot.commands.auto.TurnToGoal;
+import frc.robot.commands.auto.WaitCommand;
 import frc.robot.commands.auto.YeetOffSequence;
 import frc.robot.commands.carriage.SetClawCommand;
 import frc.robot.commands.carriage.SetTrayCommand;
@@ -44,34 +45,37 @@ public class LeftRocketCloseLow extends CommandGroup {
     addSequential(new DriveTurn(0.7, 3, true));
 
     // //Drive Track to close rocket
-    addSequential(new DriveDistance(80, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true));
+    addSequential(new DriveDistance(80, 0, 0.25, FieldPoints.ROCKET_EJECT_DIST, true));
     // //Eject Hatch
     addSequential(new EjectHatchSequence());
     // //Drive Back
     addSequential(new DriveDistance(-25, -33, 1, 10, 0, false));
     // //Turn to Feeder
-    addSequential(new DriveTurn(-167, 1, 4));
+    addSequential(new DriveTurn(-169, 1, 4));
     // //Drive To Feeder
-    addSequential(new DriveDistance(140, -167, 1, 20, 0, false));
+    addSequential(new DriveDistance(144, -169, 1, 20, 0, false));
     // //Turn to Feeder
-    addSequential(new DriveTurn(-180, 1, 4));
+    addSequential(new DriveTurn(-180, 1, 6));
     addSequential(new DriveTurn(1, 3.5, true));
     // //Drive Track To Feeder
-    addSequential(new DriveDistance(200, 0, 0.7, FieldPoints.FEEDER_EJECT_DIST, true));
+    addSequential(new DriveDistance(200, 0, 0.5, FieldPoints.FEEDER_EJECT_DIST, true));
     // //Close Fingers
     addSequential(new SetClawCommand(false));
+    addSequential(new WaitCommand(0.15));
     // Drive Back to far rocket
-    addSequential(new DriveDistance(-250, -167, 0.75, 25, 0, true));
-    addSequential(new DriveDistance(-80, -205, 1, 10, 0, false));
+    addSequential(new DriveDistance(-260, -167, 0.75, 25, 0, true));
+    addSequential(new DriveDistance(-90, -205, 1, 10, 0, false));
     // Extend Tray while turning to close cargo bay
     addParallel(new SetTrayCommand(false));
     addSequential(new DriveTurn(-148, 1, 6));
     addSequential(new DriveTurn(1, 3, true));
     // Drive Track to cargo bay
-    addSequential(new DriveDistance(60, 0, 0.3, FieldPoints.ROCKET_EJECT_DIST, true));
+    addSequential(new DriveDistance(60, 0, 0.25, FieldPoints.ROCKET_EJECT_DIST, true));
     // Eject Hatch
     addSequential(new EjectHatchSequence());
-    addSequential(new DriveDistance(-40, -160, 1, 10, 0, false));
+    addSequential(new DriveDistance(-50, -160, 1, 30, 0, true));
+    addSequential(new DriveDistance(-60, -90, 1, 20, 1, true));
+    addSequential(new DriveDistance(-200, 0, 1, 20, 1, true));
 
     //addSequential(new DriveDistance(-40, Robot.drive.getAngle(), 1, 10, 1, false));
 

@@ -43,7 +43,7 @@ public class DriveDistance extends Command {
   boolean started = true;
   boolean isFinished = false;
 
-  private double offset = 1.5;
+  private double offset = 0;
 
   public DriveDistance(double distance, double angle, double timeOut, double speed, double tolerance) {
     this.distance = distance;
@@ -180,7 +180,7 @@ public class DriveDistance extends Command {
       }
       if (rangeTimerStarted) { 
         if (carriage.getUltrasonicLeft() < tolerance){
-          if (rangeTimer.get() > 0.05) {
+          if (rangeTimer.get() > 0.25) {
               isFinished = true;
             }
         } else {

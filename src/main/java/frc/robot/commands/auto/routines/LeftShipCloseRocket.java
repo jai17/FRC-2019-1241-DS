@@ -8,6 +8,8 @@
 package frc.robot.commands.auto.routines;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
+
+import edu.wpi.first.wpilibj.command.CommandGroup;
 import frc.robot.NumberConstants;
 import frc.robot.commands.auto.DriveDistance;
 import frc.robot.commands.auto.DriveTurn;
@@ -17,50 +19,38 @@ import frc.robot.commands.carriage.SetClawCommand;
 import frc.robot.commands.carriage.SetTrayCommand;
 import frc.robot.commands.elevator.ElevatorSetpoint;
 import frc.robot.util.FieldPoints;
-
 import frc.robot.commands.auto.YeetOffSequence;
 
-public class RightShipFrontClose extends CommandGroup {
+
+public class LeftShipCloseRocket extends CommandGroup {
   /**
    * Add your docs here.
    */
-  public RightShipFrontClose() {
+  public LeftShipCloseRocket() {
+   
     //score front hatch
-    //addSequential(new YeetOffSequence());
-    // addSequential(new DriveDistance(168, 12, 1, 10)); //old drive to first
     addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.5, 1));
-    addSequential(new DriveDistance(148, -14, 0.75, 30));
-    addSequential(new DriveTurn(0, 0.75, 4));
+    addSequential(new DriveDistance(160, 17, 1, 10));
+    addSequential(new DriveTurn(-3, 1, 4));
     addSequential(new DriveTurn(1, 3.5, true));
     addSequential(new DriveDistance(100, 0, 0.35, FieldPoints.CARGO_SHIP_EJECT_DIST + 5, true));
     addSequential(new EjectHatchSequence());
     addSequential(new DriveDistance(-30, 0, 0.5, 16));
 
     //get second hatch
-    addSequential(new DriveDistance(-175, -50, 1, 30));
-    addSequential(new DriveTurn(-175, 1, 15));
-    addSequential(new DriveTurn(1, 3.5, true));
-    addSequential(new DriveDistance(150, 0, 0.6, FieldPoints.FEEDER_EJECT_DIST, true)); 
+    addSequential(new DriveDistance(-160, 50, 1, 30));
+    addSequential(new DriveTurn(175, 1, 5));
+    addSequential(new DriveDistance(150, 0, 0.45, FieldPoints.FEEDER_EJECT_DIST, true)); 
     addSequential(new SetClawCommand(false));
     addSequential(new WaitCommand(0.05));
 
-    //Drive Back to second cargo bay
-    // addSequential(new DriveDistance(-270, 196, 1, 30, 0, true));
-    // addSequential(new DriveDistance(-44, 196, 0.8, 10, 0, false));
-    addSequential(new DriveDistance(-279, -198, 1, 30, 0, false));
-
+    addSequential(new DriveDistance(-100, 190, 1, 16, 0, false));
     addParallel(new SetTrayCommand(false));
-    addSequential(new DriveTurn(-96, 0.5, 3));
-    addSequential(new DriveTurn(0.6, 3.5, true));
-    //Drive Track to cargo bay
-    addSequential(new DriveDistance(60, 0, 0.28, FieldPoints.CARGO_SHIP_EJECT_DIST, true)); 
-    //Eject Hatch
+    addSequential(new DriveTurn(-20, 1, 5));
+    addSequential(new DriveDistance(80, 0, 0.45, FieldPoints.ROCKET_EJECT_DIST, true)); 
     addSequential(new EjectHatchSequence());
-    addSequential(new WaitCommand(0.03));
-    //back up
-    addSequential(new DriveDistance(-30, -90, 0.5, 15, false));
-    //drive to depot and celebrate your two hatches
-    addSequential(new DriveTurn(-190, 0.75, 30));
-    addSequential(new DriveDistance(100, -190, 1, 30, 0, false));
+
+
+
   }
 }

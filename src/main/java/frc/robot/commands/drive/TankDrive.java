@@ -49,7 +49,7 @@ public class TankDrive extends Command {
     drive = Drivetrain.getInstance();
     requires(drive);
 
-    this.offset = 3;
+    this.offset = 0.5;
   }
 
   // Called just before this Command runs the first time
@@ -84,6 +84,7 @@ public class TankDrive extends Command {
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         }
+        System.out.println("RT Feed"); 
 
         driveLoop.setPIDType(false);
         driveLoop.setSpeedPID(1);
@@ -123,6 +124,8 @@ public class TankDrive extends Command {
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         }
+        System.out.println("LT Score"); 
+
         driveLoop.setPIDType(false);
         driveLoop.setSpeedPID(1);
 
@@ -148,17 +151,17 @@ public class TankDrive extends Command {
             if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_HIGH_HATCH_POSITION - 5) {
               
               if (distance > rampDistHi) { //ramp in 
-                output = 0.5;
+                output = 0.35;
               } else { //ramp out
-                output = Math.min(Math.max(Math.pow(distance, 3) * Math.pow(rampDistHi, -3), 0.1), 0.5);
+                output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(rampDistHi, -2), 0.1), 0.35);
               }
 
             //mid scoring
             } else if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_MID_HATCH_POSITION - 5) {
               if (distance > rampDist) {
-                output = 0.5;
+                output = 0.45;
               } else {
-                output = (0.5/rampDist)*distance;
+                output = (0.45/rampDist)*distance;
               }
 
             //low scoring
@@ -218,8 +221,8 @@ public class TankDrive extends Command {
         } else {
           drive.setLeftrampRate(0.05);
           drive.setRightrampRate(0.05);
-          driveLoop.setLeftDrive(-Robot.m_oi.getDriveLeftY());
-          driveLoop.setRightDrive(Robot.m_oi.getDriveRightY());
+          driveLoop.setLeftDrive(0.95 * -Robot.m_oi.getDriveLeftY());
+          driveLoop.setRightDrive(0.95 * Robot.m_oi.getDriveRightY());
         }
         // no drive
       } else {

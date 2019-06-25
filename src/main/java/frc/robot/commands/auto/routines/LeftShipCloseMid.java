@@ -32,7 +32,7 @@ public class LeftShipCloseMid extends CommandGroup {
   public LeftShipCloseMid() {
 
 // //Get off Level 2
-// addSequential(new YeetOffSequence());
+//addSequential(new YeetOffSequence());
 //Drive to close cargo bay
 addParallel(new ElevatorSetpoint(NumberConstants.ELEVATOR_LOW_HATCH_POSITION+3, NumberConstants.ELEVATOR_MAX_SPEED, 0.25, 1));
 addSequential(new DriveDistance (256, -5, 1, 20, 0, false));

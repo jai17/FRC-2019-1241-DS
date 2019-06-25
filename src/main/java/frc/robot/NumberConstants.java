@@ -49,6 +49,7 @@ public class NumberConstants {
 
     // MotionMagic constants
     public static final int ELEVATOR_MAX_SPEED = 4534;
+    public static final int ELEVATOR_SLOW_SPEED = 4000;
     public static final int ELEVATOR_CRUISE_VELOCITY = 0;
     public static final int ELEVATOR_ACCELERATION = 0;
 
@@ -59,7 +60,7 @@ public class NumberConstants {
     public static final double ELEVATOR_HATCH_FEEDER = 15; 
     public static final double HINTAKE_FEEDING_HEIGHT = 8;
     public static final double ELEVATOR_MID_HATCH_POSITION = 44; //46
-    public static final double ELEVATOR_HIGH_HATCH_POSITION = 75;
+    public static final double ELEVATOR_HIGH_HATCH_POSITION = 74;
     public static final double ELEVATOR_CARGOSHIP_POSITION = 28.5; // jim zondag 
 
     /*********************** CARGO ************************************/
@@ -83,7 +84,7 @@ public class NumberConstants {
     public static final double CARGO_FEEDING_ANGLE = 20; 
     public static final double CARGO_RESTING_ANGLE = 300; 
     public static final double CARGO_STATION_ANGLE = 900; 
-    public static final double CARGO_INTAKING_ANGLE = 1500; //1700
+    public static final double CARGO_INTAKING_ANGLE = 1400; //1700
     public static final double CARGO_LIFTING_ANGLE = 3161; 
 
     // Soft Limits

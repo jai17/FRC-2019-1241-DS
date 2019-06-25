@@ -58,6 +58,7 @@ public class DriveTurn extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    offset = 0;
     // drive.reset();
     xVal = vision.avg();
     degreesToTarget = vision.pixelToDegree(xVal) + offset;
@@ -74,7 +75,7 @@ public class DriveTurn extends Command {
     driveLoop.setSpeedPID(speed);
     driveLoop.setDriveState(DriveControlState.PID);
 
-    offset = 2.5;
+    offset = 0;
   }
 
   // Called repeatedly when this Command is scheduled to run

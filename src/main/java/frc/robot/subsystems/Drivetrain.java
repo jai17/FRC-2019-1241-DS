@@ -80,6 +80,9 @@ public class Drivetrain extends Subsystem {
   /* Lifter Cylinder */
   private Solenoid lifterSolenoid;
 
+  
+
+
   // Create a single instance of the drivetrain
   public static Drivetrain getInstance() {
     if (mInstance == null) {

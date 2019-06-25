@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
   Preferences prefs;
 
   public static double kP_DRIVE, kI_DRIVE, kD_DRIVE, kF_DRIVE;
-  public static double kP_DRIVEHIGH, kI_DRIVEHIGH, kD_DRIVEHIGH; 
+  public static double kP_DRIVEHIGH, kI_DRIVEHIGH, kD_DRIVEHIGH;
   public static double kP_DRIVETURN, kI_DRIVETURN, kD_DRIVETURN;
   public static double kP_TURN, kI_TURN, kD_TURN;
   public static double kP_VISION, kI_VISION, kD_VISION;
@@ -100,8 +100,8 @@ public class Robot extends TimedRobot {
   public static double[] hsvThresholdSat = new double[2];
   public static double[] hsvThresholdVal = new double[2];
 
-  DigitalOutput pin4; 
-  DigitalOutput pin5; 
+  DigitalOutput pin4;
+  DigitalOutput pin5;
 
   // Thread visionThread;
 
@@ -113,6 +113,7 @@ public class Robot extends TimedRobot {
 
   double maxElevatorSpeed = 0;
   double maxPivotSpeed = 0;
+  double xVal;
 
   Command m_autonomousCommand;
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -145,19 +146,19 @@ public class Robot extends TimedRobot {
     // Preferences instance
     prefs = Preferences.getInstance();
 
-
     // Open Logger File
-   // logger.openFile("Robot Init");
+    // logger.openFile("Robot Init");
     looper = new Looper();
 
     m_chooser.addDefault("RightRocketCloseMid", new RightRocketCloseMid());
     m_chooser.addObject("Drive Test", new DriveDistance(80, 0, 2, 0.85, 1));
+    m_chooser.addObject("Turn 90 Test", new DriveTurn(90, 0.5, 4));
     m_chooser.addObject("Drive Test HIGH", new DriveDistance(150, 0, 1, 10, 1, true));
     m_chooser.addObject("EjectHatchSequence", new EjectHatchSequence());
-    m_chooser.addObject("Drive Turn 90 Test", new DriveTurn(90, 1, 2, 1));
-    m_chooser.addObject("Drive Turn -90 Test", new DriveTurn(-90, 1, 2, 1));
-    m_chooser.addObject("Drive Turn -180 Test", new DriveTurn(-180, 1, 2, 1));
-    m_chooser.addObject("Drive Turn 180 Test", new DriveTurn(180, 1, 2, 1));
+    // m_chooser.addObject("Drive Turn 90 Test", new DriveTurn(90, 1, 2, 1));
+    // m_chooser.addObject("Drive Turn -90 Test", new DriveTurn(-90, 1, 2, 1));
+    // m_chooser.addObject("Drive Turn -180 Test", new DriveTurn(-180, 1, 2, 1));
+    // m_chooser.addObject("Drive Turn 180 Test", new DriveTurn(180, 1, 2, 1));
     m_chooser.addObject("Yeet Off Sequence", new YeetOffSequence());
     m_chooser.addObject("TurnToGoal Test", new TurnToGoal(new Point(20.56, 0), 2, 0.5));
     m_chooser.addObject("DriveToGoalLeft Test", new DriveToGoal(new Point(-30, 100), 5, 0.8, false));
@@ -196,6 +197,9 @@ public class Robot extends TimedRobot {
     cargo.resetAngle();
     hatch.resetAngle();
     drive.resetXY();
+
+    pin4 = new DigitalOutput(4);
+    pin5 = new DigitalOutput(5);
   }
 
   /**
@@ -224,6 +228,9 @@ public class Robot extends TimedRobot {
     looper.stop();
     maxElevatorSpeed = 0;
     maxPivotSpeed = 0;
+
+    pin4.set(false);
+    pin5.set(false);
   }
 
   @Override
@@ -232,6 +239,8 @@ public class Robot extends TimedRobot {
     drive.setRightCoastMode();
     Scheduler.getInstance().run();
     updateSmartDashboard();
+    pin4.set(false);
+    pin5.set(false);
   }
 
   /**
@@ -255,14 +264,17 @@ public class Robot extends TimedRobot {
     logger.openFile("Auton Init");
 
     // carriageLoop.setClawPos(true);
-    //drive.reset();
+    // drive.reset();
     drive.resetXY();
     carriage.extendCarriage();
     carriage.prisonBreak();
 
     drive.setLeftrampRate(0);
     drive.setRightrampRate(0);
-    //drive.shiftLow();
+    // drive.shiftLow();
+
+    pin4.set(true);
+    pin5.set(false);
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -318,6 +330,19 @@ public class Robot extends TimedRobot {
 
     // Joystick joy = new Joystick(0);
     // drive.runLeftDrive(joy.getRawAxis(1));
+    xVal = vision.avg();
+    
+    if (carriageLoop.getEjectorPos()) {
+      pin4.set(true);
+      pin5.set(true);
+    } else if (Math.abs(vision.pixelToDegree(xVal)) < 3 && (m_oi.getDriveLeftBumper() || m_oi.getDriveRightTrigger() || m_oi.getDriveLeftTrigger()) || DriverStation.getInstance().isAutonomous()) {
+      pin4.set(false);
+      pin5.set(true);
+    } else {
+      pin4.set(true);
+      pin5.set(false);
+    }
+
   }
 
   /**
@@ -334,7 +359,7 @@ public class Robot extends TimedRobot {
     // DRIVE
     SmartDashboard.putNumber("Robot Yaw", drive.getYaw()); // Gyro Yaw
     SmartDashboard.putNumber("Robot Angle", drive.getAngle()); // Gyro angle
-    SmartDashboard.putNumber("DriveEncoder Raw", drive.getAverageRaw()); 
+    SmartDashboard.putNumber("DriveEncoder Raw", drive.getAverageRaw());
     SmartDashboard.putNumber("Drive Encoder Inches", drive.getAveragePos()); // distance drive has travelled in inches
     SmartDashboard.putNumber("Drive Encoder Right", drive.getRightPos()); // right encoder
     SmartDashboard.putNumber("Drive Encoder Left", drive.getLeftPos()); // left encoder
@@ -345,7 +370,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("yPos", xy[1]);
 
     SmartDashboard.putString("Robot Pose", "X: " + xy[0] + " Y: " + xy[1] + " θ: " + drive.getYaw());
-    // 
+    //
     SmartDashboard.putNumber("Left Drive Output", drive.getLeftOutput());
     SmartDashboard.putNumber("Right Drive Output", drive.getRightOutput());
     SmartDashboard.putString("Drivetrain State", driveLoop.getControlState().toString());
@@ -355,7 +380,7 @@ public class Robot extends TimedRobot {
     kI_DRIVE = prefs.getDouble("kI_DRIVE", 0);
     kD_DRIVE = prefs.getDouble("kD_DRIVE", 0.019);
     kF_DRIVE = prefs.getDouble("kF_DRIVE", 0.12);
-    
+
     kP_DRIVEHIGH = prefs.getDouble("kP_DRIVEHIGH", 0.015);
     kI_DRIVEHIGH = prefs.getDouble("kI_DRIVEHIGH", 0);
     kD_DRIVEHIGH = prefs.getDouble("kD_DRIVEHIGH", 0.019);
@@ -386,7 +411,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Tray Position", !carriageLoop.getSliderPos());
     SmartDashboard.putBoolean("Ejector Position", carriageLoop.getEjectorPos());
     SmartDashboard.putBoolean("Claw Position", !carriageLoop.getClawPos());
-    //SmartDashboard.putNumber("Hatch Detector Right", carriage.getUltrasonicRight());
+    // SmartDashboard.putNumber("Hatch Detector Right",
+    // carriage.getUltrasonicRight());
     SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft());
     shooterSpeed = prefs.getDouble("shooterSpeed", 1);
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
@@ -411,7 +437,7 @@ public class Robot extends TimedRobot {
     hsvThresholdVal[1] = prefs.getDouble("ValMax", 255);
 
     SmartDashboard.putString("VISION STATE", vision.getTrackingState().toString());
-    SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime()); 
+    SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime());
 
     // SmartDashboard.putData("Hatch Command Sequence", new HatchFeedSequence());
 

@@ -50,7 +50,7 @@ public class ElevatorCommand extends Command {
         openLoop = false; 
 
       } else if (Robot.m_oi.getToolRightX( )> 0.5) { //mid rocket
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3);
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_MID_HATCH_POSITION, NumberConstants.ELEVATOR_SLOW_SPEED, 0.5);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
         openLoop = false; 
 
@@ -60,7 +60,7 @@ public class ElevatorCommand extends Command {
         openLoop = false; 
 
       } else if (Robot.m_oi.getToolYButton()) { //cargo ship
-        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_CARGOSHIP_POSITION, NumberConstants.ELEVATOR_MAX_SPEED, 0.3);
+        elevatorLoop.setMotionMagic(NumberConstants.ELEVATOR_CARGOSHIP_POSITION, NumberConstants.ELEVATOR_SLOW_SPEED, 0.5);
         elevatorLoop.setElevatorstate(ElevatorControlState.MOTION_MAGIC);
       } //end motion magic
 
@@ -82,11 +82,11 @@ public class ElevatorCommand extends Command {
       //open loop controls
       if (openLoop) {
         if (Robot.m_oi.getToolStartButton()){ //up
-          elevatorLoop.setOpenLoopSpeed(1);
+          elevatorLoop.setOpenLoopSpeed(0.5);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
 
         } else if (Robot.m_oi.getToolBackButton()){ //down
-          elevatorLoop.setOpenLoopSpeed(-1);
+          elevatorLoop.setOpenLoopSpeed(-0.5);
           elevatorLoop.setElevatorstate(ElevatorControlState.OPEN_LOOP);
 
         } else {
