@@ -75,7 +75,7 @@ public class TrackDrive extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    distance = Robot.carriage.getUltrasonicLeft();
+    distance = Robot.drive.getRangeDist();
     updateAngle();
 
     if (eject) {
@@ -142,10 +142,10 @@ public class TrackDrive extends Command {
   }
 
   private void ejectOutput() {
-    if (Math.abs(degreesToTarget) > 7 && Robot.carriage.getUltrasonicLeft() > 25) { //too far away, not aligned
+    if (Math.abs(degreesToTarget) > 7 && Robot.drive.getRangeDist() > 25) { //too far away, not aligned
       driveLoop.setStick(0);
     } else {
-      double distance = Robot.carriage.getUltrasonicLeft();
+      double distance = Robot.drive.getRangeDist();
       double rampDist = 36;
       double rampDistHi = 40;
       double output = 0;

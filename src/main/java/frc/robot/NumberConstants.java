@@ -35,6 +35,9 @@ public class NumberConstants {
     public static final int DRIVE_CRUISE_VELOCITY = 0;
     public static final int DRIVE_ACCELERATION = 0;
 
+    //Range finder constants
+    public static final double RANGE_CONVERSION = 0.0094; 
+
     /*********************** ELEVATOR ************************************/
     // PID constants
     public static final double pTalonElevator = 0.36; //0.4
@@ -56,7 +59,7 @@ public class NumberConstants {
     // Position setpoints
     public static final double ELEVATOR_REST_POSITION = 2.5; 
     public static final double HATCH_FINESSE_POSITION = 7.5;
-    public static final double ELEVATOR_LOW_HATCH_POSITION = 12.5;  //15.5
+    public static final double ELEVATOR_LOW_HATCH_POSITION = 13.5;  //15.5
     public static final double ELEVATOR_HATCH_FEEDER = 15; 
     public static final double HINTAKE_FEEDING_HEIGHT = 8;
     public static final double ELEVATOR_MID_HATCH_POSITION = 44; //46

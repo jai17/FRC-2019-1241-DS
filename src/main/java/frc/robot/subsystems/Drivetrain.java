@@ -3,6 +3,12 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.SolenoidBase;
+import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Encoder;
@@ -80,8 +86,9 @@ public class Drivetrain extends Subsystem {
   /* Lifter Cylinder */
   private Solenoid lifterSolenoid;
 
-  
-
+  //rangefinder test
+  AnalogInput leftRange;
+  AnalogInput rightRange;
 
   // Create a single instance of the drivetrain
   public static Drivetrain getInstance() {
@@ -138,6 +145,10 @@ public class Drivetrain extends Subsystem {
     } catch (RuntimeException ex) {
       DriverStation.reportError("ERROR navX: " + ex.getMessage(), true);
     }
+
+    //rangefinder initialization
+    leftRange = new AnalogInput(3);
+    rightRange = new AnalogInput(2);
 
     // reset encoders, gyro, shift high
     reset();
@@ -561,4 +572,28 @@ public class Drivetrain extends Subsystem {
   public double getPrevAvgDist() {
     return prevAvgDist;
   }
+
+  /**
+   * Get the distance the rangefinder is reading
+   * return - average value from rangefinder
+   */
+  public double getRangeDist() {
+    return (leftRange.getVoltage() + rightRange.getVoltage()) / (2 * NumberConstants.RANGE_CONVERSION);
+  } //end getRangeDist
+
+  /**
+   * Get the distance from the left rangefinder
+   * return - left rangefinder value
+   */
+  public double getLeftRangeDist() {
+    return leftRange.getVoltage() / NumberConstants.RANGE_CONVERSION;
+  } //end getLeftRangeDist
+
+  /**
+   * Get the distance from the right rangefinder
+   * return - right rangefinder value
+   */
+  public double getRightRangeDist() {
+    return rightRange.getVoltage() / NumberConstants.RANGE_CONVERSION;
+  } //end getRightRangeDist
 }

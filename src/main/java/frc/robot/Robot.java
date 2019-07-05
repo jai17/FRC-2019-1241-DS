@@ -364,6 +364,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Drive Encoder Right", drive.getRightPos()); // right encoder
     SmartDashboard.putNumber("Drive Encoder Left", drive.getLeftPos()); // left encoder
 
+    SmartDashboard.putNumber("RangefinderTest", drive.getRangeDist()); //rangefinder distance
+    SmartDashboard.putNumber("Left RangeFinder", drive.getLeftRangeDist()); //left rangefinder
+    SmartDashboard.putNumber("Right RangeFinder", drive.getRightRangeDist()); //right rangefinder
+
     double[] xy = drive.getXY();
 
     SmartDashboard.putNumber("xPos", xy[0]);
@@ -413,7 +417,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Claw Position", !carriageLoop.getClawPos());
     // SmartDashboard.putNumber("Hatch Detector Right",
     // carriage.getUltrasonicRight());
-    SmartDashboard.putNumber("Hatch Detector Left", carriage.getUltrasonicLeft());
     shooterSpeed = prefs.getDouble("shooterSpeed", 1);
     shooterSpeedSlow = prefs.getDouble("shooterSpeedSlow", 0.5);
     feedDist = prefs.getDouble("feedDist", 7);

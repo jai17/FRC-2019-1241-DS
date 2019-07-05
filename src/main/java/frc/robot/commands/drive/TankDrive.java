@@ -101,12 +101,12 @@ public class TankDrive extends Command {
             || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) {
           driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
 
-          if (Math.abs(degreesToTarget) > 20 && Robot.carriage.getUltrasonicLeft() > 25){
+          if (Math.abs(degreesToTarget) > 20 && Robot.drive.getRangeDist() > 25){
             driveLoop.setStick(0);
           } else {
-            double distance = Robot.carriage.getUltrasonicLeft();
+            double distance = Robot.drive.getRangeDist();
             //output is clamped between a top speed and a minimum speed
-            double output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(60, -2), 0.18), 0.85);
+            double output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(64, -2), 0.2), 0.85);
             driveLoop.setStick(-output);
           }
 
@@ -140,10 +140,10 @@ public class TankDrive extends Command {
             || (vision.getTrackingState() == VisionTrackingState.CARGO_SHIP)) { //if targets available
           driveLoop.setAnglePID(drive.getAngle() - degreesToTarget);
 
-          if (Math.abs(degreesToTarget) > 15 && Robot.carriage.getUltrasonicLeft() < 25) { //too close, not aligned
+          if (Math.abs(degreesToTarget) > 15 && Robot.drive.getRangeDist() < 25) { //too close, not aligned
             driveLoop.setStick(0);
           } else {
-            double distance = Robot.carriage.getUltrasonicLeft();
+            double distance = Robot.drive.getRangeDist();
             double rampDist = 36;
             double rampDistHi = 40;
             double output = 0;

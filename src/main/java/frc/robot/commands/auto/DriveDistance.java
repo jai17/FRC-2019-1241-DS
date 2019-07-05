@@ -173,13 +173,13 @@ public class DriveDistance extends Command {
   protected boolean isFinished() {
 
     if (track) {
-      logger.logd("DriveDistance_T: ", "isFinished: " + (carriage.getUltrasonicLeft() < tolerance));
-      if (carriage.getUltrasonicLeft() < tolerance && !rangeTimerStarted) {
+      logger.logd("DriveDistance_T: ", "isFinished: " + (drive.getRangeDist() < tolerance));
+      if (drive.getRangeDist() < tolerance && !rangeTimerStarted) {
         rangeTimer.start();
         rangeTimerStarted = true;
       }
       if (rangeTimerStarted) { 
-        if (carriage.getUltrasonicLeft() < tolerance){
+        if (drive.getRangeDist() < tolerance){
           if (rangeTimer.get() > 0.25) {
               isFinished = true;
             }

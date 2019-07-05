@@ -171,7 +171,7 @@ public class Carriage extends Subsystem {
   // public double getUltrasonicRight(){
   //   return hatchDetectorRight.getRangeInches(); 
   // }
-  public double getUltrasonicLeft(){
+  public double getRangeDist(){
     return hatchDetectorLeft.getRangeInches(); 
   }
 
