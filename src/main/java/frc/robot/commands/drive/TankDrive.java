@@ -84,7 +84,7 @@ public class TankDrive extends Command {
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         }
-        System.out.println("RT Feed"); 
+        // System.out.println("RT Feed"); 
 
         driveLoop.setPIDType(false);
         driveLoop.setSpeedPID(1);
@@ -106,7 +106,7 @@ public class TankDrive extends Command {
           } else {
             double distance = Robot.drive.getRangeDist();
             //output is clamped between a top speed and a minimum speed
-            double output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(64, -2), 0.2), 0.85);
+            double output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(55, -2), 0.25), 0.85);
             driveLoop.setStick(-output);
           }
 
@@ -124,7 +124,7 @@ public class TankDrive extends Command {
         } else {
           driveLoop.setDriveState(DriveControlState.OPEN_LOOP);
         }
-        System.out.println("LT Score"); 
+        // System.out.println("LT Score"); 
 
         driveLoop.setPIDType(false);
         driveLoop.setSpeedPID(1);
@@ -145,7 +145,7 @@ public class TankDrive extends Command {
           } else {
             double distance = Robot.drive.getRangeDist();
             double rampDist = 36;
-            double rampDistHi = 40;
+            double rampDistHi = 45;
             double output = 0;
             //high scoring
             if (Robot.elevator.getElevatorEncoder() > NumberConstants.ELEVATOR_HIGH_HATCH_POSITION - 5) {
@@ -153,7 +153,7 @@ public class TankDrive extends Command {
               if (distance > rampDistHi) { //ramp in 
                 output = 0.35;
               } else { //ramp out
-                output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(rampDistHi, -2), 0.1), 0.35);
+                output = Math.min(Math.max(Math.pow(distance, 2) * Math.pow(rampDistHi, -2), 0.14), 0.35);
               }
 
             //mid scoring

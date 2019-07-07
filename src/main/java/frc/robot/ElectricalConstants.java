@@ -33,7 +33,7 @@ public class ElectricalConstants {
     public static final double WHEEL_RADIUS = 2.0; 
     public static final double ROTATIONS_TO_INCHES = 2 * Math.PI * WHEEL_RADIUS * ENCODER_GEAR_RATIO;
     // public static final double TICKS_PER_INCH =  4096/ROTATIONS_TO_INCHES;//308
-    public static final double TICKS_PER_INCH =  303.9;//303.9
+    public static final double TICKS_PER_INCH =  304;//303.9
 
  
 
